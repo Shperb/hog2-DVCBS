@@ -12,7 +12,7 @@
 #include "NBS.h"
 #include "CBBS.h"
 #include "MM.h"
-//#include "BSStar.h"
+#include "BSStar.h"
 
 template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
 Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
@@ -48,7 +48,7 @@ void TestTOH(int first, int last)
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
 	NBS<TOHState<N>, TOHMove, TOH<N>> nbs;
 	CBBS<TOHState<N>, TOHMove, TOH<N>> cbbs;
-	//BS<TOHState<N>, TOHMove, TOH<N>> bs;
+	BSStar<TOHState<N>, TOHMove, TOH<N>> bs;
 	MM<TOHState<N>, TOHMove, TOH<N>> mm;
 
 
@@ -60,8 +60,8 @@ void TestTOH(int first, int last)
 	Heuristic<TOHState<N>> *f;
 	Heuristic<TOHState<N>> *b;
 
-	g.Reset();
-	f = BuildPDB<N, pdb1Disks>(g);
+	//g.Reset();
+	//f = BuildPDB<N, pdb1Disks>(g);
 	
 	int table[] = {52058078,116173544,208694125,131936966,141559500,133800745,194246206,50028346,167007978,207116816,163867037,119897198,201847476,210859515,117688410,121633885};
 	int table2[] = {145008714,165971878,154717942,218927374,182772845,5808407,19155194,137438954,13143598,124513215,132635260,39667704,2462244,41006424,214146208,54305743};
@@ -77,12 +77,20 @@ void TestTOH(int first, int last)
 			s.disks[whichPeg][s.counts[whichPeg]] = x;
 			s.counts[whichPeg]++;
 		}
-		std::cout << s << "\n";
+		b = BuildPDB<N, pdb1Disks>(s);
+ 
+ 		g.counts[0] = g.counts[1] = g.counts[2] = g.counts[3] = 0;
+ 		for (int x = N; x > 0; x--)
+ 		{
+ 			int whichPeg = random()%4;
+ 			g.disks[whichPeg][g.counts[whichPeg]] = x;
+ 			g.counts[whichPeg]++;
+ 		}
 		g.Reset();
-		std::cout << g << "\n";
+ 		f = BuildPDB<N, pdb1Disks>(g);
 		Timer timer;
 	
-		b = BuildPDB<N, pdb1Disks>(s);
+		//b = BuildPDB<N, pdb1Disks>(s);
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		
 		if (1)
@@ -117,6 +125,15 @@ void TestTOH(int first, int last)
 			printf("CBBS %llu nodes %llu necessary ", cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
+		if (1)
+ 		{
+ 			timer.StartTimer();
+ 			bs.GetPath(&toh, s, g, f, b, thePath);
+ 			timer.EndTimer();
+ 			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+ 			printf("BS %llu nodes\t%llu necessary\t", bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
+ 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+ 		}
 		if (1)
 		{
 			//printf("-=-=-MM-=-=-\n");
@@ -156,8 +173,8 @@ void TestTOH(int first, int last)
 
 void TOHTest()
 {
-	TestTOH<14, 2>(0, 50);
-//	TestTOH<14, 4>(0, 50);
+//	TestTOH<14, 2>(0, 50);
+	TestTOH<14, 4>(0, 50);
 //	TestTOH<14, 5>(0, 50);
 //	TestTOH<14, 6>(0, 50);
 //	TestTOH<14, 7>(0, 50);
