@@ -204,6 +204,7 @@ void TestPancakeRandom()
 			if(gap != 3)
 			{
 				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> rastar;
+				goal.Reset();
 				start = original;
 				t1.StartTimer();
 				rastar.GetPath(&pancake, goal, start, rastarPath);
@@ -353,6 +354,7 @@ void TestPancakeHard()
 		if (0)
 		{
 			TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
+			goal.Reset();
 			start = original;
 			t1.StartTimer();
 			astar.GetPath(&pancake, goal, start, astarPath);

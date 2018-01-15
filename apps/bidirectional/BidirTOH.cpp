@@ -93,7 +93,16 @@ void TestTOH(int first, int last)
 	
 		//b = BuildPDB<N, pdb1Disks>(s);
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
-		
+		if (1)
+		{
+			//printf("-=-=-CBBS-=-=-\n");
+			timer.StartTimer();
+			cbbs.GetPath(&toh, s, g, f, b, thePath);
+			timer.EndTimer();
+			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+			printf("CBBS %llu nodes %llu necessary ", cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
+			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+		}
 		if (1)
 		{
 			//printf("-=-=-NBS-=-=-\n");
@@ -116,17 +125,7 @@ void TestTOH(int first, int last)
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
 		*/
-		if (1)
-		{
-			//printf("-=-=-CBBS-=-=-\n");
-			timer.StartTimer();
-			cbbs.GetPath(&toh, s, g, f, b, thePath);
-			timer.EndTimer();
-			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-			printf("CBBS %llu nodes %llu necessary ", cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-		}
-		if (1)
+		if (0)
  		{
  			timer.StartTimer();
  			bs.GetPath(&toh, s, g, f, b, thePath);
@@ -135,7 +134,7 @@ void TestTOH(int first, int last)
  			printf("BS %llu nodes\t%llu necessary\t", bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
  			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
  		}
-		if (1)
+		if (0)
 		{
 			//printf("-=-=-MM-=-=-\n");
 			timer.StartTimer();
@@ -145,7 +144,7 @@ void TestTOH(int first, int last)
 			printf("MM %llu nodes %llu necessary", mm.GetNodesExpanded(),mm.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (1)
+		if (0)
 		{
 			//printf("-=-=-A*-=-=-\n");
 			astar.SetHeuristic(f);
@@ -156,7 +155,7 @@ void TestTOH(int first, int last)
 			printf("A* %llu nodes %llu necessary", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (1)
+		if (0)
 		{
 			//printf("-=-=-A*-=-=-\n");
 			rastar.SetHeuristic(f);
