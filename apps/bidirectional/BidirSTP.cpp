@@ -136,6 +136,7 @@ void TestSTP(int algorithm)
 	MM<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> mm;
 	BSStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> bs;
 	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
+	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> rastar;
 	MNPuzzle<4,4> mnp;
 	
 	for (int x = 0; x < 100; x++) // 547 to 540
@@ -147,6 +148,8 @@ void TestSTP(int algorithm)
 		std::vector<MNPuzzleState<4,4>> nbsPath;
 		std::vector<MNPuzzleState<4,4>> cbbsPath;
 		std::vector<MNPuzzleState<4,4>> astarPath;
+		std::vector<MNPuzzleState<4,4>> rastarPath;
+
 		Timer t1, t2,t3;
 		
 		
@@ -211,6 +214,16 @@ void TestSTP(int algorithm)
 			t2.EndTimer();
 			printf("MM found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(cbbsPath),
 				   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), cbbs.GetNodesTouched(), t2.GetElapsedTime());
+		}
+		if (algorithm == 0) // R-A*
+		{
+			goal.Reset();
+			start = GetKorfInstance(x);
+			t1.StartTimer();
+			rastar.GetPath(&mnp, goal, start, rastarPath);
+			t1.EndTimer();
+			printf("A* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(rastarPath),
+				   rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions(), rastar.GetNodesTouched(), t1.GetElapsedTime());
 		}
 		
 //		
