@@ -14,7 +14,7 @@
 #include <climits>
 #include <unordered_map>
 #include <utility>
-
+#include <algorithm>
 
 
 //low g -> low f
@@ -110,7 +110,87 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 					backwardCluster.push_back(std::make_pair(it.second[0],it.second.size()));
 				}
 				std::sort (backwardCluster.begin(), backwardCluster.end(),compareValues(backwardQueue));
-
+				/*
+				int minJ = INT_MAX;
+				int minI = INT_MAX;
+				int minValue = INT_MAX;
+				uint64_t NumForwardInVC = 0;
+				uint64_t NumBackwardInVC = 0;
+				int count = 0;
+				for (int i = -1; i < ((int)forwardCluster.size()); i++){
+					if (i > 0){
+						NumForwardInVC += forwardCluster[i].second;
+					}
+					else{
+						NumForwardInVC = 0;
+					}
+					bool skip = false;
+					for (int j = -1; j < ((int)backwardCluster.size()) && !skip; j++){
+						if (j > 0){
+							NumBackwardInVC += backwardCluster[j].second;
+						}
+						else{
+							NumBackwardInVC = 0;
+						}
+						if (i == ((int)forwardCluster.size())-1){
+							if (NumForwardInVC < minValue) 
+							{
+								minValue = NumForwardInVC;
+								minJ = j;
+								minI = i;
+								count = 0;
+							}
+							else if (NumForwardInVC == minValue){
+								count++;
+							}
+							skip = true;
+						} 
+						else if(j == ((int)backwardCluster.size())-1) {
+							if (NumBackwardInVC < minValue) 
+							{
+								minValue = NumBackwardInVC;
+								minJ = j;
+								minI = i;
+								count = 0;
+							}
+							else if (NumBackwardInVC == minValue){
+								count++;
+							}
+							skip = true;
+						}
+						else if(fgreater(backwardQueue.Lookup(backwardCluster[j+1].first).g+forwardQueue.Lookup(forwardCluster[i+1].first).g + epsilon, CLowerBound)){
+							if (NumBackwardInVC+NumForwardInVC < minValue ){
+								minValue = NumBackwardInVC+NumForwardInVC;
+								minJ = j;
+								minI = i;
+								count = 0;
+							}
+							else if (NumBackwardInVC+NumForwardInVC == minValue){
+								count++;
+							}
+							skip = true;
+						}
+					}
+				}
+				if (count > 0){
+					std::vector<uint64_t> v = forwardMap[forwardQueue.Lookup(forwardCluster[0].first).g];
+					nextForward.insert( nextForward.end(), v.begin(), v.end() );
+					std::vector<uint64_t> v1 = backwardMap[backwardQueue.Lookup(backwardCluster[0].first).g];
+					nextBackward.insert( nextBackward.end(), v1.begin(), v1.end() );
+				}
+				else{
+					if (minI > 0){
+						std::vector<uint64_t> v = forwardMap[forwardQueue.Lookup(forwardCluster[0].first).g];
+						nextForward.insert( nextForward.end(), v.begin(), v.end() );
+					}
+					else{
+						std::vector<uint64_t> v1 = backwardMap[backwardQueue.Lookup(backwardCluster[0].first).g];
+						nextBackward.insert( nextBackward.end(), v1.begin(), v1.end() );
+					}
+				}
+				new */
+				
+				
 				int minJ = INT_MAX;
 				int minI = INT_MAX;
 				int minValue = INT_MAX;
@@ -139,10 +219,10 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 						}
 						if (i == ((int)forwardCluster.size())-1){
 							if (NumForwardInVC < minValue 
-							//|| (NumForwardInVC == minValue &&
-							//tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
+							|| (NumForwardInVC == minValue &&
+							tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
 							//tieBreakCriteria(currentSumJ+currentSumI,minSum)
-							//)
+							)
 							){
 								minValue = NumForwardInVC;
 								minSum = currentSumJ+currentSumI;
@@ -153,10 +233,10 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 						} 
 						else if(j == ((int)backwardCluster.size())-1) {
 							if (NumBackwardInVC < minValue 
-							//|| (NumBackwardInVC == minValue && 
-							//tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
+							|| (NumBackwardInVC == minValue && 
+							tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
 							//tieBreakCriteria(currentSumJ+currentSumI,minSum)
-							//)
+							)
 							){
 								minValue = NumBackwardInVC;
 								minSum = currentSumJ+currentSumI;
@@ -167,10 +247,10 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 						}
 						else if(fgreater(backwardQueue.Lookup(backwardCluster[j+1].first).g+forwardQueue.Lookup(forwardCluster[i+1].first).g + epsilon, CLowerBound)){
 							if (NumBackwardInVC+NumForwardInVC < minValue 
-							//|| (NumBackwardInVC+NumForwardInVC == minValue && 
-							//tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
+							|| (NumBackwardInVC+NumForwardInVC == minValue && 
+							tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
 							//tieBreakCriteria(currentSumJ+currentSumI,minSum)
-							//)
+							)
 							){
 								minValue = NumBackwardInVC+NumForwardInVC;
 								minSum = currentSumJ+currentSumI;
@@ -190,6 +270,19 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 					std::vector<uint64_t> v = backwardMap[backwardQueue.Lookup(backwardCluster[j].first).g];
 					nextBackward.insert( nextBackward.end(), v.begin(), v.end() );
 				}
+				
+				/*
+
+				if (minI >= 0){
+					std::vector<uint64_t> v = forwardMap[forwardQueue.Lookup(forwardCluster[0].first).g];
+					nextForward.insert( nextForward.end(), v.begin(), v.end() );
+				}
+				if (minJ >= 0){
+					std::vector<uint64_t> v = backwardMap[backwardQueue.Lookup(backwardCluster[0].first).g];
+					nextBackward.insert( nextBackward.end(), v.begin(), v.end() );
+				}	
+				*/
+				
 				//while(forwardQueue.OpenReadySize() > 0 && !fgreater(forwardQueue.PeekAt(kOpenReady).g+backwardQueue.PeekAt(kOpenReady).g + epsilon, CLowerBound))
 				//{
 				//	forwardCandidates.push_back(forwardQueue.Peek(kOpenReady));
@@ -447,10 +540,10 @@ private:
 		if (minJ > 0){
 			minJValue += backwardQueue.Lookup(backwardCluster[minJ].first).g;
 		}
-		return (iValue+jValue <= minIValue+minJValue);
+		return (std::max(iValue,jValue) > std::max(minIValue,minJValue));
 	}
 	bool tieBreakCriteria(double currentSum,double minSum){
-		return (currentSum <= minSum);
+		return (currentSum > minSum);
 	}
 
 };

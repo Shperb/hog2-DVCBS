@@ -206,13 +206,12 @@ void TestSTP(int algorithm)
 		}
 		if (algorithm == 5) // cbbs
 		{
-			ZeroHeuristic<MNPuzzleState<4,4>> z;
 			goal.Reset();
 			start = GetKorfInstance(x);
 			t2.StartTimer();
-			cbbs.GetPath(&mnp, start, goal, &z, &z, cbbsPath);
+			cbbs.GetPath(&mnp, start, goal, &mnp, &mnp, cbbsPath);
 			t2.EndTimer();
-			printf("MM found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(cbbsPath),
+			printf("CBBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(cbbsPath),
 				   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), cbbs.GetNodesTouched(), t2.GetElapsedTime());
 		}
 		if (algorithm == 0) // R-A*

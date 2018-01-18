@@ -242,6 +242,49 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 		
 	}
 	double currentLowerBound = queue.GetLowerBound();
+	int i = nForward.size()-1;
+	int j = nBackward.size()-1;
+	while (i >= 0 || j >=0 ){
+		if (!fless(queue.GetLowerBound(), currentCost))
+		{
+			ExtractFromMiddle(thePath);
+			return true;
+		}
+		bool expandForward;
+		if (i < 0){
+			expandForward = false;
+		}
+		else if (j < 0){
+			expandForward = true;
+		}
+		else {
+			if (queue.forwardQueue.Lookup(nForward[i]).g >= queue.backwardQueue.Lookup(nBackward[j]).g){
+				expandForward = true;
+			}
+			else{
+				expandForward = false;
+			}
+		}
+		if (expandForward){
+			if (queue.forwardQueue.Lookup(nForward[i]).where != kClosed){
+				counts[currentLowerBound]++;
+				Expand(nForward[i], queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
+			}
+			i--;
+		}
+		else{
+			if (queue.backwardQueue.Lookup(nBackward[j]).where != kClosed){
+				counts[currentLowerBound]++;
+				Expand(nBackward[j], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
+			}
+			j--;
+		}
+		if (currentLowerBound != queue.GetLowerBound()){
+			return false;
+		}
+	}
+	/*
+	double currentLowerBound = queue.GetLowerBound();
 	uint64_t i = 0;
 	uint64_t j = 0;
 	while (i < nForward.size() || j < nBackward.size() ){
@@ -279,7 +322,11 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 			}
 			j++;
 		}
+		if (currentLowerBound != queue.GetLowerBound()){
+			return false;
+		}
 	}
+	*/
 	/*
 	for(int i = 0; i< nForward.size(); i++){
 		counts[currentLowerBound]++;

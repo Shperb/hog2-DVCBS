@@ -26,7 +26,7 @@ void TestRob();
 void TestPancake()
 {
 //	TestRob();
-//	TestPancakeRandom();
+	TestPancakeRandom();
 	TestPancakeHard();
 	exit(0);
 }
@@ -187,7 +187,7 @@ void TestPancakeRandom()
 			std::cout << original << "\n";
 			
 			// A*
-			
+			/*
 			if(gap != 3)
 			{
 				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar;
@@ -225,7 +225,7 @@ void TestPancakeRandom()
 				printf("GAP-%d NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(nbsPath),
 					   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime());
 			}
-			
+			*/
 						// CBBS
 			{
 				CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> cbbs;
@@ -237,7 +237,7 @@ void TestPancakeRandom()
 				printf("GAP-%d CBBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(cbbsPath),
 					   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime());
 			}
-			
+			/*
 			// BS*
 			
 			{
@@ -250,7 +250,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BS* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(bsPath),
 					   bs.GetNodesExpanded(), bs.GetNecessaryExpansions(), t2.GetElapsedTime());
 			}
-			
+			*/
 			// IDA*
 			/*
 			{
@@ -266,7 +266,7 @@ void TestPancakeRandom()
 			*/
 			
 			// MM
-			
+			/*
 			{
 				MM<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> mm;
 				goal.Reset();
@@ -277,7 +277,7 @@ void TestPancakeRandom()
 				printf("GAP-%d MM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(mmPath),
 					   mm.GetNodesExpanded(), mm.GetNecessaryExpansions(), t4.GetElapsedTime());
 			}
-			
+			*/
 			// MM0
 			/*
 			if (gap == 3)
