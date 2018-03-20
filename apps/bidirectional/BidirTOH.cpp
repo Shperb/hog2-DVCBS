@@ -48,7 +48,7 @@ void TestTOH(int first, int last)
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> rastar;
 	NBS<TOHState<N>, TOHMove, TOH<N>> nbs;
-	CBBS<TOHState<N>, TOHMove, TOH<N>> cbbs;
+	CBBS<TOHState<N>, TOHMove, TOH<N>> cbbs(1);
 	BSStar<TOHState<N>, TOHMove, TOH<N>> bs;
 	MM<TOHState<N>, TOHMove, TOH<N>> mm;
 

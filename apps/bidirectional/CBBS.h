@@ -28,9 +28,10 @@ template <class state, class action, class environment, class dataStructure = NB
           class priorityQueue = BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>>>
 class CBBS {
 public:
-	CBBS()
+	CBBS(int tieBreaking)
 	{
 		forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount();
+		tieBreakingPolicy = tieBreaking;
 	}
 	virtual ~CBBS() {}
 	void GetPath(environment *env, const state& from, const state& to,
@@ -154,6 +155,8 @@ private:
 	
 	double currentPr;
 	
+	int tieBreakingPolicy;
+	
 	
 };
 
@@ -198,7 +201,7 @@ template <class state, class action, class environment, class dataStructure, cla
 bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVertexCover(std::vector<state> &thePath)
 {
 	std::vector<uint64_t> nForward, nBackward;
-	bool result = queue.getVertexCover(nForward, nBackward);
+	bool result = queue.getVertexCover(nForward, nBackward,tieBreakingPolicy);
 	// if failed, see if we have optimal path (but return)
 	if (result == false)
 	{

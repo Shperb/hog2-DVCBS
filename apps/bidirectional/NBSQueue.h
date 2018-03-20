@@ -55,7 +55,7 @@ struct NBSCompareOpenWaiting {
 template <typename state, int epsilon = 1>
 class NBSQueue {
 public:
-bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &nextBackward)
+bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &nextBackward,int TieBreakingPolicy)
 	{
 
 		while (true)
@@ -194,15 +194,12 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 				int minJ = INT_MAX;
 				int minI = INT_MAX;
 				int minValue = INT_MAX;
-				int minSum = INT_MAX;
 				uint64_t NumForwardInVC = 0;
 				uint64_t NumBackwardInVC = 0;
-				double currentSumI = 0;
-				double currentSumJ = 0;
+				std::vector<std::pair<int,int> > minimalVertexCovers;
 				for (int i = -1; i < ((int)forwardCluster.size()); i++){
 					if (i > 0){
 						NumForwardInVC += forwardCluster[i].second;
-						currentSumI += forwardQueue.Lookup(forwardCluster[i].first).g;
 					}
 					else{
 						NumForwardInVC = 0;
@@ -211,62 +208,50 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 					for (int j = -1; j < ((int)backwardCluster.size()) && !skip; j++){
 						if (j > 0){
 							NumBackwardInVC += backwardCluster[j].second;
-							currentSumJ += backwardQueue.Lookup(backwardCluster[j].first).g;
 						}
 						else{
 							NumBackwardInVC = 0;
-							currentSumJ = 0;
 						}
 						if (i == ((int)forwardCluster.size())-1){
-							if (NumForwardInVC < minValue 
-							|| (NumForwardInVC == minValue &&
-							tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
-							//tieBreakCriteria(currentSumJ+currentSumI,minSum)
-							)
-							){
+							if (NumForwardInVC < minValue){
+								minimalVertexCovers.clear();
+							}
+							if(NumForwardInVC <= minValue){
+								minimalVertexCovers.push_back(std::make_pair(i,j));
 								minValue = NumForwardInVC;
-								minSum = currentSumJ+currentSumI;
-								minJ = j;
-								minI = i;
 							}
 							skip = true;
 						} 
 						else if(j == ((int)backwardCluster.size())-1) {
-							if (NumBackwardInVC < minValue 
-							|| (NumBackwardInVC == minValue && 
-							tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
-							//tieBreakCriteria(currentSumJ+currentSumI,minSum)
-							)
-							){
+							if (NumBackwardInVC < minValue){
+								minimalVertexCovers.clear();
+							}
+							if(NumBackwardInVC <= minValue){
+								minimalVertexCovers.push_back(std::make_pair(i,j));
 								minValue = NumBackwardInVC;
-								minSum = currentSumJ+currentSumI;
-								minJ = j;
-								minI = i;
 							}
 							skip = true;
 						}
 						else if(fgreater(backwardQueue.Lookup(backwardCluster[j+1].first).g+forwardQueue.Lookup(forwardCluster[i+1].first).g + epsilon, CLowerBound)){
-							if (NumBackwardInVC+NumForwardInVC < minValue 
-							|| (NumBackwardInVC+NumForwardInVC == minValue && 
-							tieBreakCriteria(i,j,minI,minJ,forwardCluster,backwardCluster)
-							//tieBreakCriteria(currentSumJ+currentSumI,minSum)
-							)
-							){
+							if (NumBackwardInVC+NumForwardInVC < minValue){
+								minimalVertexCovers.clear();
+							}
+							if(NumBackwardInVC+NumForwardInVC <= minValue){
+								minimalVertexCovers.push_back(std::make_pair(i,j));
 								minValue = NumBackwardInVC+NumForwardInVC;
-								minSum = currentSumJ+currentSumI;
-								minJ = j;
-								minI = i;
 							}
 							skip = true;
 						}
 					}
 				}
 				
-				for (int i = 0; i <= minI;i++){
+				std::pair<int,int> chosenVC = computeTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster,TieBreakingPolicy);
+				
+				for (int i = 0; i <= chosenVC.first;i++){
 					std::vector<uint64_t> v = forwardMap[forwardQueue.Lookup(forwardCluster[i].first).g];
 					nextForward.insert( nextForward.end(), v.begin(), v.end() );
 				}
-				for (int j = 0; j <= minJ;j++){
+				for (int j = 0; j <= chosenVC.second;j++){
 					std::vector<uint64_t> v = backwardMap[backwardQueue.Lookup(backwardCluster[j].first).g];
 					nextBackward.insert( nextBackward.end(), v.begin(), v.end() );
 				}
@@ -545,6 +530,456 @@ private:
 	bool tieBreakCriteria(double currentSum,double minSum){
 		return (currentSum > minSum);
 	}
+	
+		std::pair<int,int> computeTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster, int TieBreakingPolicy){
+		switch(TieBreakingPolicy) {
+			case 1 : return computeFullMaxGTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 2 : return computeSingleClusterMaxGTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 3 : return computeSingleClusterMinGTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 4 : return computeSingleClusterMinNodesTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 5 : return computeSingleClusterMaxNodesTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 6 : return computeSingleClusterMinGTieBreakingWithSub(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 7 : return computeSingleClusterMaxGTieBreakingWithSub(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 8 : return computeFullMinGTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 9 : return computeMinGTieBreakingWithSub(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 10 : return computeMajorityMaxWithSubTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 11 : return computeMajorityMaxTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 12 : return computeMajorityMinTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 13 : return computeMajorityMinWithSubTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 14 : return computeFullMaxGTieBreakingOld(minimalVertexCovers,forwardCluster,backwardCluster);
+			default: assert(false);
+					 return std::make_pair(-1,-1);
+		}	
+		
+	}
+	
+	std::pair<int,int> computeFullMaxGTieBreakingOld(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int maxValue = -1;
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			int maxF = 0;
+			int maxB = 0;
+			if (it->first > 0){
+				maxF = forwardQueue.Lookup(forwardCluster[it->first].first).g;
+			}
+			if (it->second > 0){
+				 maxB = backwardQueue.Lookup(backwardCluster[it->second].first).g;
+			}
+			if ((maxF > maxValue) || (maxB > maxValue)){
+				maxPair = *it;
+				maxValue = std::max(maxF,maxB);
+			}
+		}
+		return maxPair;
+	}
+	
+	std::pair<int,int> computeFullMaxGTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int maxValue = -1;
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			int maxF = -1;
+			int maxB = -1;
+			if (it->first >= 0){
+				maxF = forwardQueue.Lookup(forwardCluster[it->first].first).g;
+			}
+			if (it->second >= 0){
+				 maxB = backwardQueue.Lookup(backwardCluster[it->second].first).g;
+			}
+			if ((maxF > maxValue) || (maxB > maxValue)){
+				maxPair = *it;
+				maxValue = std::max(maxF,maxB);
+			}
+		}
+		return maxPair;
+	}
+
+	std::pair<int,int> computeSingleClusterMaxGTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		int maxF = -1;
+		int maxB = -1;
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (maxF > 0 && maxB > 0){
+				break;
+			}
+			if (it->first >= 0){
+				maxF = forwardQueue.Lookup(forwardCluster[0].first).g;
+			}
+			if (it->second >= 0){
+				 maxB = backwardQueue.Lookup(backwardCluster[0].first).g;
+			}
+		}
+		if (maxF >= maxB){
+			return std::make_pair(0,-1);
+		}
+		else{
+			return std::make_pair(-1,0);
+		}
+		return maxPair;
+	}
+
+	std::pair<int,int> computeSingleClusterMinGTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		int maxF = INT_MAX;
+		int maxB = INT_MAX;
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (maxF < INT_MAX && maxB < INT_MAX){
+				break;
+			}
+			if (it->first >= 0){
+				maxF = forwardQueue.Lookup(forwardCluster[0].first).g;
+			}
+			if (it->second >= 0){
+				 maxB = backwardQueue.Lookup(backwardCluster[0].first).g;
+			}
+		}
+		if (maxF < maxB){
+			return std::make_pair(0,-1);
+		}
+		else{
+			return std::make_pair(-1,0);
+		}
+		return maxPair;
+	}
+
+	std::pair<int,int> computeSingleClusterMinNodesTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		int maxF = INT_MAX;
+		int maxB = INT_MAX;
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (maxF < INT_MAX && maxB < INT_MAX){
+				break;
+			}
+			if (it->first >= 0){
+				maxF = forwardCluster[0].second;
+			}
+			if (it->second >= 0){
+				 maxB = backwardCluster[0].second;
+			}
+		}
+		if (maxF < maxB){
+			return std::make_pair(0,-1);
+		}
+		else{
+			return std::make_pair(-1,0);
+		}
+		return maxPair;
+	}	
+	
+	std::pair<int,int> computeSingleClusterMaxNodesTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		int maxF = -1;
+		int maxB = -1;
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (maxF > 0 && maxB > 0){
+				break;
+			}
+			if (it->first >= 0){
+				maxF = forwardCluster[0].second;
+			}
+			if (it->second >= 0){
+				 maxB = backwardCluster[0].second;
+			}
+		}
+		if (maxF >= maxB){
+			return std::make_pair(0,-1);
+		}
+		else{
+			return std::make_pair(-1,0);
+		}
+		return maxPair;
+	}
+	
+		std::pair<int,int> computeSingleClusterMinGTieBreakingWithSub(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		int maxF = INT_MAX;
+		int maxB = INT_MAX;
+		int minOpenForward = 0;
+		int minOpenBackward = 0;
+		if (forwardCluster.size() > 0){
+			minOpenForward = forwardQueue.Lookup(forwardCluster[0].first).g;
+		}
+		if (backwardCluster.size() > 0){
+			minOpenBackward = backwardQueue.Lookup(backwardCluster[0].first).g;
+		}
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (maxF < INT_MAX && maxB < INT_MAX){
+				break;
+			}
+			if (it->first >= 0){
+				maxF = forwardQueue.Lookup(forwardCluster[0].first).g;
+			}
+			if (it->second >= 0){
+				 maxB = backwardQueue.Lookup(backwardCluster[0].first).g;
+			}
+		}
+		if (maxF - minOpenBackward < maxB - minOpenForward){
+			return std::make_pair(0,-1);
+		}
+		else{
+			return std::make_pair(-1,0);
+		}
+		return maxPair;
+	}
+	
+	std::pair<int,int> computeSingleClusterMaxGTieBreakingWithSub(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		int maxF = -1;
+		int maxB = -1;
+		int minOpenForward = 0;
+		int minOpenBackward = 0;
+		if (forwardCluster.size() > 0){
+			minOpenForward = forwardQueue.Lookup(forwardCluster[0].first).g;
+		}
+		if (backwardCluster.size() > 0){
+			minOpenBackward = backwardQueue.Lookup(backwardCluster[0].first).g;
+		}
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (maxF > 0 && maxB > 0){
+				break;
+			}
+			if (it->first >= 0){
+				maxF = forwardQueue.Lookup(forwardCluster[0].first).g;
+			}
+			if (it->second >= 0){
+				 maxB = backwardQueue.Lookup(backwardCluster[0].first).g;
+			}
+		}
+		if (maxF - minOpenBackward >= maxB - minOpenForward){
+			return std::make_pair(0,-1);
+		}
+		else{
+			return std::make_pair(-1,0);
+		}
+		return maxPair;
+	}
+	
+	std::pair<int,int> computeFullMinGTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int minValue = INT_MAX;
+		std::pair<int,int> minPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			int maxF = INT_MAX;
+			int maxB = INT_MAX;
+			if (it->first >= 0){
+				maxF = forwardQueue.Lookup(forwardCluster[it->first].first).g;
+			}
+			if (it->second >= 0){
+				 maxB = backwardQueue.Lookup(backwardCluster[it->second].first).g;
+			}
+			if ((maxF < minValue) || (maxB < minValue)){
+				minPair = *it;
+				minValue = std::min(maxF,maxB);
+			}
+		}
+		return minPair;
+	}
+	
+	
+	std::pair<int,int> computeMinGTieBreakingWithSub(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){	
+		int minValue = INT_MAX;
+		int minOpenForward = 0;
+		int minOpenBackward = 0;
+		if (forwardCluster.size() > 0){
+			minOpenForward = forwardQueue.Lookup(forwardCluster[0].first).g;
+		}
+		if (backwardCluster.size() > 0){
+			minOpenBackward = backwardQueue.Lookup(backwardCluster[0].first).g;
+		}
+		std::pair<int,int> minPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			int maxF = INT_MAX;
+			int maxB = INT_MAX;
+			if (it->first >= 0){
+				maxF = forwardQueue.Lookup(forwardCluster[it->first].first).g;
+			}
+			if (it->second >= 0){
+				 maxB = backwardQueue.Lookup(backwardCluster[it->second].first).g;
+			}
+			if ((maxF - minOpenBackward < minValue) || (maxB - minOpenForward < minValue)){
+				minPair = *it;
+				minValue = std::min(maxF- minOpenBackward,maxB - minOpenForward);
+			}
+		}
+		return minPair;
+	}
+	
+	std::pair<int,int> computeMajorityMaxTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int forwardCount = 0;
+		int backwardCount = 0;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (it->first >= 0){
+				forwardCount++;
+			}
+			if (it->second >= 0){
+				backwardCount++;
+			}
+		}
+		if (forwardCount > backwardCount){
+			return std::make_pair(0,-1);
+		}
+		else if (forwardCount < backwardCount){
+			return std::make_pair(-1,0);
+		}
+		else{
+			
+			int fVal = forwardQueue.Lookup(forwardCluster[0].first).g;
+			int bVal = backwardQueue.Lookup(backwardCluster[0].first).g;
+			if (fVal >= bVal){
+				return std::make_pair(0,-1);
+			}
+			else{
+				return std::make_pair(-1,0);
+			}
+		}
+	}
+
+
+	std::pair<int,int> computeMajorityMinTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int forwardCount = 0;
+		int backwardCount = 0;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (it->first >= 0){
+				forwardCount++;
+			}
+			if (it->second >= 0){
+				backwardCount++;
+			}
+		}
+		if (forwardCount > backwardCount){
+			return std::make_pair(0,-1);
+		}
+		else if (forwardCount < backwardCount){
+			return std::make_pair(-1,0);
+		}
+		else{
+			
+			int fVal = forwardQueue.Lookup(forwardCluster[0].first).g;
+			int bVal = backwardQueue.Lookup(backwardCluster[0].first).g;
+			if (fVal < bVal){
+				return std::make_pair(0,-1);
+			}
+			else{
+				return std::make_pair(-1,0);
+			}
+		}
+	}	
+	
+	std::pair<int,int> computeMajorityMaxWithSubTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int forwardCount = 0;
+		int backwardCount = 0;
+		int minOpenForward = 0;
+		int minOpenBackward = 0;
+		if (forwardCluster.size() > 0){
+			minOpenForward = forwardQueue.Lookup(forwardCluster[0].first).g;
+		}
+		if (backwardCluster.size() > 0){
+			minOpenBackward = backwardQueue.Lookup(backwardCluster[0].first).g;
+		}
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (it->first >= 0){
+				forwardCount++;
+			}
+			if (it->second >= 0){
+				backwardCount++;
+			}
+		}
+		if (forwardCount > backwardCount){
+			return std::make_pair(0,-1);
+		}
+		else if (forwardCount < backwardCount){
+			return std::make_pair(-1,0);
+		}
+		else{
+			
+			int fVal = forwardQueue.Lookup(forwardCluster[0].first).g - minOpenBackward;
+			int bVal = backwardQueue.Lookup(backwardCluster[0].first).g - minOpenForward;
+			if (fVal >= bVal){
+				return std::make_pair(0,-1);
+			}
+			else{
+				return std::make_pair(-1,0);
+			}
+		}
+	}
+	
+	std::pair<int,int> computeMajorityMinWithSubTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int forwardCount = 0;
+		int backwardCount = 0;
+		int minOpenForward = 0;
+		int minOpenBackward = 0;
+		if (forwardCluster.size() > 0){
+			minOpenForward = forwardQueue.Lookup(forwardCluster[0].first).g;
+		}
+		if (backwardCluster.size() > 0){
+			minOpenBackward = backwardQueue.Lookup(backwardCluster[0].first).g;
+		}
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (it->first >= 0){
+				forwardCount++;
+			}
+			if (it->second >= 0){
+				backwardCount++;
+			}
+		}
+		if (forwardCount > backwardCount){
+			return std::make_pair(0,-1);
+		}
+		else if (forwardCount < backwardCount){
+			return std::make_pair(-1,0);
+		}
+		else{
+			
+			int fVal = forwardQueue.Lookup(forwardCluster[0].first).g - minOpenBackward;
+			int bVal = backwardQueue.Lookup(backwardCluster[0].first).g - minOpenForward;
+			if (fVal < bVal){
+				return std::make_pair(0,-1);
+			}
+			else{
+				return std::make_pair(-1,0);
+			}
+		}
+	}
+	/*
+	std::pair<int,int> computeMajorityTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int forwardCount = 0;
+		int backwardCount = 0;
+		int minI = INT_MAX;
+		int minJ = INT_MAX;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (it->first >= 0){
+				forwardCount++;
+				minI = std::min(it->first,minI);
+			}
+			if (it->second >= 0){
+				backwardCount++;
+				minJ = std::min(it->second,minJ);
+			}
+		}
+		if (forwardCount > backwardCount){
+			return std::make_pair(minI,-1);
+		}
+		else if (forwardCount < backwardCount){
+			return std::make_pair(-1,minJ);
+		}
+		else{
+			int fVal = forwardQueue.Lookup(forwardCluster[minI].first).g;
+			int bVal = backwardQueue.Lookup(backwardCluster[minJ].first).g;
+			if (fVal >= bVal){
+				return std::make_pair(minI,-1);
+			}
+			else{
+				return std::make_pair(-1,minJ);
+			}
+		}
+	*/
+
 
 };
 
