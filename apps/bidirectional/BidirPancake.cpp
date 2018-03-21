@@ -232,7 +232,10 @@ void TestPancakeRandom()
 			
 						// CBBS
 			{
-				for (int i = 1; i<=14;i++){
+				for (int i = 1; i<=15;i++){
+					if (i != 4 && i !=15){
+						continue;
+					}
 					CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> cbbs(i);
 					goal.Reset();
 					start = original;

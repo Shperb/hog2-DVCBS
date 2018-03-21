@@ -547,6 +547,7 @@ private:
 			case 12 : return computeMajorityMinTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
 			case 13 : return computeMajorityMinWithSubTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
 			case 14 : return computeFullMaxGTieBreakingOld(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 15 : return computeMajorityMinNodesTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
 			default: assert(false);
 					 return std::make_pair(-1,-1);
 		}	
@@ -666,6 +667,36 @@ private:
 		}
 		return maxPair;
 	}	
+	
+	std::pair<int,int> computeMajorityMinNodesTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		
+		int forwardCount = 0;
+		int backwardCount = 0;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (it->first >= 0){
+				forwardCount++;
+			}
+			if (it->second >= 0){
+				backwardCount++;
+			}
+		}
+		if (forwardCount > backwardCount){
+			return std::make_pair(0,-1);
+		}
+		else if (forwardCount < backwardCount){
+			return std::make_pair(-1,0);
+		}
+		else{
+			int maxF = forwardCluster[0].second;
+			int maxB = backwardCluster[0].second;
+			if (maxF < maxB){
+				return std::make_pair(0,-1);
+			}
+			else{
+				return std::make_pair(-1,0);
+			}
+		}
+	}
 	
 	std::pair<int,int> computeSingleClusterMaxNodesTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
 		int maxF = -1;

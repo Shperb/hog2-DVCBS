@@ -95,7 +95,10 @@ void TestTOH(int first, int last)
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		if (1)
 		{
-			for (int i = 0; i<=14; i++){
+			for (int i = 1; i<=15; i++){
+				if (i != 4 && i !=15){
+					continue;
+				}
 				CBBS<TOHState<N>, TOHMove, TOH<N>> cbbs(i);
 				//printf("-=-=-CBBS-=-=-\n");
 				timer.StartTimer();
