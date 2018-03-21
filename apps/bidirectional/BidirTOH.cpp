@@ -48,7 +48,7 @@ void TestTOH(int first, int last)
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
 	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> rastar;
 	NBS<TOHState<N>, TOHMove, TOH<N>> nbs;
-	CBBS<TOHState<N>, TOHMove, TOH<N>> cbbs(1);
+	
 	BSStar<TOHState<N>, TOHMove, TOH<N>> bs;
 	MM<TOHState<N>, TOHMove, TOH<N>> mm;
 
@@ -95,13 +95,17 @@ void TestTOH(int first, int last)
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		if (1)
 		{
-			//printf("-=-=-CBBS-=-=-\n");
-			timer.StartTimer();
-			cbbs.GetPath(&toh, s, g, f, b, thePath);
-			timer.EndTimer();
-			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-			printf("CBBS %llu nodes %llu necessary ", cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+			for (int i = 0; i<=14; i++){
+				CBBS<TOHState<N>, TOHMove, TOH<N>> cbbs(i);
+				//printf("-=-=-CBBS-=-=-\n");
+				timer.StartTimer();
+				cbbs.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+				printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
+				printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+			}
+
 		}
 		if (1)
 		{

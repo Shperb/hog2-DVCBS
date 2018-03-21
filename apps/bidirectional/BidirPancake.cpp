@@ -232,14 +232,17 @@ void TestPancakeRandom()
 			
 						// CBBS
 			{
-				CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> cbbs(1);
-				goal.Reset();
-				start = original;
-				t6.StartTimer();
-				cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
-				t6.EndTimer();
-				printf("GAP-%d CBBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(cbbsPath),
-					   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime());
+				for (int i = 1; i<=14;i++){
+					CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> cbbs(i);
+					goal.Reset();
+					start = original;
+					t6.StartTimer();
+					cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
+					t6.EndTimer();
+					printf("GAP-%d CBBS %d found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, i, pancake.GetPathLength(cbbsPath),
+						   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime());
+				}
+
 			}
 			/*
 			// BS*
@@ -408,14 +411,17 @@ void TestPancakeHard()
 		// CBBS
 		if (1)
 		{
-			CBBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> cbbs(1);
-			goal.Reset();
-			start = original;
-			t2.StartTimer();
-			cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
-			t2.EndTimer();
-			printf("HARD-%d CBBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; \n", count, pancake.GetPathLength(cbbsPath),
-				   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t2.GetElapsedTime());
+			for (int i = 0; i<=14;i++){
+				CBBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> cbbs(i);
+				goal.Reset();
+				start = original;
+				t2.StartTimer();
+				cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
+				t2.EndTimer();
+				printf("HARD-%d CBBS %d found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; \n", count, i, pancake.GetPathLength(cbbsPath),
+					cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t2.GetElapsedTime());
+			}
+			
 		}
 		// NBS0
 		if (0)
