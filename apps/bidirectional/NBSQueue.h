@@ -497,6 +497,100 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 		}
 		return false;
 	}
+	
+	uint64_t getMinimalVertexCover(double CStar)
+	{
+
+				std::vector<uint64_t> forwardCandidates;
+				std::vector<uint64_t> backwardCandidates;				
+				std::unordered_map<double,std::vector<uint64_t> > forwardMap,backwardMap;
+				forwardQueue.getClosedNodesLeqCStart(CStar,forwardMap);
+				backwardQueue.getClosedNodesLeqCStart(CStar,backwardMap);
+				std::vector<std::pair<double,uint64_t> > forwardCluster;
+				std::vector<std::pair<double,uint64_t> > backwardCluster;
+				
+				struct compareValues {
+					compareValues(){}
+					bool operator () (std::pair<double,uint64_t> i, std::pair<double,uint64_t> j) { return (i.first<j.first); }
+				};
+				
+				for (auto it : forwardMap){
+					forwardCluster.push_back(std::make_pair(it.first,it.second.size()));
+				}
+				std::sort (forwardCluster.begin(), forwardCluster.end(),compareValues());
+				for (auto it : backwardMap){
+					backwardCluster.push_back(std::make_pair(it.first,it.second.size()));
+				}
+				std::sort (backwardCluster.begin(), backwardCluster.end(),compareValues());
+
+				
+				int minJ = INT_MAX;
+				int minI = INT_MAX;
+				int minValue = INT_MAX;
+				uint64_t NumForwardInVC = 0;
+				uint64_t NumBackwardInVC = 0;
+				std::vector<std::pair<int,int> > minimalVertexCovers;
+				for (int i = -1; i < ((int)forwardCluster.size()); i++){
+					if (i > 0){
+						NumForwardInVC += forwardCluster[i].second;
+					}
+					else{
+						NumForwardInVC = 0;
+					}
+					bool skip = false;
+					for (int j = -1; j < ((int)backwardCluster.size()) && !skip; j++){
+						if (j > 0){
+							NumBackwardInVC += backwardCluster[j].second;
+						}
+						else{
+							NumBackwardInVC = 0;
+						}
+						if (i == ((int)forwardCluster.size())-1){
+							if (NumForwardInVC < minValue){
+								minimalVertexCovers.clear();
+							}
+							if(NumForwardInVC <= minValue){
+								minimalVertexCovers.push_back(std::make_pair(i,j));
+								minValue = NumForwardInVC;
+							}
+							skip = true;
+						} 
+						else if(j == ((int)backwardCluster.size())-1) {
+							if (NumBackwardInVC < minValue){
+								minimalVertexCovers.clear();
+							}
+							if(NumBackwardInVC <= minValue){
+								minimalVertexCovers.push_back(std::make_pair(i,j));
+								minValue = NumBackwardInVC;
+							}
+							skip = true;
+						}
+						else if(backwardCluster[j+1].first+forwardCluster[i+1].first >= CStar){
+							if (NumBackwardInVC+NumForwardInVC < minValue){
+								minimalVertexCovers.clear();
+							}
+							if(NumBackwardInVC+NumForwardInVC <= minValue){
+								minimalVertexCovers.push_back(std::make_pair(i,j));
+								minValue = NumBackwardInVC+NumForwardInVC;
+							}
+							skip = true;
+						}
+					}
+				}
+				
+				std::pair<int,int> chosenVC = minimalVertexCovers[0];
+				uint64_t expansions = 0;
+				for (int i = 0; i <= chosenVC.first;i++){
+					std::vector<uint64_t> v = forwardMap[forwardCluster[i].first];
+					expansions+= v.size();
+				}
+				for (int j = 0; j <= chosenVC.second;j++){
+					std::vector<uint64_t> v = backwardMap[backwardCluster[j].first];
+					expansions+= v.size();
+				}
+				return expansions;
+	}
+	
 	void Reset()
 	{
 		CLowerBound = 0;
@@ -548,6 +642,7 @@ private:
 			case 13 : return computeMajorityMinWithSubTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
 			case 14 : return computeFullMaxGTieBreakingOld(minimalVertexCovers,forwardCluster,backwardCluster);
 			case 15 : return computeMajorityMinNodesTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 16: return computeSingleClusterMinNodesMaxGFTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
 			default: assert(false);
 					 return std::make_pair(-1,-1);
 		}	
@@ -664,6 +759,38 @@ private:
 		}
 		else{
 			return std::make_pair(-1,0);
+		}
+		return maxPair;
+	}
+
+	std::pair<int,int> computeSingleClusterMinNodesMaxGFTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<uint64_t,uint64_t> >& forwardCluster, std::vector<std::pair<uint64_t,uint64_t> >& backwardCluster){
+		int maxF = INT_MAX;
+		int maxB = INT_MAX;
+		std::pair<int,int> maxPair;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (maxF < INT_MAX && maxB < INT_MAX){
+				break;
+			}
+			if (it->first >= 0){
+				maxF = forwardCluster[0].second;
+			}
+			if (it->second >= 0){
+				 maxB = backwardCluster[0].second;
+			}
+		}
+		if (maxF < maxB){
+			return std::make_pair(0,-1);
+		}
+		else if (maxF > maxB){
+			return std::make_pair(-1,0);
+		}
+		else{
+			if (forwardCluster[0].first >= backwardCluster[0].first){
+				return std::make_pair(0,-1);
+			}
+			else{
+				return std::make_pair(-1,0);
+			}
 		}
 		return maxPair;
 	}	

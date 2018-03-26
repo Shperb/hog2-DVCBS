@@ -79,6 +79,8 @@ public:
 	
 	void getNodesLeqValue(double constraint,int index,std::unordered_map<double,std::vector<uint64_t> > &map);
 	void getNodesLeqValue(double constraint,std::unordered_map<double,std::vector<uint64_t> > &map);
+	
+	void getClosedNodesLeqCStart(double CStar,std::unordered_map<double,std::vector<uint64_t> > &map);
 
 	size_t ClosedSize() const { return size()-OpenReadySize()-OpenWaitingSize(); }
 	size_t size() const { return elements.size(); }
@@ -403,6 +405,18 @@ void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::getNodesLeqValue(do
 {
 	getNodesLeqValue(constraint,0,map);
 }
+
+template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
+void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::getClosedNodesLeqCStart(double CStar,std::unordered_map<double,std::vector<uint64_t> > &map){
+	int i = 0;	
+	for(auto it = elements.begin(); it != elements.end(); it++,i++){
+    // found nth element..print and break.
+		if(it->g + it->h < CStar) {
+			map[it->g].push_back(i);
+		}
+	}
+}
+
 
 template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
 void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::getNodesLeqValue(double constraint,int index,std::unordered_map<double,std::vector<uint64_t> > &map)

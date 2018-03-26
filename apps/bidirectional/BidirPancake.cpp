@@ -26,7 +26,7 @@ void TestRob();
 void TestPancake()
 {
 //	TestRob();
-	TestPancakeRandom();
+//	TestPancakeRandom();
 	TestPancakeHard();
 	exit(0);
 }
@@ -185,11 +185,7 @@ void TestPancakeRandom()
 			
 			printf("Problem %d of %d\n", count+1, 50);
 			std::cout << original << "\n";
-			
-			if(gap < 3){
-				continue;
-			}
-			
+						
 			// A*
 			/*
 			if(gap != 3)
@@ -219,6 +215,7 @@ void TestPancakeRandom()
 			
 			// NBS
 			*/
+			/*
 			{
 				NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> nbs;
 				goal.Reset();
@@ -229,11 +226,12 @@ void TestPancakeRandom()
 				printf("GAP-%d NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(nbsPath),
 					   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime());
 			}
+			*/
 			
 						// CBBS
 			{
 				for (int i = 1; i<=15;i++){
-					if (i != 4 && i !=15){
+					if (i !=16){
 						continue;
 					}
 					CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> cbbs(i);
@@ -414,7 +412,10 @@ void TestPancakeHard()
 		// CBBS
 		if (1)
 		{
-			for (int i = 0; i<=14;i++){
+			for (int i = 1; i<=15;i++){
+				if (i != 4 && i !=15){
+					continue;
+				}
 				CBBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> cbbs(i);
 				goal.Reset();
 				start = original;
@@ -441,7 +442,7 @@ void TestPancakeHard()
 		}
 		
 		// BS*
-		if (1)
+		if (0)
 		{
 			BSStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> bs;
 			goal.Reset();
@@ -467,7 +468,7 @@ void TestPancakeHard()
 		}
 		
 		// MM
-		if (1)
+		if (0)
 		{
 			MM<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> mm;
 			goal.Reset();

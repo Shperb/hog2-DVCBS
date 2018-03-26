@@ -41,7 +41,16 @@ public:
 	bool ExpandAVertexCover(std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	
-	
+	uint64_t getOptimalNumberOfExpantions(){
+		//uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(middleNode), theID);
+		//double cost = queue.forwardQueue.Lookup(theID).g;
+		//queue.backwardQueue.Lookup(env->GetStateHash(middleNode), theID);
+		//double cost2 = queue.backwardQueue.Lookup(theID).g;
+		printf("curr Cost: %d\n",currentCost);
+		//printf("cost: %d\n",cost);
+		//printf("cost2: %d\n",cost2);
+		return queue.getMinimalVertexCover(currentCost);
+	}
 	
 	
 	virtual const char *GetName() { return "CBBS"; }
@@ -103,6 +112,7 @@ public:
 	//	void SetWeight(double w) {weight = w;}
 private:
 	void ExtractFromMiddle(std::vector<state> &thePath);
+	double ExtractCostFromMiddle();
 	void ExtractPathToGoal(state &node, std::vector<state> &thePath)
 	{ uint64_t theID; queue.backwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToGoalFromID(theID, thePath); }
 	void ExtractPathToGoalFromID(uint64_t node, std::vector<state> &thePath)
@@ -114,6 +124,19 @@ private:
 		thePath.push_back(queue.backwardQueue.Lookup(node).data);
 	}
 	
+	double ExtractCostToGoal(state &node)
+	{ uint64_t theID; queue.backwardQueue.Lookup(env->GetStateHash(node), theID); return ExtractCostToGoalFromID(theID); }
+	double ExtractCostToGoalFromID(uint64_t node)
+	{
+		double cost = 0;
+		do {
+			cost += queue.backwardQueue.Lookup(node).g;
+			node = queue.backwardQueue.Lookup(node).parentID;
+		} while (queue.backwardQueue.Lookup(node).parentID != node);
+		cost += queue.backwardQueue.Lookup(node).g;
+		return cost;
+	}
+		
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
 	{ uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
@@ -123,6 +146,20 @@ private:
 			node = queue.forwardQueue.Lookup(node).parentID;
 		} while (queue.forwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(queue.forwardQueue.Lookup(node).data);
+	}
+	
+	double  ExtractCostToStart(state &node)
+	{ uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(node), theID); return ExtractCostToStartFromID(theID); }
+	double ExtractCostToStartFromID(uint64_t node)
+	{
+		double cost = 0;
+		do {
+			cost += queue.forwardQueue.Lookup(node).g;
+			printf("cost: %d ",cost);
+			node = queue.forwardQueue.Lookup(node).parentID;
+		} while (queue.forwardQueue.Lookup(node).parentID != node);
+		cost += queue.forwardQueue.Lookup(node).g;
+		return cost;
 	}
 	
 	void OpenGLDraw(const priorityQueue &queue) const;
@@ -386,8 +423,21 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
+double CBBS<state, action, environment, dataStructure, priorityQueue>::ExtractCostFromMiddle()
+{
+	double cost = 0;
+	printf("cost1: %d",cost);
+	cost += ExtractCostToGoal(middleNode);
+	printf("cost2: %d",cost);
+	cost += ExtractCostToStart(middleNode);
+	printf("cost3: %d",cost);
+	return cost;
+}
+
+template <class state, class action, class environment, class dataStructure, class priorityQueue>
 void CBBS<state, action, environment, dataStructure, priorityQueue>::ExtractFromMiddle(std::vector<state> &thePath)
 {
+	
 	std::vector<state> pFor, pBack;
 	ExtractPathToGoal(middleNode, pBack);
 	ExtractPathToStart(middleNode, pFor);
@@ -395,7 +445,6 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::ExtractFrom
 	thePath = pFor;
 	thePath.insert( thePath.end(), pBack.begin()+1, pBack.end() );
 }
-
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
 bool CBBS<state, action, environment, dataStructure, priorityQueue>::DoSingleSearchStep(std::vector<state> &thePath)

@@ -95,8 +95,8 @@ void TestTOH(int first, int last)
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		if (1)
 		{
-			for (int i = 1; i<=15; i++){
-				if (i != 4 && i !=15){
+			for (int i = 1; i<=16; i++){
+				if (i !=16){
 					continue;
 				}
 				CBBS<TOHState<N>, TOHMove, TOH<N>> cbbs(i);
@@ -107,10 +107,11 @@ void TestTOH(int first, int last)
 				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
 				printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
 				printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+				//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
 			}
 
 		}
-		if (1)
+		if (0)
 		{
 			//printf("-=-=-NBS-=-=-\n");
 			timer.StartTimer();
@@ -191,9 +192,9 @@ void TestTOH(int first, int last)
 
 void TOHTest()
 {
-//	TestTOH<14, 2>(0, 50);
+	TestTOH<14, 2>(0, 50);
 	TestTOH<14, 4>(0, 50);
-//	TestTOH<14, 5>(0, 50);
+	TestTOH<14, 5>(0, 50);
 //	TestTOH<14, 6>(0, 50);
 //	TestTOH<14, 7>(0, 50);
 //	TestTOH<14, 8>(0, 50);
