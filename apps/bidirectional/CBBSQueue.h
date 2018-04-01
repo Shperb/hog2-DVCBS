@@ -166,7 +166,7 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 						else{
 							NumBackwardInVC = 0;
 						}
-						if (i == ((int)forwardCluster.size())-1){
+						if (i >= 0 && i == ((int)forwardCluster.size())-1){
 							if (NumForwardInVC < minValue){
 								minimalVertexCovers.clear();
 							}
@@ -176,7 +176,7 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 							}
 							skip = true;
 						} 
-						else if(j == ((int)backwardCluster.size())-1) {
+						else if(j >= 0 && j == ((int)backwardCluster.size())-1) {
 							if (NumBackwardInVC < minValue){
 								minimalVertexCovers.clear();
 							}
@@ -300,6 +300,7 @@ private:
 			//case 14 : return computeFullMaxGTieBreakingOld(minimalVertexCovers,forwardCluster,backwardCluster);
 			case 9 : return computeMajorityMinNodesTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
 			case 10: return computeSingleClusterMinNodesMaxGFTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 11: return NBStie(minimalVertexCovers,forwardCluster,backwardCluster);
 			
 			default: assert(false);
 					 return std::make_pair(-1,-1);
@@ -760,6 +761,33 @@ private:
 				return std::make_pair(-1,0);
 			}
 		}
+	}
+	
+	std::pair<int,int> NBStie(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<double,uint64_t> >& forwardCluster, std::vector<std::pair<double,uint64_t> >& backwardCluster){
+		if (minimalVertexCovers.size() ==1){
+			
+		}
+		int forwardCount = 0;
+		int backwardCount = 0;
+		int Ival = -1;
+		int Jval = -1;
+		for(std::vector<std::pair<int,int> >::iterator it = minimalVertexCovers.begin(); it != minimalVertexCovers.end(); ++it) {
+			if (it->first >= 0){
+				forwardCount++;
+			}
+			if (it->second >= 0){
+				backwardCount++;
+			}
+		}
+		if (forwardCount > 0){
+			Ival = 0;
+		}
+		if (backwardCount > 0){
+			Jval = 0;
+		}
+		
+		return std::make_pair(Ival,Jval);
+			
 	}
 	/*
 	std::pair<int,int> computeMajorityTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<double,uint64_t> >& forwardCluster, std::vector<std::pair<double,uint64_t> >& backwardCluster){

@@ -230,10 +230,10 @@ void TestSTP(int algorithm)
 		if (algorithm == 5) // all CBBS + NBS
 		{
 
-			for (int i =1; i<=10;i++){
-				//if (i != 4){
-				//	continue;
-				//}
+			for (int i =1; i<=11;i++){
+				if (i != 4){
+					continue;
+				}
 				CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> cbbs(i);
 				goal.Reset();
 				start = GetKorfInstance(x);

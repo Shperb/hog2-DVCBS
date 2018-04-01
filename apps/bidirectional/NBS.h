@@ -90,9 +90,11 @@ public:
 		uint64_t necessary = 0;
 		for (const auto &i : counts)
 		{
+			std::cout << "first =" << i.first << "second =" << i.second <<" ";
 			if (i.first < currentCost)
 				necessary+=i.second;
 		}
+		std::cout << "currentCost =" << currentCost << "necessary =" << necessary <<std::endl;
 		return necessary;
 	}
 	double GetSolutionCost() const { return currentCost; }

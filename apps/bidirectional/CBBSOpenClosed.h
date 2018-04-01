@@ -46,6 +46,7 @@ public:
 	void eraseFromNodesMap(stateLocation whichQueue,uint64_t val,double oldKey);
 	void eraseFirstClusterFromNodesMap(stateLocation whichQueue);
 	void putInNodesMap(stateLocation whichQueue,uint64_t val);
+	void validateSize(int func);
 	void Remove(uint64_t objKey);
 	//void IncreaseKey(uint64_t objKey);
 	stateLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
@@ -130,6 +131,7 @@ void CBBSOpenClosed<state,   dataStructure>::Reset()
 template<typename state,   class dataStructure>
 uint64_t CBBSOpenClosed<state,   dataStructure>::AddOpenNode(const state &val, uint64_t hash, double g, double h, uint64_t parent, stateLocation whichQueue)
 {
+	//validateSize(1);
 	// should do lookup here...
 	if (table.find(hash) != table.end())
 	{
@@ -151,7 +153,7 @@ uint64_t CBBSOpenClosed<state,   dataStructure>::AddOpenNode(const state &val, u
 	table[hash] = elements.size()-1; // hashing to element list location
 	
 	putInNodesMap(whichQueue,elements.size() - 1);
-
+	//validateSize(2);
 	return elements.size()-1;
 }
 
@@ -161,12 +163,14 @@ uint64_t CBBSOpenClosed<state,   dataStructure>::AddOpenNode(const state &val, u
 template<typename state,   class dataStructure>
 uint64_t CBBSOpenClosed<state,   dataStructure>::AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent)
 {
+	//validateSize(3);
 	// should do lookup here...
 	assert(table.find(hash) == table.end());
 	elements.push_back(dataStructure(val, g, h, parent,kClosed));
 	if (parent == kTBDNoNode)
 		elements.back().parentID = elements.size()-1;
 	table[hash] = elements.size()-1; // hashing to element list location
+	//validateSize(4);
 	return elements.size()-1;
 }
 
@@ -177,13 +181,16 @@ uint64_t CBBSOpenClosed<state,   dataStructure>::AddClosedNode(state &val, uint6
 template<typename state,   class dataStructure>
 void CBBSOpenClosed<state,   dataStructure>::KeyChanged(uint64_t val,double oldKey)
 {
+	//validateSize(5);
 	eraseFromNodesMap(elements[val].where,val,oldKey);
 	putInNodesMap(elements[val].where,val);
+	//validateSize(6);
 }
 
 template<typename state,   class dataStructure>
 void CBBSOpenClosed<state,   dataStructure>::putInNodesMap(stateLocation whichQueue,uint64_t val)
 {
+	//validateSize(7);
 	double key;
 	if (whichQueue == kOpenReady){
 		key = elements[val].g;
@@ -194,13 +201,16 @@ void CBBSOpenClosed<state,   dataStructure>::putInNodesMap(stateLocation whichQu
 	else{
 		return;
 	}
-	nodesMap[whichQueue][key].insert(val);
-	nodesMapSize[whichQueue] += 1;
+	if (nodesMap[whichQueue][key].insert(val).second){
+		nodesMapSize[whichQueue] = nodesMapSize[whichQueue]+1;
+	}
+	//validateSize(8);
 }
 
 template<typename state,   class dataStructure>
 void CBBSOpenClosed<state,   dataStructure>::eraseFromNodesMap(stateLocation whichQueue,uint64_t val)
 {
+	//validateSize(9);
 	double key;
 	if (whichQueue == kOpenReady){
 		key = elements[val].g;
@@ -216,46 +226,71 @@ void CBBSOpenClosed<state,   dataStructure>::eraseFromNodesMap(stateLocation whi
 		auto toDelete = containerIter->second.find(val);
 		if (toDelete != containerIter->second.end()){
 			containerIter->second.erase(toDelete);
-			nodesMapSize[whichQueue] -= 1;
+			nodesMapSize[whichQueue] = nodesMapSize[whichQueue]-1;
 			if (containerIter->second.empty()){
 				nodesMap[whichQueue].erase(containerIter);
 			}
 		}
 	}
+	//validateSize(10);
+}
+
+template<typename state,   class dataStructure>
+void CBBSOpenClosed<state,   dataStructure>::validateSize(int func)
+{
+	//printf("bla ");
+	for (int queue = 0;queue <=1;queue++){
+		uint64_t size = 0;
+		auto containerIter = nodesMap[queue].begin();
+		while (containerIter != nodesMap[queue].end()){
+			size+= containerIter->second.size();
+			containerIter++;
+		}
+		if (size != nodesMapSize[queue]){
+			printf("found inconsistancy: %i,%i,%lld,%lld",func,queue,size,nodesMapSize[queue]);
+		}
+	}
+
 }
 
 template<typename state,   class dataStructure>
 void CBBSOpenClosed<state,   dataStructure>::eraseFromNodesMap(stateLocation whichQueue,uint64_t val,double oldKey)
 {
+	//validateSize(11);
 	auto containerIter = nodesMap[whichQueue].find(oldKey);
 	if (containerIter != nodesMap[whichQueue].end()){
 		auto toDelete = containerIter->second.find(val);
 		if (toDelete != containerIter->second.end()){
 			containerIter->second.erase(toDelete);
-			nodesMapSize[whichQueue] -= 1;
+			nodesMapSize[whichQueue] = nodesMapSize[whichQueue]-1;
 			if (containerIter->second.empty()){
 				nodesMap[whichQueue].erase(containerIter);
 			}
 		}
 	}
+	//validateSize(12);
 }
 
 template<typename state,   class dataStructure>
 void CBBSOpenClosed<state,   dataStructure>::eraseFirstClusterFromNodesMap(stateLocation whichQueue)
 {
+	//validateSize(13);
 	auto containerIter = nodesMap[whichQueue].begin();
 	if (containerIter != nodesMap[whichQueue].end()){
-		nodesMapSize[whichQueue] -= containerIter->second.size();
+		nodesMapSize[whichQueue] = nodesMapSize[whichQueue]-containerIter->second.size();
 		nodesMap[whichQueue].erase(containerIter);
 	}
+	//validateSize(14);
 }
 
 template<typename state, class dataStructure>
 void CBBSOpenClosed<state, dataStructure>::Remove(uint64_t val)
 {
+	//validateSize(15);
 	stateLocation whichQueue = elements[val].where;
 	elements[val].where = kClosed;
 	eraseFromNodesMap(whichQueue,val);
+	//validateSize(16);
 }
 
 template<typename state,   class dataStructure>
@@ -274,16 +309,18 @@ stateLocation CBBSOpenClosed<state,   dataStructure>::Lookup(uint64_t hashKey, u
 template<typename state,   class dataStructure>
 uint64_t CBBSOpenClosed<state,   dataStructure>::CloseAtIndex(uint64_t val)
 {
-
+	//validateSize(17);
 	stateLocation whichQueue = elements[val].where;
 	elements[val].where = kClosed;
 	eraseFromNodesMap(whichQueue,val);
+	//validateSize(18);
 	return val;
 }
 
 template<typename state, class dataStructure>
 void CBBSOpenClosed<state, dataStructure>::PutToReady()
 {
+	//validateSize(19);
 	assert(OpenWaitingSize() != 0);
 	auto container = nodesMap[kOpenWaiting].begin()->second;
 	for (auto i = container.begin();i != container.end(); i++){
@@ -291,6 +328,7 @@ void CBBSOpenClosed<state, dataStructure>::PutToReady()
 		elements[*i].where = kOpenReady;
 	}
 	eraseFirstClusterFromNodesMap(kOpenWaiting);
+	//validateSize(20);
 }
 
 
