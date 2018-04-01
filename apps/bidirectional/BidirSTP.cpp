@@ -206,7 +206,7 @@ void TestSTP(int algorithm)
 		
 		if (algorithm == 6) // cbbs
 		{
-			CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> cbbs(16);
+			CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> cbbs(4);
 			goal.Reset();
 			start = GetKorfInstance(x);
 			t2.StartTimer();
@@ -229,17 +229,11 @@ void TestSTP(int algorithm)
 		
 		if (algorithm == 5) // all CBBS + NBS
 		{
-			goal.Reset();
-			start = GetKorfInstance(x);
-			t2.StartTimer();
-			nbs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
-			t2.EndTimer();
-			printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
-				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t2.GetElapsedTime());
-			for (int i =1; i<=15;i++){
-				if (i != 4 && i !=15){
-					continue;
-				}
+
+			for (int i =1; i<=10;i++){
+				//if (i != 4){
+				//	continue;
+				//}
 				CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> cbbs(i);
 				goal.Reset();
 				start = GetKorfInstance(x);
@@ -249,6 +243,14 @@ void TestSTP(int algorithm)
 				printf("CBBS %d found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", i,mnp.GetPathLength(cbbsPath),
 					cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), cbbs.GetNodesTouched(), t2.GetElapsedTime());
 			}
+			
+			goal.Reset();
+			start = GetKorfInstance(x);
+			t2.StartTimer();
+			nbs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
+			t2.EndTimer();
+			printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
+				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t2.GetElapsedTime());
 			
 		}
 		

@@ -10,8 +10,6 @@
 #include <ext/hash_map>
 #include <stdint.h>
 #include "AStarOpenClosed.h"
-#include <unordered_map>
-
 
 //struct AHash64 {
 //	size_t operator()(const uint64_t &x) const
@@ -54,21 +52,17 @@ public:
 	uint64_t AddClosedNode(state &val, uint64_t hash, double g, double h, uint64_t parent=kTBDNoNode);
 	void KeyChanged(uint64_t objKey);
 	void Remove(uint64_t objKey);
-	void addAgainToReady(uint64_t objKey);
-	void removeFirstInReady();
 	//void IncreaseKey(uint64_t objKey);
 	stateLocation Lookup(uint64_t hashKey, uint64_t &objKey) const;
 	inline dataStructure &Lookup(uint64_t objKey) { return elements[objKey]; }
 	inline const dataStructure &Lookat(uint64_t objKey) const { return elements[objKey]; }
 	uint64_t Peek(stateLocation whichQueue) const;
-	uint64_t PeekAtIndex(stateLocation whichQueue,int index) const;
 	inline const dataStructure &PeekAt(stateLocation whichQueue) const;
 
 	//if exist min pair, return true, else(one queue is empty) return false;
 	//if it returns true, left and right should be set to the pair that is supposed to be returned.
 	//bool ExtractMinPair(uint64_t& left, uint64_t& right) ;
 	uint64_t Close();
-	uint64_t CloseAtIndex(uint64_t index);
 	uint64_t PutToReady();
 	//void Reopen(uint64_t objKey);
 
@@ -76,11 +70,6 @@ public:
 	size_t OpenReadySize() const { return priorityQueues[kOpenReady].size(); }
 	size_t OpenWaitingSize() const { return priorityQueues[kOpenWaiting].size(); }
 	size_t OpenSize() const { return priorityQueues[kOpenReady].size()+priorityQueues[kOpenWaiting].size(); }
-	
-	void getNodesLeqValue(double constraint,int index,std::unordered_map<double,std::vector<uint64_t> > &map);
-	void getNodesLeqValue(double constraint,std::unordered_map<double,std::vector<uint64_t> > &map);
-	
-	void getClosedNodesLeqCStart(double CStar,std::unordered_map<double,std::vector<uint64_t> > &map);
 
 	size_t ClosedSize() const { return size()-OpenReadySize()-OpenWaitingSize(); }
 	size_t size() const { return elements.size(); }
@@ -253,26 +242,6 @@ void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Remove(uint64_t val)
 
 }
 
-template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::removeFirstInReady()
-{
-	elements[priorityQueues[kOpenReady][0]].openLocation = 999999;
-	priorityQueues[kOpenReady][0] = priorityQueues[kOpenReady][priorityQueues[kOpenReady].size() - 1];
-	elements[priorityQueues[kOpenReady][0]].openLocation = 0;
-	priorityQueues[kOpenReady].pop_back();
-
-	if (!HeapifyUp(0, kOpenReady))
-		HeapifyDown(0, kOpenReady);
-}
-
-template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::addAgainToReady(uint64_t val)
-{
-	priorityQueues[kOpenReady].push_back(val);
-	elements[val].openLocation = priorityQueues[kOpenReady].size() - 1;
-	HeapifyUp(priorityQueues[kOpenReady].size() - 1,kOpenReady);
-}
-
 ///**
 // * Indicate that the key for a particular object has increased.
 // */
@@ -320,20 +289,6 @@ uint64_t BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::Peek(stateLocatio
 	return priorityQueues[whichQueue][0];
 }
 
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-uint64_t BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::PeekAtIndex(stateLocation whichQueue,int index) const
-{
-	if (whichQueue == kOpenReady)
-	{
-		assert(OpenReadySize() >= index+1);		
-	}
-	else if (whichQueue == kOpenWaiting)
-	{
-		assert(OpenWaitingSize() >= index+1);
-	}
-	return priorityQueues[whichQueue][index];
-}
-
 /**
  * Peek at the next item to be expanded.
  */
@@ -367,73 +322,9 @@ uint64_t BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::Close()
 	elements[priorityQueues[0][0]].openLocation = 0;
 	priorityQueues[0].pop_back();
 	
-	if (priorityQueues[0].size() > 0){
-		HeapifyDown(0,kOpenReady);
-	}
+	HeapifyDown(0,kOpenReady);
 	
 	return ans;
-}
-
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-uint64_t BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::CloseAtIndex(uint64_t val)
-{
-
-	int index = elements[val].openLocation;
-	assert(OpenReadySize() > index);
-	uint64_t ans = priorityQueues[0][index];
-	if (ans != val){
-		int x = 5;
-	}
-	elements[ans].where = kClosed;
-	priorityQueues[0][index] = priorityQueues[0][OpenReadySize()-1];
-	elements[priorityQueues[0][index]].openLocation = index;
-	priorityQueues[0].pop_back();
-	if (OpenReadySize() > index){
-		if (!HeapifyUp(index, kOpenReady))
-			HeapifyDown(index, kOpenReady);	
-	}
-	//for (int i = 0; i< priorityQueues[0].size();i++){
-	//	if (elements[priorityQueues[0][i]].where == kClosed){
-	//		int x = 5;
-	//	}
-	//}
-	return ans;
-}
-
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::getNodesLeqValue(double constraint,std::unordered_map<double,std::vector<uint64_t> > &map)
-{
-	getNodesLeqValue(constraint,0,map);
-}
-
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::getClosedNodesLeqCStart(double CStar,std::unordered_map<double,std::vector<uint64_t> > &map){
-	int i = 0;	
-	for(auto it = elements.begin(); it != elements.end(); it++,i++){
-    // found nth element..print and break.
-		if(it->g + it->h < CStar) {
-			map[it->g].push_back(i);
-		}
-	}
-}
-
-
-template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
-void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::getNodesLeqValue(double constraint,int index,std::unordered_map<double,std::vector<uint64_t> > &map)
-{
-	double currentValue = elements[priorityQueues[0][index]].g;
-	if (currentValue > constraint){
-		return;
-	}
-	
-	map[currentValue].push_back(priorityQueues[0][index]);	
-	
-	if(index*2+1 < priorityQueues[0].size()){
-		getNodesLeqValue(constraint,index*2+1,map);
-	}
-	if(index*2+2 < priorityQueues[0].size()){
-		getNodesLeqValue(constraint,index*2+2,map);
-	}
 }
 
 template<typename state, typename CmpKey0, typename CmpKey1, class dataStructure>
@@ -472,9 +363,6 @@ uint64_t BDOpenClosed<state, CmpKey0, CmpKey1, dataStructure>::PutToReady()
 template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
 bool BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::HeapifyUp(unsigned int index, stateLocation whichQueue)
 {
-	if (elements[priorityQueues[whichQueue][index]].where == kClosed){
-		int x = 5;
-	}
 	if (index == 0) return false;
 	int parent = (index-1)/2;
 
@@ -514,11 +402,12 @@ bool BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::HeapifyUp(unsigned 
 template<typename state, typename CmpKey0, typename CmpKey1,   class dataStructure>
 void BDOpenClosed<state, CmpKey0, CmpKey1,   dataStructure>::HeapifyDown(unsigned int index, stateLocation whichQueue)
 {
-	if (elements[priorityQueues[whichQueue][index]].where == kClosed){
-		int x = 5;
-	}
+	
 	unsigned int child1 = index*2+1;
 	unsigned int child2 = index*2+2;
+
+
+
 	if (whichQueue == kOpenReady)
 	{
 		CmpKey0 compare;

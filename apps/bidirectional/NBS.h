@@ -204,19 +204,23 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(
 	{
 		if (currentCost == DBL_MAX)
 		{
+			printf("here1");
 			thePath.resize(0);
 			return true;
 		}
 		ExtractFromMiddle(thePath);
+		printf("here2");
 		return true;
 	}
 	else if (queue.forwardQueue.Lookup(nForward).data == queue.backwardQueue.Lookup(nBackward).data) // if success, see if nodes are the same (return path)
 	{
+		printf("here3");
 		ExtractFromMiddle(thePath);
 		return true;
 	}
 	else if (!fless(queue.GetLowerBound(), currentCost))
 	{
+		printf("here4");
 		ExtractFromMiddle(thePath);
 		return true;
 	}

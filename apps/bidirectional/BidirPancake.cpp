@@ -26,8 +26,8 @@ void TestRob();
 void TestPancake()
 {
 //	TestRob();
-//	TestPancakeRandom();
-	TestPancakeHard();
+	TestPancakeRandom();
+//	TestPancakeHard();
 	exit(0);
 }
 
@@ -231,7 +231,7 @@ void TestPancakeRandom()
 						// CBBS
 			{
 				for (int i = 1; i<=15;i++){
-					if (i !=16){
+					if (i !=4){
 						continue;
 					}
 					CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> cbbs(i);
