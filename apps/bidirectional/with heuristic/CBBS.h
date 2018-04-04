@@ -101,9 +101,11 @@ public:
 		uint64_t necessary = 0;
 		for (const auto &i : counts)
 		{
+			//std::cout << "first =" << i.first << "second =" << i.second <<" ";
 			if (i.first < currentCost)
 				necessary+=i.second;
 		}
+		//std::cout << "currentCost =" << currentCost << "necessary =" << necessary <<std::endl;
 		return necessary;
 	}
 	double GetSolutionCost() const { return currentCost; }
@@ -296,9 +298,9 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 		dataStructure queue;
 	};
 	double currentLowerBound = queue.GetLowerBound();
-	/*
+	
 	if (nForward.size() == 0){
-		std::sort (nBackward.begin(), nBackward.end(),compareBackward(queue));
+		//std::sort (nBackward.begin(), nBackward.end(),compareBackward(queue));
 		for (int j =0; j< ((int)nBackward.size());j++){
 			if (queue.backwardQueue.Lookup(nBackward[j]).where != kClosed){
 					counts[currentLowerBound]++;
@@ -306,6 +308,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 			}
 			if (!fless(queue.GetLowerBound(), currentCost)){
 					ExtractFromMiddle(thePath);
+					std::cout << "currentCost =" << currentCost << "queue.GetLowerBound() =" << queue.GetLowerBound() <<std::endl;
 					return true;
 			}
 			if (currentLowerBound != queue.GetLowerBound()){
@@ -315,7 +318,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 	}
 	
 	else if (nBackward.size() == 0){
-		std::sort (nForward.begin(), nForward.end(),compareForward(queue));
+		//std::sort (nForward.begin(), nForward.end(),compareForward(queue));
 		for (int i =0; i< ((int)nForward.size());i++){
 			if (queue.forwardQueue.Lookup(nForward[i]).where != kClosed){
 				counts[currentLowerBound]++;
@@ -323,6 +326,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 			}
 			if (!fless(queue.GetLowerBound(), currentCost)){
 					ExtractFromMiddle(thePath);
+					std::cout << "currentCost =" << currentCost << "queue.GetLowerBound() =" << queue.GetLowerBound() <<std::endl;
 					return true;
 			}
 			if (currentLowerBound != queue.GetLowerBound()){
@@ -331,7 +335,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 		}
 	}
 	else{
-		printf("here");
+		printf("heredfdgdfgdgdg");
 		int i = nForward.size()-1;
 		int j = nBackward.size()-1;
 		while (i >= 0 || j >=0 ){
@@ -374,7 +378,8 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 			}
 		}
 	}
-	*/
+	
+	/*
 	uint64_t i = 0;
 	uint64_t j = 0;
 	while (i < nForward.size() || j < nBackward.size() ){
@@ -417,7 +422,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 			return false;
 		}
 	}
-	
+	*/
 	/*
 	for(int i = 0; i< nForward.size(); i++){
 		counts[currentLowerBound]++;
@@ -477,11 +482,11 @@ template <class state, class action, class environment, class dataStructure, cla
 double CBBS<state, action, environment, dataStructure, priorityQueue>::ExtractCostFromMiddle()
 {
 	double cost = 0;
-	printf("cost1: %d",cost);
+	//printf("cost1: %d",cost);
 	cost += ExtractCostToGoal(middleNode);
-	printf("cost2: %d",cost);
+	//printf("cost2: %d",cost);
 	cost += ExtractCostToStart(middleNode);
-	printf("cost3: %d",cost);
+	//printf("cost3: %d",cost);
 	return cost;
 }
 
@@ -518,10 +523,8 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 	assert(tmp == nextID);
 
 	//this can happen when we expand a single node instead of a pair
-	if (fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost)){
+	if (fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost))
 		return;
-	}
-		
 	
 	nodesExpanded++;
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
