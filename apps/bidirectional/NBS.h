@@ -19,7 +19,6 @@
 #include "NBSQueue.h"
 #include "NBSQueueGF.h"
 
-#define EPSILON 1
 
 using std::cout;
 
@@ -41,7 +40,21 @@ public:
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	
 	
+	uint64_t getForwardUnnecessaryNodesInPath(){
+		return forwardUnnecessaryNodesInPath;
+	}
 	
+	uint64_t getBackwardUnnecessaryNodesInPath(){
+		return backwardUnnecessaryNodesInPath;
+	}
+	
+	uint64_t getForwardMeetingPoint(){
+		return forwardMeetingPoint;
+	}
+	
+	uint64_t getBackwardMeetingPoint(){
+		return backwardMeetingPoint;
+	}
 	
 	virtual const char *GetName() { return "NBS"; }
 	
@@ -90,14 +103,16 @@ public:
 		uint64_t necessary = 0;
 		for (const auto &i : counts)
 		{
-			std::cout << "first =" << i.first << "second =" << i.second <<" ";
+			//std::cout << "first =" << i.first << "second =" << i.second <<" ";
 			if (i.first < currentCost)
 				necessary+=i.second;
 		}
-		std::cout << "currentCost =" << currentCost << "necessary =" << necessary <<std::endl;
+		//std::cout << "currentCost =" << currentCost << "necessary =" << necessary <<std::endl;
 		return necessary;
 	}
 	double GetSolutionCost() const { return currentCost; }
+	double GetExpansionUntilFirstSolution() const { return expansionsUntilSolution; }
+
 	
 	void OpenGLDraw() const;
 	
@@ -111,9 +126,16 @@ private:
 		do {
 			thePath.push_back(queue.backwardQueue.Lookup(node).data);
 			node = queue.backwardQueue.Lookup(node).parentID;
+			backwardMeetingPoint++;
+			if (queue.backwardQueue.Lookup(node).g+queue.backwardQueue.Lookup(node).h == currentCost){
+				backwardUnnecessaryNodesInPath++;
+			}
 		} while (queue.backwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(queue.backwardQueue.Lookup(node).data);
+		
+		
 	}
+	
 	
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
 	{ uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
@@ -122,6 +144,10 @@ private:
 		do {
 			thePath.push_back(queue.forwardQueue.Lookup(node).data);
 			node = queue.forwardQueue.Lookup(node).parentID;
+			forwardMeetingPoint++;
+			if (queue.forwardQueue.Lookup(node).g+queue.forwardQueue.Lookup(node).h == currentCost){
+				forwardUnnecessaryNodesInPath++;
+			}
 		} while (queue.forwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(queue.forwardQueue.Lookup(node).data);
 	}
@@ -137,6 +163,7 @@ private:
 	uint64_t nodesTouched, nodesExpanded;
 	state middleNode;
 	double currentCost;
+	double expansionsUntilSolution;
 	double currentSolutionEstimate;
 	std::vector<state> neighbors;
 	environment *env;
@@ -155,6 +182,11 @@ private:
 	bool expand;
 	
 	double currentPr;
+	
+	uint64_t forwardUnnecessaryNodesInPath;
+	uint64_t backwardUnnecessaryNodesInPath;
+	uint64_t forwardMeetingPoint;
+	uint64_t backwardMeetingPoint;
 	
 	
 };
@@ -180,7 +212,12 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::InitializeSe
 	backwardHeuristic = backward;
 	currentSolutionEstimate = 0;
 	currentCost = DBL_MAX;
+	expansionsUntilSolution = 0;
 	queue.Reset();
+	backwardUnnecessaryNodesInPath = 0;
+	forwardUnnecessaryNodesInPath = 0;
+	forwardMeetingPoint = 0;
+	backwardMeetingPoint = 0;
 //	queue.forwardQueue.Reset();
 //	queue.backwardQueue.Reset();
 	ResetNodeCount();
@@ -206,23 +243,23 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(
 	{
 		if (currentCost == DBL_MAX)
 		{
-			printf("here1");
+			//printf("here1");
 			thePath.resize(0);
 			return true;
 		}
 		ExtractFromMiddle(thePath);
-		printf("here2");
+		//printf("here2");
 		return true;
 	}
 	else if (queue.forwardQueue.Lookup(nForward).data == queue.backwardQueue.Lookup(nBackward).data) // if success, see if nodes are the same (return path)
 	{
-		printf("here3");
+		//printf("here3");
 		ExtractFromMiddle(thePath);
 		return true;
 	}
 	else if (!fless(queue.GetLowerBound(), currentCost))
 	{
-		printf("here4");
+		//printf("here4");
 		ExtractFromMiddle(thePath);
 		return true;
 	}
@@ -309,6 +346,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 //								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
 //								nodesExpanded);
 							currentCost = current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g;
+							expansionsUntilSolution = nodesExpanded;
 							
 							middleNode = succ;
 						}
@@ -366,6 +404,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 //								current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
 //								nodesExpanded);
 							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
+							expansionsUntilSolution = nodesExpanded;
 							
 							middleNode = succ;
 						}

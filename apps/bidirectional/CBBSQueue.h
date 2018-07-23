@@ -18,7 +18,7 @@
 #include <algorithm>
 
 
-template <typename state, int epsilon = 1>
+template <typename state, int epsilon = 0>
 class CBBSQueue {
 public:
 bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &nextBackward,int TieBreakingPolicy)
@@ -62,10 +62,13 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 				std::vector<std::pair<double,uint64_t> > backwardCluster;
 				for (auto it = forwardQueue.getNodesMapBegin(kOpenReady); it != forwardQueue.getNodesMapEnd(kOpenReady) && it->first <= CLowerBound-backwardQueue.getFirstKey(kOpenReady) - epsilon+TOLERANCE; it++){
 					forwardCluster.push_back(std::make_pair(it->first,it->second.size()));
+					//printf("<F,%f,%llu>",it->first,it->second.size());
 				}
 				for (auto it = backwardQueue.getNodesMapBegin(kOpenReady); it != backwardQueue.getNodesMapEnd(kOpenReady) && it->first <= CLowerBound-forwardQueue.getFirstKey(kOpenReady) - epsilon+TOLERANCE; it++){
 					backwardCluster.push_back(std::make_pair(it->first,it->second.size()));
+					//printf("<B,%f,%llu>",it->first,it->second.size());
 				}
+				//printf("\n");
 				/*
 				forwardQueue.getNodesLeqValue(CLowerBound-backwardQueue.PeekAt(kOpenReady).g - epsilon+TOLERANCE,forwardMap);
 				backwardQueue.getNodesLeqValue(CLowerBound-forwardQueue.PeekAt(kOpenReady).g - epsilon+TOLERANCE,backwardMap);
@@ -233,14 +236,19 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 				{
 					const auto i5 = forwardQueue.getFirstKey(kOpenWaiting);
 					CLowerBound = std::min(CLowerBound, i5);
+					//printf("fF=%f\n",i5);
 				}
 				if (backwardQueue.OpenWaitingSize() != 0)
 				{
 					const auto i6 = backwardQueue.getFirstKey(kOpenWaiting);
 					CLowerBound = std::min(CLowerBound, i6);
+					//printf("fB=%f\n",i6);
 				}
 				if ((forwardQueue.OpenReadySize() != 0) && (backwardQueue.OpenReadySize() != 0))
 					CLowerBound = std::min(CLowerBound, forwardQueue.getFirstKey(kOpenReady) + backwardQueue.getFirstKey(kOpenReady) + epsilon);
+					//printf("gB=%f, gF=%f, epsilion=%d, LB:%f\n",forwardQueue.getFirstKey(kOpenReady),backwardQueue.getFirstKey(kOpenReady),epsilon,CLowerBound);
+				
+				
 			}
 			
 

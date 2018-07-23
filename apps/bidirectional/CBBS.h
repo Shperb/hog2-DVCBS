@@ -20,8 +20,6 @@
 #include "NBSQueueGF.h"
 #include <algorithm>
 
-#define EPSILON 1
-
 using std::cout;
 
 
@@ -41,6 +39,22 @@ public:
 						  Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);
 	bool ExpandAVertexCover(std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
+	
+	uint64_t getForwardUnnecessaryNodesInPath(){
+		return forwardUnnecessaryNodesInPath;
+	}
+	
+	uint64_t getBackwardUnnecessaryNodesInPath(){
+		return backwardUnnecessaryNodesInPath;
+	}
+
+	uint64_t getForwardMeetingPoint(){
+		return forwardMeetingPoint;
+	}
+	
+	uint64_t getBackwardMeetingPoint(){
+		return backwardMeetingPoint;
+	}
 	
 	uint64_t getOptimalNumberOfExpantions(){
 		//uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(middleNode), theID);
@@ -107,6 +121,8 @@ public:
 		return necessary;
 	}
 	double GetSolutionCost() const { return currentCost; }
+	double GetExpansionUntilFirstSolution() const { return expansionsUntilSolution; }
+
 	
 	void OpenGLDraw() const;
 	
@@ -120,9 +136,16 @@ private:
 	{
 		do {
 			thePath.push_back(queue.backwardQueue.Lookup(node).data);
+			backwardMeetingPoint++;
+			//printf("B: <%f,%f,%f> ",queue.backwardQueue.Lookup(node).g,queue.backwardQueue.Lookup(node).h,currentCost);
+			if (queue.backwardQueue.Lookup(node).g+queue.backwardQueue.Lookup(node).h == currentCost){
+				backwardUnnecessaryNodesInPath++;
+			}
 			node = queue.backwardQueue.Lookup(node).parentID;
 		} while (queue.backwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(queue.backwardQueue.Lookup(node).data);
+		//printf("B: <%f,%f,%f> ",queue.backwardQueue.Lookup(node).g,queue.backwardQueue.Lookup(node).h,currentCost);
+
 	}
 	
 	double ExtractCostToGoal(state &node)
@@ -144,9 +167,15 @@ private:
 	{
 		do {
 			thePath.push_back(queue.forwardQueue.Lookup(node).data);
+			forwardMeetingPoint++;
+			//printf("F: <%f,%f,%f> ",queue.forwardQueue.Lookup(node).g,queue.forwardQueue.Lookup(node).h,currentCost);
+			if (queue.forwardQueue.Lookup(node).g+queue.forwardQueue.Lookup(node).h == currentCost){
+				forwardUnnecessaryNodesInPath++;
+			}
 			node = queue.forwardQueue.Lookup(node).parentID;
 		} while (queue.forwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(queue.forwardQueue.Lookup(node).data);
+		//printf("F: <%f,%f,%f> ",queue.forwardQueue.Lookup(node).g,queue.forwardQueue.Lookup(node).h,currentCost);
 	}
 	
 	double  ExtractCostToStart(state &node)
@@ -174,6 +203,7 @@ private:
 	uint64_t nodesTouched, nodesExpanded;
 	state middleNode;
 	double currentCost;
+	double expansionsUntilSolution;
 	double currentSolutionEstimate;
 	std::vector<state> neighbors;
 	environment *env;
@@ -195,6 +225,10 @@ private:
 	
 	int tieBreakingPolicy;
 	
+	uint64_t forwardUnnecessaryNodesInPath;
+	uint64_t backwardUnnecessaryNodesInPath;
+	uint64_t forwardMeetingPoint;
+	uint64_t backwardMeetingPoint;	
 	
 };
 
@@ -218,7 +252,12 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::InitializeS
 	forwardHeuristic = forward;
 	backwardHeuristic = backward;
 	currentSolutionEstimate = 0;
+	forwardUnnecessaryNodesInPath = 0;
+	backwardUnnecessaryNodesInPath = 0;
+	forwardMeetingPoint = 0;
+	backwardMeetingPoint = 0;
 	currentCost = DBL_MAX;
+	expansionsUntilSolution = 0;
 	queue.Reset();
 //	queue.forwardQueue.Reset();
 //	queue.backwardQueue.Reset();
@@ -246,11 +285,11 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 		if (currentCost == DBL_MAX)
 		{
 			thePath.resize(0);
-			printf("here1");
+			//printf("here1");
 			return true;
 		}
 		ExtractFromMiddle(thePath);
-		printf("here2");
+		//printf("here2");
 		return true;
 	}
 	/*
@@ -279,7 +318,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 		for (int j =0; j< nBackward.size(); j++){
 			if (mapData.find(&(queue.backwardQueue.Lookup(nBackward[j]).data)) != mapData.end()){
 				ExtractFromMiddle(thePath);
-				printf("here3");
+				//printf("here3");
 				return true;
 			}
 		}
@@ -296,42 +335,74 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 		dataStructure queue;
 	};
 	double currentLowerBound = queue.GetLowerBound();
-	/*
+	
 	if (nForward.size() == 0){
-		std::sort (nBackward.begin(), nBackward.end(),compareBackward(queue));
+		/*
+		uint64_t node = *(queue.forwardQueue.getNodesMapBegin(kOpenReady)->second.begin());
+		if (queue.forwardQueue.Lookup(node).where != kClosed){
+			counts[currentLowerBound]++;
+			Expand(node, queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
+		}
+		if (!fless(queue.GetLowerBound(), currentCost)){
+				ExtractFromMiddle(thePath);
+				return true;
+		}
+		if (currentLowerBound != queue.GetLowerBound()){
+			return false;
+		}
+		*/
+		//std::sort (nBackward.begin(), nBackward.end(),compareBackward(queue));
 		for (int j =0; j< ((int)nBackward.size());j++){
+			double oldKey = queue.backwardQueue.getFirstKey(kOpenReady);
 			if (queue.backwardQueue.Lookup(nBackward[j]).where != kClosed){
 					counts[currentLowerBound]++;
 					Expand(nBackward[j], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
 			}
 			if (!fless(queue.GetLowerBound(), currentCost)){
 					ExtractFromMiddle(thePath);
+					//printf("B, LB: %f,g:%f, h:%f\n",queue.GetLowerBound(),queue.backwardQueue.Lookup(nBackward[j]).g,queue.backwardQueue.Lookup(nBackward[j]).h);
 					return true;
 			}
-			if (currentLowerBound != queue.GetLowerBound()){
+			if (currentLowerBound != queue.GetLowerBound() || oldKey != queue.backwardQueue.getFirstKey(kOpenReady)){
 				return false;
 			}
 		}
 	}
 	
 	else if (nBackward.size() == 0){
-		std::sort (nForward.begin(), nForward.end(),compareForward(queue));
+		/*
+		uint64_t node = *(queue.backwardQueue.getNodesMapBegin(kOpenReady)->second.begin());
+		if (queue.backwardQueue.Lookup(node).where != kClosed){
+			counts[currentLowerBound]++;
+			Expand(node, queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
+		}
+		if (!fless(queue.GetLowerBound(), currentCost)){
+				ExtractFromMiddle(thePath);
+				return true;
+		}
+		if (currentLowerBound != queue.GetLowerBound()){
+			return false;
+		}
+		*/
+		//std::sort (nForward.begin(), nForward.end(),compareForward(queue));
 		for (int i =0; i< ((int)nForward.size());i++){
+			double oldKey = queue.forwardQueue.getFirstKey(kOpenReady);
 			if (queue.forwardQueue.Lookup(nForward[i]).where != kClosed){
 				counts[currentLowerBound]++;
 				Expand(nForward[i], queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
 			}
 			if (!fless(queue.GetLowerBound(), currentCost)){
 					ExtractFromMiddle(thePath);
+					//printf("F, LB: %f,g:%f, h:%f\n",queue.GetLowerBound(),queue.forwardQueue.Lookup(nForward[i]).g,queue.forwardQueue.Lookup(nForward[i]).h);
 					return true;
 			}
-			if (currentLowerBound != queue.GetLowerBound()){
+			if (currentLowerBound != queue.GetLowerBound() || oldKey != queue.forwardQueue.getFirstKey(kOpenReady)){
 				return false;
 			}
 		}
 	}
 	else{
-		printf("here");
+		//printf("here");
 		int i = nForward.size()-1;
 		int j = nBackward.size()-1;
 		while (i >= 0 || j >=0 ){
@@ -374,7 +445,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 			}
 		}
 	}
-	*/
+	/*
 	uint64_t i = 0;
 	uint64_t j = 0;
 	while (i < nForward.size() || j < nBackward.size() ){
@@ -416,8 +487,9 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 		if (currentLowerBound != queue.GetLowerBound()){
 			return false;
 		}
+		
 	}
-	
+	*/
 	/*
 	for(int i = 0; i< nForward.size(); i++){
 		counts[currentLowerBound]++;
@@ -548,8 +620,13 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 					double oldGCost = current.Lookup(childID).g;
 					current.Lookup(childID).parentID = nextID;
 					current.Lookup(childID).g = current.Lookup(nextID).g+edgeCost;
-					current.KeyChanged(childID,oldGCost);
-					
+					if (loc == kOpenWaiting){
+						current.KeyChanged(childID,oldGCost+current.Lookup(childID).h);
+					}
+					else{
+						current.KeyChanged(childID,oldGCost);
+					}
+
 					// TODO: check if we improved the current solution?
 					uint64_t reverseLoc;
 					auto loc = opposite.Lookup(env->GetStateHash(succ), reverseLoc);
@@ -564,7 +641,7 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 //								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
 //								nodesExpanded);
 							currentCost = current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g;
-							
+							expansionsUntilSolution = nodesExpanded;
 							middleNode = succ;
 						}
 					}
@@ -621,6 +698,7 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 //								current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
 //								nodesExpanded);
 							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
+							expansionsUntilSolution = nodesExpanded;
 							
 							middleNode = succ;
 						}

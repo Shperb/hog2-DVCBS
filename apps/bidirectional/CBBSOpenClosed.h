@@ -94,9 +94,10 @@ private:
 template<typename state, class dataStructure>
 CBBSOpenClosed<state, dataStructure>::CBBSOpenClosed()
 {
-	std::map<double,std::set<uint64_t> > map;
-	nodesMap.push_back(map);
-	nodesMap.push_back(map);
+	std::map<double,std::set<uint64_t> > mapReady;
+	std::map<double,std::set<uint64_t> > mapWaiting;
+	nodesMap.push_back(mapReady);
+	nodesMap.push_back(mapWaiting);
 	nodesMapSize.push_back(0);
 	nodesMapSize.push_back(0);
 	//readyQueue.resize(0);
@@ -192,6 +193,7 @@ void CBBSOpenClosed<state,   dataStructure>::putInNodesMap(stateLocation whichQu
 		key = elements[val].g+elements[val].h;
 	}
 	else{
+		printf("f6\n");
 		return;
 	}
 	if (nodesMap[whichQueue][key].insert(val).second){
@@ -210,6 +212,7 @@ void CBBSOpenClosed<state,   dataStructure>::eraseFromNodesMap(stateLocation whi
 		key = elements[val].g+elements[val].h;
 	}
 	else{
+		printf("f7\n");
 		return;
 	}
 	auto containerIter = nodesMap[whichQueue].find(key);
@@ -217,11 +220,20 @@ void CBBSOpenClosed<state,   dataStructure>::eraseFromNodesMap(stateLocation whi
 		auto toDelete = containerIter->second.find(val);
 		if (toDelete != containerIter->second.end()){
 			containerIter->second.erase(toDelete);
+			if (containerIter->second.find(val) != containerIter->second.end()){
+				printf("f8\n");
+			}
 			nodesMapSize[whichQueue] -= 1;
 			if (containerIter->second.empty()){
 				nodesMap[whichQueue].erase(containerIter);
 			}
 		}
+		else{
+			printf("f2\n");
+		}
+	}
+	else{
+		printf("f1\n");
 	}
 }
 
@@ -233,11 +245,20 @@ void CBBSOpenClosed<state,   dataStructure>::eraseFromNodesMap(stateLocation whi
 		auto toDelete = containerIter->second.find(val);
 		if (toDelete != containerIter->second.end()){
 			containerIter->second.erase(toDelete);
+			if (containerIter->second.find(val) != containerIter->second.end()){
+				printf("f9\n");
+			}
 			nodesMapSize[whichQueue] -= 1;
 			if (containerIter->second.empty()){
 				nodesMap[whichQueue].erase(containerIter);
 			}
 		}
+		else{
+			printf("f3\n");
+		}
+	}
+	else{
+		printf("f4\n");
 	}
 }
 
@@ -245,10 +266,18 @@ template<typename state,   class dataStructure>
 void CBBSOpenClosed<state,   dataStructure>::eraseFirstClusterFromNodesMap(stateLocation whichQueue)
 {
 	auto containerIter = nodesMap[whichQueue].begin();
+	auto oldsize = nodesMap[whichQueue].size();
 	if (containerIter != nodesMap[whichQueue].end()){
 		nodesMapSize[whichQueue] -= containerIter->second.size();
 		nodesMap[whichQueue].erase(containerIter);
+		if (oldsize == nodesMap[whichQueue].size()){
+			printf("f9\n");
+		}
 	}
+	else{
+		printf("f5\n");
+	}
+	
 }
 
 template<typename state, class dataStructure>

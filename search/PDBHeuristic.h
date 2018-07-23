@@ -176,10 +176,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::vector<bool> coarseOpenNext((COUNT+coarseSize-1)/coarseSize);
 	
 	uint64_t entries = 1;
-	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goalState << std::endl;
-	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	//std::cout << "Num Entries: " << COUNT << std::endl;
+	//std::cout << "Goal State: " << goalState << std::endl;
+	////std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
+	//std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
@@ -192,7 +192,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	int depth = 0;
 	uint64_t newEntries;
 	std::vector<std::thread*> threads(numThreads);
-	printf("Creating %d threads\n", numThreads);
+	//printf("Creating %d threads\n", numThreads);
 	do {
 		newEntries = 0;
 		Timer s;
@@ -234,16 +234,16 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		}
 		
 		entries += total;//newEntries;
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
-			   depth, s.EndTimer(), total, entries, COUNT);
+		//printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+		//	   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
 		coarseOpenCurr.swap(coarseOpenNext);
 	} while (entries != COUNT);
 	
-	printf("%1.2fs elapsed\n", t.EndTimer());
+	//printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)
 	{
-		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		//printf("Entries: %llu; count: %llu\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
 	PrintHistogram();
@@ -266,10 +266,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::vector<bool> coarseClosed((COUNT+coarseSize-1)/coarseSize);
 	
 	uint64_t entries = 1;
-	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goalState << std::endl;
-	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	//std::cout << "Num Entries: " << COUNT << std::endl;
+	//std::cout << "Goal State: " << goalState << std::endl;
+	////std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
+	//std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
@@ -281,7 +281,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	int depth = 0;
 	uint64_t newEntries;
 	std::vector<std::thread*> threads(numThreads);
-	printf("Creating %d threads\n", numThreads);
+	//printf("Creating %d threads\n", numThreads);
 	do {
 		newEntries = 0;
 		Timer s;
@@ -321,15 +321,15 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		}
 		
 		entries += total;//newEntries;
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
-			   depth, s.EndTimer(), total, entries, COUNT);
+		//printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total\n",
+		//	   depth, s.EndTimer(), total, entries, COUNT);
 		depth++;
 	} while (entries != COUNT);
 	
-	printf("%1.2fs elapsed\n", t.EndTimer());
+	//printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)
 	{
-		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		//printf("Entries: %llu; count: %llu\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
 	PrintHistogram();
@@ -354,10 +354,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::vector<bool> coarseOpenNext((COUNT+coarseSize-1)/coarseSize);
 	
 	uint64_t entries = 1;
-	std::cout << "Num Entries: " << COUNT << std::endl;
-	std::cout << "Goal State: " << goalState << std::endl;
-	//std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
-	std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
+	//std::cout << "Num Entries: " << COUNT << std::endl;
+	//std::cout << "Goal State: " << goalState << std::endl;
+	////std::cout << "State Hash of Goal: " << GetStateHash(goal) << std::endl;
+	//std::cout << "PDB Hash of Goal: " << GetPDBHash(goalState) << std::endl;
 	
 	std::deque<state> q_curr, q_next;
 	std::vector<state> children;
@@ -373,7 +373,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	uint64_t newEntries;
 	bool searchForward = true;
 	std::vector<std::thread*> threads(numThreads);
-	printf("Creating %d threads\n", numThreads);
+	//printf("Creating %d threads\n", numThreads);
 	do {
 		newEntries = 0;
 		Timer s;
@@ -428,8 +428,8 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		}
 		entries += total;//newEntries;
 		distribution.push_back(total);
-		printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total [%s]\n",
-			   depth, s.EndTimer(), total, entries, COUNT, searchForward?"forward":"backward");
+		//printf("Depth %d complete; %1.2fs elapsed. %llu new states written; %llu of %llu total [%s]\n",
+		//	   depth, s.EndTimer(), total, entries, COUNT, searchForward?"forward":"backward");
 		if (double(total)*double(total)*0.4 > double(COUNT-entries)*double(distribution[distribution.size()-2]))// || depth == 8)
 			searchForward = false;
 		if (COUNT-entries <= total) // If we wrote more entries than there are left, switch directions
@@ -438,10 +438,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		coarseOpenCurr.swap(coarseOpenNext);
 	} while (entries != COUNT);
 	
-	printf("%1.2fs elapsed\n", t.EndTimer());
+	//printf("%1.2fs elapsed\n", t.EndTimer());
 	if (entries != COUNT)
 	{
-		printf("Entries: %llu; count: %llu\n", entries, COUNT);
+		//printf("Entries: %llu; count: %llu\n", entries, COUNT);
 		assert(entries == COUNT);
 	}
 	PrintHistogram();
@@ -457,7 +457,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 																	 std::mutex *lock)
 {
 //	lock->lock();
-//	printf("Thread %d online\n", threadNum);
+//	//printf("Thread %d online\n", threadNum);
 //	lock->unlock();
 
 	std::pair<uint64_t, uint64_t> p;
@@ -487,7 +487,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			if (stateDepth == depth)
 			{
 				GetStateFromPDBHash(x, s, threadNum);
-				//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
+				////std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 				env->GetActions(s, acts);
 				for (int y = 0; y < acts.size(); y++)
 				{
@@ -517,7 +517,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	}
 	results->Add(count);
 //	lock->lock();
-//	printf("Thread %d offline\n", threadNum);
+//	//printf("Thread %d offline\n", threadNum);
 //	lock->unlock();
 }
 
@@ -558,7 +558,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			{
 				blankEntries++;
 				GetStateFromPDBHash(x, s, threadNum);
-				//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
+				////std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 				env->GetActions(s, acts);
 				for (int y = 0; y < acts.size(); y++)
 				{
@@ -580,7 +580,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		// write out everything
 		if (cache.size() > 0)
 		{
-			//printf("%d items to write\n", cache.size());
+			////printf("%d items to write\n", cache.size());
 			lock->lock();
 			if (blankEntries == 0)
 				coarse[start/coarseSize] = true; // closed
@@ -641,7 +641,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 				if (stateDepth == depth)
 				{
 					GetStateFromPDBHash(x, s, threadNum);
-					//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
+					////std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 					env->GetActions(s, acts);
 					for (int y = 0; y < acts.size(); y++)
 					{
@@ -691,7 +691,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 				{
 					blankEntries++;
 					GetStateFromPDBHash(x, s, threadNum);
-					//std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
+					////std::cout << "Expanding[r][" << stateDepth << "]: " << s << std::endl;
 					env->GetActions(s, acts);
 					for (int y = 0; y < acts.size(); y++)
 					{
@@ -713,7 +713,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 			// write out everything
 			if (cache.size() > 0)
 			{
-				//printf("%d items to write\n", cache.size());
+				////printf("%d items to write\n", cache.size());
 				lock->lock();
 				if (blankEntries == 0)
 					coarseClosed[start/coarseSize] = true; // closed
@@ -818,10 +818,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	std::vector<uint64_t> dist;
 	if (print_histogram)
 	{
-		printf("Setting boundaries [%d values]: ", cutoffs.size());
-		for (int x = 0; x < cutoffs.size(); x++)
-			printf("%d ", cutoffs[x]);
-		printf("\n");
+		//printf("Setting boundaries [%d values]: ", cutoffs.size());
+		//for (int x = 0; x < cutoffs.size(); x++)
+			//printf("%d ", cutoffs[x]);
+		//printf("\n");
 	}
 	cutoffs.push_back(256);
 	
@@ -831,7 +831,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
-				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				////printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
 				PDB.Set(x, cutoffs[y]);
 				break;
 			}
@@ -848,10 +848,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	GetOptimizedBoundaries(dist, 1<<numBits, cutoffs);
 	if (print_histogram)
 	{
-		printf("Setting boundaries [%d values]: ", (1<<numBits));
-		for (int x = 0; x < cutoffs.size(); x++)
-			printf("%d ", cutoffs[x]);
-		printf("\n");
+		//printf("Setting boundaries [%d values]: ", (1<<numBits));
+		//for (int x = 0; x < cutoffs.size(); x++)
+			//printf("%d ", cutoffs[x]);
+		//printf("\n");
 	}
 	cutoffs.push_back(256);
 	
@@ -861,7 +861,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
-				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				////printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
 				PDB.Set(x, cutoffs[y]);
 				break;
 			}
@@ -880,10 +880,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	GetOptimizedBoundaries(dist, 1<<numBits, cutoffs);
 	if (print_histogram)
 	{
-		printf("Setting boundaries [%d values]: ", (1<<numBits));
-		for (int x = 0; x < cutoffs.size(); x++)
-			printf("%d ", cutoffs[x]);
-		printf("\n");
+		//printf("Setting boundaries [%d values]: ", (1<<numBits));
+		//for (int x = 0; x < cutoffs.size(); x++)
+			//printf("%d ", cutoffs[x]);
+		//printf("\n");
 	}
 	cutoffs.push_back(256);
 	
@@ -893,7 +893,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
-				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				////printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
 				PDB.Set(x, cutoffs[y]);
 				break;
 			}
@@ -914,10 +914,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	GetOptimizedBoundaries(dist, 1<<5, cutoffs);
 	if (print_histogram)
 	{
-		printf("Setting boundaries [%d values]: ", (1<<4));
-		for (int x = 0; x < cutoffs.size(); x++)
-			printf("%d ", cutoffs[x]);
-		printf("\n");
+		//printf("Setting boundaries [%d values]: ", (1<<4));
+		//for (int x = 0; x < cutoffs.size(); x++)
+			//printf("%d ", cutoffs[x]);
+		//printf("\n");
 	}
 	if (type == kPlain)
 		newPDB->type = kValueCompress;
@@ -927,7 +927,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		newPDB->compressionValue = compressionValue;
 	}
 	else {
-		printf("Unknown PDB type: %d\n", type);
+		//printf("Unknown PDB type: %d\n", type);
 	}
 	for (int x = 0; x < cutoffs.size(); x++)
 		newPDB->vrcValues[x] = cutoffs[x];
@@ -939,7 +939,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
-				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				////printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
 				newPDB->PDB.Set(x, y);
 				break;
 			}
@@ -960,10 +960,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	GetOptimizedBoundaries(dist, 1<<4, cutoffs);
 	if (print_histogram)
 	{
-		printf("Setting boundaries [%d values]: ", (1<<4));
-		for (int x = 0; x < cutoffs.size(); x++)
-			printf("%d ", cutoffs[x]);
-		printf("\n");
+		//printf("Setting boundaries [%d values]: ", (1<<4));
+		//for (int x = 0; x < cutoffs.size(); x++)
+			//printf("%d ", cutoffs[x]);
+		//printf("\n");
 	}
 	if (type == kPlain)
 		newPDB->type = kValueCompress;
@@ -973,7 +973,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		newPDB->compressionValue = compressionValue;
 	}
 	else {
-		printf("Unknown PDB type: %d\n", type);
+		//printf("Unknown PDB type: %d\n", type);
 	}
 	for (int x = 0; x < cutoffs.size(); x++)
 		newPDB->vrcValues[x] = cutoffs[x];
@@ -985,7 +985,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
-				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				////printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
 				newPDB->PDB.Set(x, y);
 				break;
 			}
@@ -1004,10 +1004,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	GetOptimizedBoundaries(dist, 1<<3, cutoffs);
 	if (print_histogram)
 	{
-		printf("Setting boundaries [%d values]: ", (1<<4));
-		for (int x = 0; x < cutoffs.size(); x++)
-			printf("%d ", cutoffs[x]);
-		printf("\n");
+		//printf("Setting boundaries [%d values]: ", (1<<4));
+		//for (int x = 0; x < cutoffs.size(); x++)
+			//printf("%d ", cutoffs[x]);
+		//printf("\n");
 	}
 	if (type == kPlain)
 		newPDB->type = kValueCompress;
@@ -1017,7 +1017,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		newPDB->compressionValue = compressionValue;
 	}
 	else {
-		printf("Unknown PDB type: %d\n", type);
+		//printf("Unknown PDB type: %d\n", type);
 	}
 
 	for (int x = 0; x < cutoffs.size(); x++)
@@ -1030,7 +1030,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
-				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				////printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
 				newPDB->PDB.Set(x, y);
 				break;
 			}
@@ -1050,10 +1050,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	GetOptimizedBoundaries(dist, 1<<2, cutoffs);
 	if (print_histogram)
 	{
-		printf("Setting boundaries [%d values]: ", (1<<4));
-		for (int x = 0; x < cutoffs.size(); x++)
-			printf("%d ", cutoffs[x]);
-		printf("\n");
+		//printf("Setting boundaries [%d values]: ", (1<<4));
+		//for (int x = 0; x < cutoffs.size(); x++)
+			//printf("%d ", cutoffs[x]);
+		//printf("\n");
 	}
 	if (type == kPlain)
 		newPDB->type = kValueCompress;
@@ -1063,7 +1063,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		newPDB->compressionValue = compressionValue;
 	}
 	else {
-		printf("Unknown PDB type: %d\n", type);
+		//printf("Unknown PDB type: %d\n", type);
 	}
 
 	for (int x = 0; x < cutoffs.size(); x++)
@@ -1076,7 +1076,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
-				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				////printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
 				newPDB->PDB.Set(x, y);
 				break;
 			}
@@ -1096,10 +1096,10 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 	GetOptimizedBoundaries(dist, 1<<1, cutoffs);
 	if (print_histogram)
 	{
-		printf("Setting boundaries [%d values]: ", (1<<4));
-		for (int x = 0; x < cutoffs.size(); x++)
-			printf("%d ", cutoffs[x]);
-		printf("\n");
+		//printf("Setting boundaries [%d values]: ", (1<<4));
+		//for (int x = 0; x < cutoffs.size(); x++)
+			//printf("%d ", cutoffs[x]);
+		//printf("\n");
 	}
 	if (type == kPlain)
 		newPDB->type = kValueCompress;
@@ -1109,7 +1109,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		newPDB->compressionValue = compressionValue;
 	}
 	else {
-		printf("Unknown PDB type: %d\n", type);
+		//printf("Unknown PDB type: %d\n", type);
 	}
 
 	for (int x = 0; x < cutoffs.size(); x++)
@@ -1122,7 +1122,7 @@ void PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, pdb
 		{
 			if (PDB.Get(x) >= cutoffs[y] && PDB.Get(x) < cutoffs[y+1])
 			{
-				//printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
+				////printf("%d -> %d\n", PDB[whichPDB][x], cutoffs[y]);
 				newPDB->PDB.Set(x, y);
 				break;
 			}
@@ -1197,12 +1197,12 @@ double PDBHeuristic<abstractState, abstractAction, abstractEnvironment, state, p
 			average += PDB.Get(x);
 		}
 	}
-	for (int x = 0; x < histogram.size(); x++)
-	{
-		if (histogram[x] > 0)
-			printf("%d: %llu\n", x, histogram[x]);
-	}
-	printf("Average: %f; count: %llu\n", average/PDB.Size(), PDB.Size());
+	//for (int x = 0; x < histogram.size(); x++)
+	//{
+		//if (histogram[x] > 0)
+			//printf("%d: %llu\n", x, histogram[x]);
+	//}
+	//printf("Average: %f; count: %llu\n", average/PDB.Size(), PDB.Size());
 	return average/PDB.Size();
 }
 

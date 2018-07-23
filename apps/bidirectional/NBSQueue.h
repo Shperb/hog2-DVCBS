@@ -42,7 +42,7 @@ struct NBSCompareOpenWaiting {
 	}
 };
 
-template <typename state, int epsilon = 1>
+template <typename state, int epsilon = 0>
 class NBSQueue {
 public:
 	bool GetNextPair(uint64_t &nextForward, uint64_t &nextBackward)

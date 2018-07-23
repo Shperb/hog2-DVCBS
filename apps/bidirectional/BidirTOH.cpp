@@ -91,9 +91,9 @@ void TestTOH(int first, int last)
  		f = BuildPDB<N, pdb1Disks>(g);
 		Timer timer;
 		
-		if (count <= 20){
-			continue;
-		}
+		//if (count <= 20){
+		//	continue;
+		//}
 	
 		//b = BuildPDB<N, pdb1Disks>(s);
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
@@ -115,7 +115,7 @@ void TestTOH(int first, int last)
 			}
 
 		}
-		if (0)
+		if (1)
 		{
 			//printf("-=-=-NBS-=-=-\n");
 			timer.StartTimer();
@@ -196,10 +196,10 @@ void TestTOH(int first, int last)
 
 void TOHTest()
 {
-//	TestTOH<14, 2>(0, 50);
+	TestTOH<14, 2>(0, 50);
 	TestTOH<14, 4>(0, 50);
-	TestTOH<14, 5>(0, 50);
-//	TestTOH<14, 6>(0, 50);
+//	TestTOH<14, 5>(0, 50);
+	TestTOH<14, 6>(0, 50);
 //	TestTOH<14, 7>(0, 50);
 //	TestTOH<14, 8>(0, 50);
 //	TestTOH<14, 9>(0, 50);
