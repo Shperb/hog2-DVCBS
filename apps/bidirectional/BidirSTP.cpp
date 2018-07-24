@@ -131,7 +131,9 @@ MNPuzzleState<4, 4> GetKorfInstance(int which)
 
 void TestSTP(int algorithm)
 {
-	NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> nbs;
+	NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,0>> nbs;
+	NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,1>> nbsEpsilon;
+
 	MM<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> mm;
 	BSStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> bs;
 	TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
@@ -146,6 +148,8 @@ void TestSTP(int algorithm)
 		
 		std::vector<MNPuzzleState<4,4>> nbsPath;
 		std::vector<MNPuzzleState<4,4>> cbbsPath;
+		std::vector<MNPuzzleState<4,4>> nbsEpsilonPath;
+		std::vector<MNPuzzleState<4,4>> cbbsEpsilonPath;
 		std::vector<MNPuzzleState<4,4>> astarPath;
 		std::vector<MNPuzzleState<4,4>> rastarPath;
 
@@ -234,14 +238,33 @@ void TestSTP(int algorithm)
 				if (i != 4){
 					continue;
 				}
-				CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> cbbs(i);
+				CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,0>> cbbs(i);
 				goal.Reset();
 				start = GetKorfInstance(x);
 				t2.StartTimer();
 				cbbs.GetPath(&mnp, start, goal, &mnp, &mnp, cbbsPath);
 				t2.EndTimer();
-				printf("CBBS %d found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", i,mnp.GetPathLength(cbbsPath),
-					cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), cbbs.GetNodesTouched(), t2.GetElapsedTime());
+				//printf("CBBS %d found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", i,mnp.GetPathLength(cbbsPath),
+				//	cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), cbbs.GetNodesTouched(), t2.GetElapsedTime());	
+				printf("CBBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", mnp.GetPathLength(cbbsPath),
+					cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t2.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
+			}
+			
+			for (int i =1; i<=11;i++){
+				if (i != 4){
+					continue;
+				}
+				CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,1>> cbbs(i);
+				goal.Reset();
+				start = GetKorfInstance(x);
+				t2.StartTimer();
+				cbbs.GetPath(&mnp, start, goal, &mnp, &mnp, cbbsEpsilonPath);
+				t2.EndTimer();
+				//printf("CBBS %d found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", i,mnp.GetPathLength(cbbsPath),
+				//	cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), cbbs.GetNodesTouched(), t2.GetElapsedTime());
+					
+				printf("CBBS-E found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", mnp.GetPathLength(cbbsEpsilonPath),
+					cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t2.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
 			}
 			
 			goal.Reset();
@@ -249,8 +272,21 @@ void TestSTP(int algorithm)
 			t2.StartTimer();
 			nbs.GetPath(&mnp, start, goal, &mnp, &mnp, nbsPath);
 			t2.EndTimer();
-			printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
-				   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t2.GetElapsedTime());
+			//printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
+			//	   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t2.GetElapsedTime());
+				   
+			printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", mnp.GetPathLength(nbsPath),
+				nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());
+			
+			goal.Reset();
+			start = GetKorfInstance(x);
+			t2.StartTimer();
+			nbsEpsilon.GetPath(&mnp, start, goal, &mnp, &mnp, nbsEpsilonPath);
+			t2.EndTimer();
+			//printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(nbsPath),
+			//	   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t2.GetElapsedTime());
+			printf("NBS-E found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", mnp.GetPathLength(nbsEpsilonPath),
+				nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 			
 		}
 		
