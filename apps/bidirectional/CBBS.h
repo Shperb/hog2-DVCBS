@@ -27,10 +27,11 @@ template <class state, class action, class environment, class dataStructure = CB
           class priorityQueue = CBBSOpenClosed<state> >
 class CBBS {
 public:
-	CBBS(int tieBreaking)
+	CBBS(int tieBreaking, bool allSolutions = false)
 	{
 		forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount();
 		tieBreakingPolicy = tieBreaking;
+		isAllSolutions = allSolutions;
 	}
 	virtual ~CBBS() {}
 	void GetPath(environment *env, const state& from, const state& to,
@@ -115,8 +116,14 @@ public:
 		uint64_t necessary = 0;
 		for (const auto &i : counts)
 		{
-			if (i.first < currentCost)
-				necessary+=i.second;
+			if (isAllSolutions){
+				if (i.first <= currentCost)
+					necessary+=i.second;
+			}
+			else{
+				if (i.first < currentCost)
+					necessary+=i.second;
+			}
 		}
 		return necessary;
 	}
@@ -208,6 +215,7 @@ private:
 	std::vector<state> neighbors;
 	environment *env;
 	std::unordered_map<double, int> counts;
+	bool isAllSolutions;
 	
 	dataStructure queue;
 	//	priorityQueue queue.forwardQueue, queue.backwardQueue;
@@ -358,7 +366,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 					counts[currentLowerBound]++;
 					Expand(nBackward[j], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
 			}
-			if (!fless(queue.GetLowerBound(), currentCost)){
+			if ((!isAllSolutions && !fless(queue.GetLowerBound(), currentCost)) || (isAllSolutions && !flesseq(queue.GetLowerBound(), currentCost))){
 					ExtractFromMiddle(thePath);
 					//printf("B, LB: %f,g:%f, h:%f\n",queue.GetLowerBound(),queue.backwardQueue.Lookup(nBackward[j]).g,queue.backwardQueue.Lookup(nBackward[j]).h);
 					return true;
@@ -391,7 +399,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 				counts[currentLowerBound]++;
 				Expand(nForward[i], queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
 			}
-			if (!fless(queue.GetLowerBound(), currentCost)){
+			if ((!isAllSolutions && !fless(queue.GetLowerBound(), currentCost)) || (isAllSolutions && !flesseq(queue.GetLowerBound(), currentCost))){
 					ExtractFromMiddle(thePath);
 					//printf("F, LB: %f,g:%f, h:%f\n",queue.GetLowerBound(),queue.forwardQueue.Lookup(nForward[i]).g,queue.forwardQueue.Lookup(nForward[i]).h);
 					return true;
@@ -406,7 +414,7 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVert
 		int i = nForward.size()-1;
 		int j = nBackward.size()-1;
 		while (i >= 0 || j >=0 ){
-			if (!fless(queue.GetLowerBound(), currentCost))
+			if ((!isAllSolutions && !fless(queue.GetLowerBound(), currentCost)) || (isAllSolutions && !flesseq(queue.GetLowerBound(), currentCost)))
 			{
 				ExtractFromMiddle(thePath);
 				return true;
@@ -590,7 +598,7 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 	assert(tmp == nextID);
 
 	//this can happen when we expand a single node instead of a pair
-	if (fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost)){
+	if ( (!isAllSolutions && fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost)) || (isAllSolutions && fgreater(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost))){
 		return;
 	}
 		
@@ -605,8 +613,9 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 
 		// screening
 		double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
-		if (fgreatereq(current.Lookup(nextID).g+edgeCost, currentCost))
+		if ( (!isAllSolutions && fgreatereq(current.Lookup(nextID).g+edgeCost, currentCost)) || (isAllSolutions && fgreater(current.Lookup(nextID).g+edgeCost, currentCost))){
 			continue;
+		}
 
 		switch (loc)
 		{
@@ -671,9 +680,9 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 					//		nextID,0);
 					//else
 					double newNodeF = current.Lookup(nextID).g + edgeCost + heuristic->HCost(succ, target);
-					if (fless(newNodeF , currentCost))
+					if ((!isAllSolutions && fless(newNodeF , currentCost)) || (isAllSolutions && flesseq(newNodeF , currentCost)))
 					{
-						if (fless(newNodeF, queue.GetLowerBound()))
+						if ((!isAllSolutions && fless(newNodeF , queue.GetLowerBound())) || (isAllSolutions && flesseq(newNodeF , queue.GetLowerBound())))
 							current.AddOpenNode(succ,
 												env->GetStateHash(succ),
 												current.Lookup(nextID).g + edgeCost,

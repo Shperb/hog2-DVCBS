@@ -42,17 +42,19 @@ struct NBSCompareOpenWaiting {
 	}
 };
 
-template <typename state, int epsilon = 0>
+template <typename state, int epsilon = 0, bool isAllSolutions = false>
 class NBSQueue {
 public:
 	bool GetNextPair(uint64_t &nextForward, uint64_t &nextBackward)
 	{
 		// move items with f<CLowerBound to ready
-		while (forwardQueue.OpenWaitingSize() != 0 && fless(forwardQueue.PeekAt(kOpenWaiting).g+forwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+		while (forwardQueue.OpenWaitingSize() != 0 && ((!isAllSolutions && fless(forwardQueue.PeekAt(kOpenWaiting).g+forwardQueue.PeekAt(kOpenWaiting).h, CLowerBound)) ||
+														(isAllSolutions && !fgreater(forwardQueue.PeekAt(kOpenWaiting).g+forwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))))
 		{
 			forwardQueue.PutToReady();
 		}
-		while (backwardQueue.OpenWaitingSize() != 0 && fless(backwardQueue.PeekAt(kOpenWaiting).g+backwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))
+		while (backwardQueue.OpenWaitingSize() != 0 && ((!isAllSolutions && fless(backwardQueue.PeekAt(kOpenWaiting).g+backwardQueue.PeekAt(kOpenWaiting).h, CLowerBound)) ||
+														(isAllSolutions && !fgreater(backwardQueue.PeekAt(kOpenWaiting).g+backwardQueue.PeekAt(kOpenWaiting).h, CLowerBound))))
 		{
 			backwardQueue.PutToReady();
 		}

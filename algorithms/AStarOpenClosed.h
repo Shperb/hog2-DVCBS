@@ -84,6 +84,8 @@ public:
 	size_t OpenSize() const { return theHeap.size(); }
 	size_t ClosedSize() const { return size()-OpenSize(); }
 	size_t size() const { return elements.size(); }
+	std::vector<dataStructure > elements;
+
 	//	void verifyData();
 private:
 	bool HeapifyUp(unsigned int index);
@@ -93,7 +95,6 @@ private:
 	// storing the element id; looking up with...hash?
 	typedef __gnu_cxx::hash_map<uint64_t, uint64_t, AHash64> IndexTable;
 	IndexTable table;
-	std::vector<dataStructure > elements;
 };
 
 

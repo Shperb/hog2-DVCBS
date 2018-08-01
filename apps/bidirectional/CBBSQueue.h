@@ -18,7 +18,7 @@
 #include <algorithm>
 
 
-template <typename state, int epsilon = 0>
+template <typename state, int epsilon = 0, bool isAllSolutions = false>
 class CBBSQueue {
 public:
 bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &nextBackward,int TieBreakingPolicy)
@@ -33,11 +33,11 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 			
 				// move items with f<CLowerBound to ready
 				
-				while (forwardQueue.OpenWaitingSize() != 0 && (!fgreater(forwardQueue.getFirstKey(kOpenWaiting),CLowerBound)))
+				while (forwardQueue.OpenWaitingSize() != 0 && ((!isAllSolutions && fless(forwardQueue.getFirstKey(kOpenWaiting),CLowerBound)) || (isAllSolutions && !fgreater(forwardQueue.getFirstKey(kOpenWaiting),CLowerBound))))
 				{
 					forwardQueue.PutToReady();
 				}
-				while (backwardQueue.OpenWaitingSize() != 0 && (!fgreater(backwardQueue.getFirstKey(kOpenWaiting), CLowerBound)))
+				while (backwardQueue.OpenWaitingSize() != 0 && ((!isAllSolutions && fless(backwardQueue.getFirstKey(kOpenWaiting), CLowerBound)) || (isAllSolutions && !fgreater(backwardQueue.getFirstKey(kOpenWaiting), CLowerBound))))
 				{
 					backwardQueue.PutToReady();
 				}
@@ -231,22 +231,43 @@ bool getVertexCover(std::vector<uint64_t> &nextForward, std::vector<uint64_t> &n
 			}
 			else
 			{
-				CLowerBound = DBL_MAX;
-				if (forwardQueue.OpenWaitingSize() != 0)
+				bool changed = false;
+				if (/*backwardQueue.OpenReadySize() == 0 && */backwardQueue.OpenWaitingSize() != 0)
 				{
-					const auto i5 = forwardQueue.getFirstKey(kOpenWaiting);
-					CLowerBound = std::min(CLowerBound, i5);
-					//printf("fF=%f\n",i5);
+					const auto i4 = backwardQueue.getFirstKey(kOpenWaiting);
+					if (!fgreater(i4, CLowerBound))
+					{
+						changed = true;
+						backwardQueue.PutToReady();
+					}
 				}
-				if (backwardQueue.OpenWaitingSize() != 0)
+				if (/*forwardQueue.OpenReadySize() == 0 && */forwardQueue.OpenWaitingSize() != 0)
 				{
-					const auto i6 = backwardQueue.getFirstKey(kOpenWaiting);
-					CLowerBound = std::min(CLowerBound, i6);
-					//printf("fB=%f\n",i6);
+					const auto i3 = forwardQueue.getFirstKey(kOpenWaiting);
+					if (!fgreater(i3, CLowerBound))
+					{
+						changed = true;
+						forwardQueue.PutToReady();
+					}
 				}
-				if ((forwardQueue.OpenReadySize() != 0) && (backwardQueue.OpenReadySize() != 0))
-					CLowerBound = std::min(CLowerBound, forwardQueue.getFirstKey(kOpenReady) + backwardQueue.getFirstKey(kOpenReady) + epsilon);
-					//printf("gB=%f, gF=%f, epsilion=%d, LB:%f\n",forwardQueue.getFirstKey(kOpenReady),backwardQueue.getFirstKey(kOpenReady),epsilon,CLowerBound);
+				if (!changed){
+					CLowerBound = DBL_MAX;
+					if (forwardQueue.OpenWaitingSize() != 0)
+					{
+						const auto i5 = forwardQueue.getFirstKey(kOpenWaiting);
+						CLowerBound = std::min(CLowerBound, i5);
+						//printf("fF=%f\n",i5);
+					}
+					if (backwardQueue.OpenWaitingSize() != 0)
+					{
+						const auto i6 = backwardQueue.getFirstKey(kOpenWaiting);
+						CLowerBound = std::min(CLowerBound, i6);
+						//printf("fB=%f\n",i6);
+					}
+					if ((forwardQueue.OpenReadySize() != 0) && (backwardQueue.OpenReadySize() != 0))
+						CLowerBound = std::min(CLowerBound, forwardQueue.getFirstKey(kOpenReady) + backwardQueue.getFirstKey(kOpenReady) + epsilon);
+					//printf("LB=%f\n",CLowerBound);
+				}
 				
 				
 			}
