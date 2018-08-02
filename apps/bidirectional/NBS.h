@@ -27,9 +27,10 @@ template <class state, class action, class environment, class dataStructure = NB
           class priorityQueue = BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>>>
 class NBS {
 public:
-	NBS()
+	NBS(bool allSolutions = false)
 	{
 		forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount();
+		isAllSolutions = allSolutions;
 	}
 	virtual ~NBS() {}
 	void GetPath(environment *env, const state& from, const state& to,
@@ -104,8 +105,14 @@ public:
 		for (const auto &i : counts)
 		{
 			//std::cout << "first =" << i.first << "second =" << i.second <<" ";
-			if (i.first < currentCost)
-				necessary+=i.second;
+			if (isAllSolutions){
+				if (i.first <= currentCost)
+					necessary+=i.second;
+			}
+			else{
+				if (i.first < currentCost)
+					necessary+=i.second;
+			}
 		}
 		//std::cout << "currentCost =" << currentCost << "necessary =" << necessary <<std::endl;
 		return necessary;
@@ -187,7 +194,7 @@ private:
 	uint64_t backwardUnnecessaryNodesInPath;
 	uint64_t forwardMeetingPoint;
 	uint64_t backwardMeetingPoint;
-	
+	bool isAllSolutions;
 	
 };
 
@@ -251,13 +258,13 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(
 		//printf("here2");
 		return true;
 	}
-	else if (queue.forwardQueue.Lookup(nForward).data == queue.backwardQueue.Lookup(nBackward).data) // if success, see if nodes are the same (return path)
+	else if (!isAllSolutions && queue.forwardQueue.Lookup(nForward).data == queue.backwardQueue.Lookup(nBackward).data) // if success, see if nodes are the same (return path)
 	{
 		//printf("here3");
 		ExtractFromMiddle(thePath);
 		return true;
 	}
-	else if (!fless(queue.GetLowerBound(), currentCost))
+	else if ((!isAllSolutions && !fless(queue.GetLowerBound(), currentCost)) || (isAllSolutions && fgreater(queue.GetLowerBound(), currentCost)))
 	{
 		//printf("here4");
 		ExtractFromMiddle(thePath);
@@ -302,7 +309,8 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 	assert(tmp == nextID);
 	
 	//this can happen when we expand a single node instead of a pair
-	if (fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost))
+	if ((!isAllSolutions && fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost)) ||
+			(isAllSolutions && fgreater(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost)))
 		return;
 	
 	nodesExpanded++;
@@ -315,8 +323,9 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 
 		// screening
 		double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
-		if (fgreatereq(current.Lookup(nextID).g+edgeCost, currentCost))
+		if ( (!isAllSolutions && fgreatereq(current.Lookup(nextID).g+edgeCost, currentCost)) || (isAllSolutions && fgreater(current.Lookup(nextID).g+edgeCost, currentCost))){
 			continue;
+		}
 
 		switch (loc)
 		{
@@ -377,9 +386,9 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 					//		nextID,0);
 					//else
 					double newNodeF = current.Lookup(nextID).g + edgeCost + heuristic->HCost(succ, target);
-					if (fless(newNodeF , currentCost))
+					if ((!isAllSolutions && fless(newNodeF , currentCost)) || (isAllSolutions && flesseq(newNodeF , currentCost)))
 					{
-						if (fless(newNodeF, queue.GetLowerBound()))
+						if ((!isAllSolutions && fless(newNodeF , queue.GetLowerBound())) || (isAllSolutions && flesseq(newNodeF , queue.GetLowerBound())))
 							current.AddOpenNode(succ,
 												env->GetStateHash(succ),
 												current.Lookup(nextID).g + edgeCost,
