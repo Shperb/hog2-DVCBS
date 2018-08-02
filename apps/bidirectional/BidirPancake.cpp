@@ -197,7 +197,7 @@ void TestPancakeRandom()
 				std::swap(original.puzzle[x], original.puzzle[x+random()%(N-x)]);
 			
 			
-			if (gap !=3 /*|| count+1 != 5*/){
+			if (false/*gap !=3 || count+1 != 5*/){
 				continue;
 			}
 			
@@ -236,7 +236,7 @@ void TestPancakeRandom()
 			}
 			*/
 			//Single Solution
-			if(false)
+			if(1)
 			{
 			// NBS
 			
@@ -251,7 +251,7 @@ void TestPancakeRandom()
 					printf("GAP-%d NBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(nbsPath),
 						   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());
 					
-					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, NBSQueue<PancakePuzzleState<N>,0,true>> nbsLEQ(false);
+					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, NBSQueue<PancakePuzzleState<N>,0,true>> nbsLEQ(false,true);
 					goal.Reset();
 					start = original;
 					t2.StartTimer();
@@ -270,7 +270,7 @@ void TestPancakeRandom()
 					printf("GAP-%d NBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(nbsEpsilonPath),
 						   nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 						   
-					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,NBSQueue<PancakePuzzleState<N>,1,true>> nbsEpsilonLeq(false);
+					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,NBSQueue<PancakePuzzleState<N>,1,true>> nbsEpsilonLeq(false,true);
 					goal.Reset();
 					start = original;
 					t2.StartTimer();
@@ -301,7 +301,7 @@ void TestPancakeRandom()
 						if (i !=4){
 							continue;
 						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,0,true>> cbbs(i,false);
+						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,0,true>> cbbs(i,false,true);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();
@@ -330,7 +330,7 @@ void TestPancakeRandom()
 						if (i !=4){
 							continue;
 						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,1,true>> cbbsEpsilon(i,false);
+						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,1,true>> cbbsEpsilon(i,false,true);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();
@@ -344,7 +344,7 @@ void TestPancakeRandom()
 			}
 			
 			//ALL Solution
-			if(true)
+			if(1)
 			{
 			// NBS
 			
@@ -359,7 +359,7 @@ void TestPancakeRandom()
 					printf("GAP-%d NBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(nbsPath),
 						   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t2.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());
 					
-					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, NBSQueue<PancakePuzzleState<N>,0,true>> nbsLEQ(true);
+					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, NBSQueue<PancakePuzzleState<N>,0,true>> nbsLEQ(true,true);
 					goal.Reset();
 					start = original;
 					t2.StartTimer();
@@ -378,7 +378,7 @@ void TestPancakeRandom()
 					printf("GAP-%d NBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(nbsEpsilonPath),
 						   nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 						   
-					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,NBSQueue<PancakePuzzleState<N>,1,true>> nbsEpsilonLeq(true);
+					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,NBSQueue<PancakePuzzleState<N>,1,true>> nbsEpsilonLeq(true,true);
 					goal.Reset();
 					start = original;
 					t2.StartTimer();
@@ -409,7 +409,7 @@ void TestPancakeRandom()
 						if (i !=4){
 							continue;
 						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,0,true>> cbbs(i,true);
+						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,0,true>> cbbs(i,true,true);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();
@@ -438,7 +438,7 @@ void TestPancakeRandom()
 						if (i !=4){
 							continue;
 						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,1,true>> cbbsEpsilon(i,true);
+						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,1,true>> cbbsEpsilon(i,true,true);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();

@@ -27,10 +27,11 @@ template <class state, class action, class environment, class dataStructure = NB
           class priorityQueue = BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>>>
 class NBS {
 public:
-	NBS(bool allSolutions = false)
+	NBS(bool allSolutions = false,bool leq = false)
 	{
 		forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount();
 		isAllSolutions = allSolutions;
+		isLEQ = leq;
 	}
 	virtual ~NBS() {}
 	void GetPath(environment *env, const state& from, const state& to,
@@ -195,6 +196,7 @@ private:
 	uint64_t forwardMeetingPoint;
 	uint64_t backwardMeetingPoint;
 	bool isAllSolutions;
+	bool isLEQ;
 	
 };
 
@@ -388,7 +390,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 					double newNodeF = current.Lookup(nextID).g + edgeCost + heuristic->HCost(succ, target);
 					if ((!isAllSolutions && fless(newNodeF , currentCost)) || (isAllSolutions && flesseq(newNodeF , currentCost)))
 					{
-						if ((!isAllSolutions && fless(newNodeF , queue.GetLowerBound())) || (isAllSolutions && flesseq(newNodeF , queue.GetLowerBound())))
+						if (fless(newNodeF , queue.GetLowerBound()) || (isLEQ && flesseq(newNodeF , queue.GetLowerBound())))
 							current.AddOpenNode(succ,
 												env->GetStateHash(succ),
 												current.Lookup(nextID).g + edgeCost,

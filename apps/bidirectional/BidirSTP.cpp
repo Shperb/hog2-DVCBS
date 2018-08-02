@@ -233,7 +233,7 @@ void TestSTP(int algorithm)
 		
 		if (algorithm == 5) // all CBBS + NBS
 		{
-			if(0){
+			if(1){
 				for (int i =1; i<=11;i++){
 					if (i != 4){
 						continue;
@@ -253,7 +253,7 @@ void TestSTP(int algorithm)
 					if (i != 4){
 						continue;
 					}
-					CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,0,true>> cbbs(i,false);
+					CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,0,true>> cbbs(i,false,true);
 					goal.Reset();
 					start = GetKorfInstance(x);
 					t2.StartTimer();
@@ -285,7 +285,7 @@ void TestSTP(int algorithm)
 					if (i != 4){
 						continue;
 					}
-					CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,1,true>> cbbs(i,false);
+					CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,1,true>> cbbs(i,false,true);
 					goal.Reset();
 					start = GetKorfInstance(x);
 					t2.StartTimer();
@@ -312,7 +312,7 @@ void TestSTP(int algorithm)
 				
 				}
 				{
-				NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,0,true>> nbs(false);
+				NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,0,true>> nbs(false,true);
 				goal.Reset();
 				start = GetKorfInstance(x);
 				t2.StartTimer();
@@ -338,7 +338,7 @@ void TestSTP(int algorithm)
 					nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 				}
 				{
-				NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,1,true>> nbsEpsilon(false);
+				NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,1,true>> nbsEpsilon(false,true);
 				goal.Reset();
 				start = GetKorfInstance(x);
 				t2.StartTimer();
@@ -371,7 +371,7 @@ void TestSTP(int algorithm)
 					if (i != 4){
 						continue;
 					}
-					CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,0,true>> cbbs(i,true);
+					CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,0,true>> cbbs(i,true,true);
 					goal.Reset();
 					start = GetKorfInstance(x);
 					t2.StartTimer();
@@ -403,7 +403,7 @@ void TestSTP(int algorithm)
 					if (i != 4){
 						continue;
 					}
-					CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,1,true>> cbbs(i,true);
+					CBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,CBBSQueue<MNPuzzleState<4, 4>,1,true>> cbbs(i,true,true);
 					goal.Reset();
 					start = GetKorfInstance(x);
 					t2.StartTimer();
@@ -430,7 +430,7 @@ void TestSTP(int algorithm)
 				
 				}
 				{
-				NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,0,true>> nbs(true);
+				NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,0,true>> nbs(true,true);
 				goal.Reset();
 				start = GetKorfInstance(x);
 				t2.StartTimer();
@@ -456,7 +456,7 @@ void TestSTP(int algorithm)
 					nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 				}
 				{
-				NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,1,true>> nbsEpsilon(true);
+				NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>,NBSQueue<MNPuzzleState<4, 4>,1,true>> nbsEpsilon(true,true);
 				goal.Reset();
 				start = GetKorfInstance(x);
 				t2.StartTimer();

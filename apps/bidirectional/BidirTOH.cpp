@@ -98,7 +98,7 @@ void TestTOH(int first, int last)
 		//b = BuildPDB<N, pdb1Disks>(s);
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		//Single Solution
-		if(0){
+		if(1){
 			if (1)
 			{
 				for (int i = 1; i<=16; i++){
@@ -126,7 +126,7 @@ void TestTOH(int first, int last)
 					if (i !=4){
 						continue;
 					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,0,true>> cbbs(i,false);
+					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,0,true>> cbbs(i,false,true);
 					//printf("-=-=-CBBS-=-=-\n");
 					timer.StartTimer();
 					cbbs.GetPath(&toh, s, g, f, b, thePath);
@@ -165,7 +165,7 @@ void TestTOH(int first, int last)
 					if (i !=4){
 						continue;
 					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,1,true>> cbbs(i,false);
+					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,1,true>> cbbs(i,false,true);
 					//printf("-=-=-CBBS-=-=-\n");
 					timer.StartTimer();
 					cbbs.GetPath(&toh, s, g, f, b, thePath);
@@ -195,7 +195,7 @@ void TestTOH(int first, int last)
 			}
 			if (1)
 			{
-				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,true>> nbs(false);
+				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,true>> nbs(false,true);
 				//printf("-=-=-NBS-=-=-\n");
 				timer.StartTimer();
 				nbs.GetPath(&toh, s, g, f, b, thePath);
@@ -224,7 +224,7 @@ void TestTOH(int first, int last)
 			if (1)
 			{
 				//printf("-=-=-NBS-=-=-\n");
-				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,true>> nbsEpsilon(false);
+				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,true>> nbsEpsilon(false,true);
 				timer.StartTimer();
 				nbsEpsilon.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
@@ -266,7 +266,7 @@ void TestTOH(int first, int last)
 					if (i !=4){
 						continue;
 					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,0,true>> cbbs(i,true);
+					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,0,true>> cbbs(i,true,true);
 					//printf("-=-=-CBBS-=-=-\n");
 					timer.StartTimer();
 					cbbs.GetPath(&toh, s, g, f, b, thePath);
@@ -305,7 +305,7 @@ void TestTOH(int first, int last)
 					if (i !=4){
 						continue;
 					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,1,true>> cbbs(i,true);
+					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,1,true>> cbbs(i,true,true);
 					//printf("-=-=-CBBS-=-=-\n");
 					timer.StartTimer();
 					cbbs.GetPath(&toh, s, g, f, b, thePath);
@@ -335,7 +335,7 @@ void TestTOH(int first, int last)
 			}
 			if (1)
 			{
-				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,true>> nbs(true);
+				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,true>> nbs(true,true);
 				//printf("-=-=-NBS-=-=-\n");
 				timer.StartTimer();
 				nbs.GetPath(&toh, s, g, f, b, thePath);
@@ -364,7 +364,7 @@ void TestTOH(int first, int last)
 			if (1)
 			{
 				//printf("-=-=-NBS-=-=-\n");
-				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,true>> nbsEpsilon(true);
+				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,true>> nbsEpsilon(true,true);
 				timer.StartTimer();
 				nbsEpsilon.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
