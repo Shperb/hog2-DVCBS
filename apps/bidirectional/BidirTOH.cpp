@@ -13,6 +13,8 @@
 #include "CBBS.h"
 #include "MM.h"
 #include "BSStar.h"
+#include "CalculateWVC.h"
+
 
 template <int numDisks, int pdb1Disks, int pdb2Disks = numDisks-pdb1Disks>
 Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
@@ -45,10 +47,8 @@ Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal)
 template <int N, int pdb1Disks>
 void TestTOH(int first, int last)
 {
-	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
-	TemplateAStar<TOHState<N>, TOHMove, TOH<N>> rastar;
 
-	
+
 	BSStar<TOHState<N>, TOHMove, TOH<N>> bs;
 	MM<TOHState<N>, TOHMove, TOH<N>> mm;
 
@@ -98,7 +98,7 @@ void TestTOH(int first, int last)
 		//b = BuildPDB<N, pdb1Disks>(s);
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		//Single Solution
-		if(1){
+		if(0){
 			if (1)
 			{
 				for (int i = 1; i<=16; i++){
@@ -238,7 +238,7 @@ void TestTOH(int first, int last)
 		}
 		
 		//All Solutions
-		if(1){
+		if(0){
 			if (1)
 			{
 				for (int i = 1; i<=16; i++){
@@ -410,6 +410,7 @@ void TestTOH(int first, int last)
 		if (0)
 		{
 			//printf("-=-=-A*-=-=-\n");
+			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
 			astar.SetHeuristic(f);
 			timer.StartTimer();
 			astar.GetPath(&toh, s, g, thePath);
@@ -420,14 +421,39 @@ void TestTOH(int first, int last)
 		}
 		if (0)
 		{
+			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> rastar;
 			//printf("-=-=-A*-=-=-\n");
-			rastar.SetHeuristic(f);
+			rastar.SetHeuristic(b);
 			timer.StartTimer();
 			rastar.GetPath(&toh, g, s, thePath);
 			timer.EndTimer();
 			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
 			printf("R-A* %llu nodes %llu necessary", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+		}
+		if (1){
+			
+			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(true);
+			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> rastar(true);
+			astar.SetHeuristic(f);
+			timer.StartTimer();
+			astar.GetPath(&toh, s, g, thePath);
+			timer.EndTimer();
+			printf("A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),toh.GetPathLength(thePath),timer.GetElapsedTime());
+			rastar.SetHeuristic(b);
+			timer.StartTimer();
+			rastar.GetPath(&toh, g, s, thePath);
+			timer.EndTimer();
+			printf("R-A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions(),toh.GetPathLength(thePath), timer.GetElapsedTime());
+			std::vector<AStarOpenClosedData<TOHState<N>>> astarOpenClose  = astar.openClosedList.elements;
+			std::vector<AStarOpenClosedData<TOHState<N>>> rastarOpenClose = rastar.openClosedList.elements;
+			CalculateWVC<TOHState<N>> calculateWVC;
+			int C = toh.GetPathLength(thePath);
+			printf("Optimal-Necessary-L %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 0,false));
+			printf("Optimal-Necessary-E-L %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 1,false));
+			printf("Optimal-Necessary-LEQ %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 0,true));
+			printf("Optimal-Necessary-E-LEQ %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 1,true));
+			
 		}
 		while (b->heuristics.size() > 0)
 		{

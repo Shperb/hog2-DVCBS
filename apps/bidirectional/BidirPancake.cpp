@@ -236,7 +236,7 @@ void TestPancakeRandom()
 			}
 			*/
 			//Single Solution
-			if(1)
+			if(0)
 			{
 			// NBS
 			
@@ -344,7 +344,7 @@ void TestPancakeRandom()
 			}
 			
 			//ALL Solution
-			if(1)
+			if(0)
 			{
 			// NBS
 			
@@ -449,6 +449,34 @@ void TestPancakeRandom()
 					}
 
 				}
+			}
+		
+			if (1){
+				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar(true);
+				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> rastar(true);
+				astar.SetHeuristic(&pancake);
+				//timer.StartTimer();
+				goal.Reset();
+				start = original;
+				astar.GetPath(&pancake, start, goal, astarPath);
+				//timer.EndTimer();
+				//printf("A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),toh.GetPathLength(thePath),timer.GetElapsedTime());
+				goal.Reset();
+				start = original;
+				rastar.SetHeuristic(&pancake2);
+				//timer.StartTimer();
+				rastar.GetPath(&pancake, goal, start, rastarPath);
+				//timer.EndTimer();
+				//printf("R-A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions(),toh.GetPathLength(thePath), timer.GetElapsedTime());
+				std::vector<AStarOpenClosedData<PancakePuzzleState<N>>> astarOpenClose  = astar.openClosedList.elements;
+				std::vector<AStarOpenClosedData<PancakePuzzleState<N>>> rastarOpenClose = rastar.openClosedList.elements;
+				CalculateWVC<PancakePuzzleState<N>> calculateWVC;
+				int C = pancake.GetPathLength(astarPath);
+				printf("Optimal-Necessary-L %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 0,false));
+				printf("Optimal-Necessary-E-L %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 1,false));
+				printf("Optimal-Necessary-LEQ %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 0,true));
+				printf("Optimal-Necessary-E-LEQ %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 1,true));
+			
 			}
 			
 			/*

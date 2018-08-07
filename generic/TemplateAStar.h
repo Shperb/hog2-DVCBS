@@ -69,7 +69,7 @@ struct AStarCompare {
 template <class state, class action, class environment, class openList = AStarOpenClosed<state, AStarCompare<state>> >
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar() { ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; theHeuristic = 0; directed = false; }
+	TemplateAStar(bool allSolutions = false) { isAllSolutions = allSolutions; ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; theHeuristic = 0; directed = false; }
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & );
@@ -154,7 +154,8 @@ private:
 	std::vector<dataLocation> neighborLoc;
 	environment *env;
 	bool stopAfterGoal;
-	
+	bool isAllSolutions;
+	uint64_t firstGoal;
 	double goalFCost;
 	double radius; // how far around do we consider other agents?
 	double weight; 
@@ -262,6 +263,7 @@ bool TemplateAStar<state,action,environment,openList>::InitializeSearch(environm
 	ResetNodeCount();
 	start = from;
 	goal = to;
+	goalFCost = DBL_MAX;
 	
 	if (env->GoalTest(from, to) && (stopAfterGoal)) //assumes that from and to are valid states
 	{
@@ -319,18 +321,30 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 //	{ lastF = openClosedList.Lookup(nodeid).g+openClosedList.Lookup(nodeid).h;
 //		//printf("Updated limit to %f\n", lastF);
 //	}
+
+	if (isAllSolutions && (openClosedList.Lookup(nodeid).g + openClosedList.Lookup(nodeid).h > goalFCost)){
+			ExtractPathToStartFromID(firstGoal, thePath);
+			reverse(thePath.begin(), thePath.end()); 
+			return true;
+	}
+
 	if (!openClosedList.Lookup(nodeid).reopened)
 		uniqueNodesExpanded++;
 	nodesExpanded++;
 
 	if ((stopAfterGoal) && (env->GoalTest(openClosedList.Lookup(nodeid).data, goal)))
 	{
-		ExtractPathToStartFromID(nodeid, thePath);
-		// Path is backwards - reverse
-		reverse(thePath.begin(), thePath.end()); 
-		goalFCost = openClosedList.Lookup(nodeid).g + openClosedList.Lookup(nodeid).h;
-		return true;
+		goalFCost = std::min(goalFCost,openClosedList.Lookup(nodeid).g + openClosedList.Lookup(nodeid).h);
+		firstGoal = nodeid;
+		if (!isAllSolutions){
+			ExtractPathToStartFromID(nodeid, thePath);
+			// Path is backwards - reverse
+			reverse(thePath.begin(), thePath.end()); 
+			return true;
+		}
+
 	}
+	
 	
  	neighbors.resize(0);
 	edgeCosts.resize(0);

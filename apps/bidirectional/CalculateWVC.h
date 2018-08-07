@@ -14,7 +14,7 @@ public:
 	double getOptimalP() { return optimalP; }
 	double CalcWVC(std::vector<AStarOpenClosedData<state>> astarOpenClosedList,
 				   std::vector<AStarOpenClosedData<state>> reverstAstarOpenClosedList,
-				   int C, int epsilon) {
+				   int C, int epsilon, bool isAllMustExpand) {
 		_C = C;
 		std::map<int,int> gCountMapForward = initGCountMap(astarOpenClosedList);
 		std::map<int,int> gCountMapBackward = initGCountMap(reverstAstarOpenClosedList);
@@ -27,25 +27,48 @@ public:
 		
 		//printf("C: %d\n", _C);
 		
-		int i = 0; int j = C - i - epsilon;
-		double wvc = allWVC(gCountMapBackward, C - epsilon);
+		int i = 0; int j= C - i - epsilon;;
+		if (isAllMustExpand){
+			j++;
+		}
+		double wvc = allWVC(gCountMapBackward, C - epsilon,isAllMustExpand);
 		//printf("init WVC: %f\n", wvc);
 		double minWVC = wvc;
-		while (i < C - epsilon)
-		{
-			wvc = wvc + gCountMapForward[i];
-			// printf("i before is: %d\n", i);
-			i = nextG(gCountMapForward, i);
-			// printf("i after is: %d\n", i);
-			int oldj = j;
-			j = C - i - epsilon;
-			for(int jTag = j; jTag < oldj; jTag = nextG(gCountMapBackward, jTag)) {
-				wvc = wvc - gCountMapBackward[jTag];
+		if (!isAllMustExpand){
+			while (i < C - epsilon)
+			{
+				wvc = wvc + gCountMapForward[i];
+				// printf("i before is: %d\n", i);
+				i = nextG(gCountMapForward, i,isAllMustExpand);
+				// printf("i after is: %d\n", i);
+				int oldj = j;
+				j = C - i - epsilon - 1;
+				for(int jTag = j; jTag < oldj; jTag = nextG(gCountMapBackward, jTag,isAllMustExpand)) {
+					wvc = wvc - gCountMapBackward[jTag];
+				}
+				if(wvc < minWVC) {
+					minWVC = wvc;
+					optimalP = (double)i / (double)C ;
+				}		
 			}
-			if(wvc < minWVC) {
-				minWVC = wvc;
-				optimalP = (double)i / (double)C ;
-			}		
+		}
+		else{
+			while (i <= C - epsilon)
+			{
+				wvc = wvc + gCountMapForward[i];
+				// printf("i before is: %d\n", i);
+				i = nextG(gCountMapForward, i,isAllMustExpand);
+				// printf("i after is: %d\n", i);
+				int oldj = j;
+				j = C - i - epsilon;
+				for(int jTag = j; jTag < oldj; jTag = nextG(gCountMapBackward, jTag,isAllMustExpand)) {
+					wvc = wvc - gCountMapBackward[jTag];
+				}
+				if(wvc < minWVC) {
+					minWVC = wvc;
+					optimalP = (double)i / (double)C ;
+				}		
+			}	
 		}
 		
 		return minWVC;
@@ -74,24 +97,32 @@ private:
 		return ngMap;
 	}
 	
-	double allWVC(std::map<int,int> map, int C) {
+	double allWVC(std::map<int,int> map, int C,bool isAllMustExpand) {
 		int count = 0;
-		
-		for(int j = 0; j < map.size() && j < C; j++) {
-			count = count + map[j];
+		if (!isAllMustExpand){
+			for(int j = 0; j < map.size() && j < C; j++) {
+				count = count + map[j];
+			}
+		}
+		else{
+			for(int j = 0; j < map.size() && j <= C; j++) {
+				count = count + map[j];
+			}			
 		}
 		
 		return count;
 	}
 	
-	int nextG(std::map<int,int> map, int nextOf) {
+	int nextG(std::map<int,int> map, int nextOf,bool isAllMustExpand) {
 		for(int i = 1; i < map.size(); i++) {
 			if(map.find(nextOf+i) != map.end()) {
 				//Element found
 				return (nextOf+i);
 			}
 		}
-		
+		if (isAllMustExpand){
+			return _C+1;
+		}
 		return _C;
 	}
 	
