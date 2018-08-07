@@ -16,8 +16,8 @@ public:
 				   std::vector<AStarOpenClosedData<state>> reverstAstarOpenClosedList,
 				   int C, int epsilon, bool isAllMustExpand) {
 		_C = C;
-		std::map<int,int> gCountMapForward = initGCountMap(astarOpenClosedList);
-		std::map<int,int> gCountMapBackward = initGCountMap(reverstAstarOpenClosedList);
+		std::map<int,int> gCountMapForward = initGCountMap(astarOpenClosedList,C,isAllMustExpand);
+		std::map<int,int> gCountMapBackward = initGCountMap(reverstAstarOpenClosedList,C,isAllMustExpand);
 		
 		// *** print vectors and map to check map is built correctly ***
 		// printOpenClosedDataG(astarOpenClosedList);
@@ -79,12 +79,12 @@ private:
 	double optimalP = 0;
 	int _C;
 
-	std::map<int,int> initGCountMap(std::vector<AStarOpenClosedData<state>> openClosedList) {
+	std::map<int,int> initGCountMap(std::vector<AStarOpenClosedData<state>> openClosedList, double CStar,bool isAll) {
 		std::map<int,int> ngMap;
 		for(int i = 0; i < openClosedList.size(); i++) {
 			AStarOpenClosedData<state> item = openClosedList[i];
 			int g = item.g;
-			if(item.where == kClosedList) {
+			if(item.where == kClosedList && (item.g+item.h < CStar + isAll) ) {
 				if(ngMap.find(g) == ngMap.end()) {
 					//Element not found
 					ngMap.insert(std::pair<int, int>(g, 1));

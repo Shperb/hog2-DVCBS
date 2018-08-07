@@ -197,7 +197,7 @@ void TestPancakeRandom()
 				std::swap(original.puzzle[x], original.puzzle[x+random()%(N-x)]);
 			
 			
-			if (false/*gap !=3 || count+1 != 5*/){
+			if (gap ==3/* || count+1 != 1*/){
 				continue;
 			}
 			
