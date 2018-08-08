@@ -15,9 +15,12 @@ public:
 	double CalcWVC(std::vector<AStarOpenClosedData<state>> astarOpenClosedList,
 				   std::vector<AStarOpenClosedData<state>> reverstAstarOpenClosedList,
 				   int C, int epsilon, bool isAllMustExpand) {
+		if (isAllMustExpand){
+			C++;
+		}		   
 		_C = C;
-		std::map<int,int> gCountMapForward = initGCountMap(astarOpenClosedList,C,isAllMustExpand);
-		std::map<int,int> gCountMapBackward = initGCountMap(reverstAstarOpenClosedList,C,isAllMustExpand);
+		std::map<int,int> gCountMapForward = initGCountMap(astarOpenClosedList,C);
+		std::map<int,int> gCountMapBackward = initGCountMap(reverstAstarOpenClosedList,C);
 		
 		// *** print vectors and map to check map is built correctly ***
 		// printOpenClosedDataG(astarOpenClosedList);
@@ -28,48 +31,27 @@ public:
 		//printf("C: %d\n", _C);
 		
 		int i = 0; int j= C - i - epsilon;;
-		if (isAllMustExpand){
-			j++;
-		}
-		double wvc = allWVC(gCountMapBackward, C - epsilon,isAllMustExpand);
+		double wvc = allWVC(gCountMapBackward, C - epsilon);
 		//printf("init WVC: %f\n", wvc);
 		double minWVC = wvc;
-		if (!isAllMustExpand){
-			while (i < C - epsilon)
-			{
-				wvc = wvc + gCountMapForward[i];
-				// printf("i before is: %d\n", i);
-				i = nextG(gCountMapForward, i,isAllMustExpand);
-				// printf("i after is: %d\n", i);
-				int oldj = j;
-				j = C - i - epsilon - 1;
-				for(int jTag = j; jTag < oldj; jTag = nextG(gCountMapBackward, jTag,isAllMustExpand)) {
-					wvc = wvc - gCountMapBackward[jTag];
-				}
-				if(wvc < minWVC) {
-					minWVC = wvc;
-					optimalP = (double)i / (double)C ;
-				}		
+
+		while (i < C - epsilon)
+		{
+			wvc = wvc + gCountMapForward[i];
+			// printf("i before is: %d\n", i);
+			i = nextG(gCountMapForward, i);
+			// printf("i after is: %d\n", i);
+			int oldj = j;
+			j = C - i - epsilon;
+			for(int jTag = j; jTag < oldj; jTag = nextG(gCountMapBackward, jTag)) {
+				wvc = wvc - gCountMapBackward[jTag];
 			}
-		}
-		else{
-			while (i <= C - epsilon)
-			{
-				wvc = wvc + gCountMapForward[i];
-				// printf("i before is: %d\n", i);
-				i = nextG(gCountMapForward, i,isAllMustExpand);
-				// printf("i after is: %d\n", i);
-				int oldj = j;
-				j = C - i - epsilon;
-				for(int jTag = j; jTag < oldj; jTag = nextG(gCountMapBackward, jTag,isAllMustExpand)) {
-					wvc = wvc - gCountMapBackward[jTag];
-				}
-				if(wvc < minWVC) {
-					minWVC = wvc;
-					optimalP = (double)i / (double)C ;
-				}		
-			}	
-		}
+			if(wvc < minWVC) {
+				minWVC = wvc;
+				//printf("i %d, j%d\n",i-1,j);
+				optimalP = (double)i / (double)C ;
+			}		
+		}	
 		
 		return minWVC;
 	}
@@ -79,12 +61,12 @@ private:
 	double optimalP = 0;
 	int _C;
 
-	std::map<int,int> initGCountMap(std::vector<AStarOpenClosedData<state>> openClosedList, double CStar,bool isAll) {
+	std::map<int,int> initGCountMap(std::vector<AStarOpenClosedData<state>> openClosedList, double CStar) {
 		std::map<int,int> ngMap;
 		for(int i = 0; i < openClosedList.size(); i++) {
 			AStarOpenClosedData<state> item = openClosedList[i];
 			int g = item.g;
-			if(item.where == kClosedList && (item.g+item.h < CStar + isAll) ) {
+			if(item.where == kClosedList && (item.g+item.h < CStar) ) {
 				if(ngMap.find(g) == ngMap.end()) {
 					//Element not found
 					ngMap.insert(std::pair<int, int>(g, 1));
@@ -97,31 +79,22 @@ private:
 		return ngMap;
 	}
 	
-	double allWVC(std::map<int,int> map, int C,bool isAllMustExpand) {
+	double allWVC(std::map<int,int> map, int C) {
 		int count = 0;
-		if (!isAllMustExpand){
-			for(int j = 0; j < map.size() && j < C; j++) {
-				count = count + map[j];
-			}
-		}
-		else{
-			for(int j = 0; j < map.size() && j <= C; j++) {
-				count = count + map[j];
-			}			
+		
+		for(int j = 0; j < map.size() && j < C; j++) {
+			count = count + map[j];
 		}
 		
 		return count;
 	}
 	
-	int nextG(std::map<int,int> map, int nextOf,bool isAllMustExpand) {
+	int nextG(std::map<int,int> map, int nextOf) {
 		for(int i = 1; i < map.size(); i++) {
 			if(map.find(nextOf+i) != map.end()) {
 				//Element found
 				return (nextOf+i);
 			}
-		}
-		if (isAllMustExpand){
-			return _C+1;
 		}
 		return _C;
 	}
