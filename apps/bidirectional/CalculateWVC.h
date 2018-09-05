@@ -12,15 +12,21 @@ public:
 	CalculateWVC() {}
 	~CalculateWVC() {}
 	double getOptimalP() { return optimalP; }
-	double CalcWVC(std::vector<AStarOpenClosedData<state>> astarOpenClosedList,
-				   std::vector<AStarOpenClosedData<state>> reverstAstarOpenClosedList,
+	double CalcWVC(std::vector<AStarOpenClosedData<state>> &astarOpenClosedList,
+				   std::vector<AStarOpenClosedData<state>> &reverstAstarOpenClosedList,
+				   int C, int epsilon, bool isAllMustExpand) {
+		std::map<int,int> gCountMapForward = initGCountMap(astarOpenClosedList,C);
+		std::map<int,int> gCountMapBackward = initGCountMap(reverstAstarOpenClosedList,C);	  
+		return CalcWVC(gCountMapForward,gCountMapBackward,C,epsilon,isAllMustExpand);
+	}
+	
+	double CalcWVC(std::map<int,int> &gCountMapForward,
+				   std::map<int,int> &gCountMapBackward,
 				   int C, int epsilon, bool isAllMustExpand) {
 		if (isAllMustExpand){
 			C++;
 		}		   
 		_C = C;
-		std::map<int,int> gCountMapForward = initGCountMap(astarOpenClosedList,C);
-		std::map<int,int> gCountMapBackward = initGCountMap(reverstAstarOpenClosedList,C);
 		
 		// *** print vectors and map to check map is built correctly ***
 		// printOpenClosedDataG(astarOpenClosedList);
@@ -56,12 +62,7 @@ public:
 		return minWVC;
 	}
 	
-private:
-
-	double optimalP = 0;
-	int _C;
-
-	std::map<int,int> initGCountMap(std::vector<AStarOpenClosedData<state>> openClosedList, double CStar) {
+		std::map<int,int> initGCountMap(std::vector<AStarOpenClosedData<state>> openClosedList, double CStar) {
 		std::map<int,int> ngMap;
 		for(int i = 0; i < openClosedList.size(); i++) {
 			AStarOpenClosedData<state> item = openClosedList[i];
@@ -78,6 +79,13 @@ private:
 		}
 		return ngMap;
 	}
+	
+private:
+
+	double optimalP = 0;
+	int _C;
+
+
 	
 	double allWVC(std::map<int,int> map, int C) {
 		int count = 0;

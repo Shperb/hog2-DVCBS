@@ -417,7 +417,43 @@ void TestTOH(int first, int last)
 			timer.EndTimer();
 			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
 			printf("A* %llu nodes %llu necessary", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
-			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+			printf(" %1.2fs elapsed\n", timer.GetElapsedTime());
+		}
+		if (0)
+		{
+			//printf("-=-=-A*-=-=-\n");
+			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(true);
+			astar.SetHeuristic(f);
+			timer.StartTimer();
+			astar.GetPath(&toh, s, g, thePath);
+			timer.EndTimer();
+			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+			printf("A*-A %llu nodes %llu necessary", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
+			printf(" %1.2fs elapsed\n", timer.GetElapsedTime());
+		}
+		if (1)
+		{
+			//printf("-=-=-A*-=-=-\n");
+			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(false,1);
+			astar.SetHeuristic(f);
+			timer.StartTimer();
+			astar.GetPath(&toh, s, g, thePath);
+			timer.EndTimer();
+			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+			printf("A*-E %llu nodes %llu necessary", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
+			printf(" %1.2fs elapsed\n", timer.GetElapsedTime());
+		}
+		if (1)
+		{
+			//printf("-=-=-A*-=-=-\n");
+			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(true,1);
+			astar.SetHeuristic(f);
+			timer.StartTimer();
+			astar.GetPath(&toh, s, g, thePath);
+			timer.EndTimer();
+			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+			printf("A*-A-E %llu nodes %llu necessary", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
+			printf(" %1.2fs elapsed\n", timer.GetElapsedTime());
 		}
 		if (0)
 		{
@@ -431,7 +467,7 @@ void TestTOH(int first, int last)
 			printf("R-A* %llu nodes %llu necessary", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (1){
+		if (0){
 			
 			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(true);
 			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> rastar(true);

@@ -69,7 +69,7 @@ struct AStarCompare {
 template <class state, class action, class environment, class openList = AStarOpenClosed<state, AStarCompare<state>> >
 class TemplateAStar : public GenericSearchAlgorithm<state,action,environment> {
 public:
-	TemplateAStar(bool allSolutions = false) { isAllSolutions = allSolutions; ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; theHeuristic = 0; directed = false; }
+	TemplateAStar(bool allSolutions = false, double eps = 0) { isAllSolutions = allSolutions; ResetNodeCount(); env = 0; useBPMX = 0; radius = 4.0; stopAfterGoal = true; weight=1; useRadius=false; useOccupancyInfo=false; radEnv = 0; reopenNodes = false; theHeuristic = 0; directed = false; epsilon = eps;}
 	virtual ~TemplateAStar() {}
 	void GetPath(environment *env, const state& from, const state& to, std::vector<state> &thePath);
 	void GetPath(environment *, const state& , const state& , std::vector<action> & );
@@ -167,6 +167,7 @@ private:
 	uint64_t uniqueNodesExpanded;
 	environment *radEnv;
 	Heuristic<state> *theHeuristic;
+	double epsilon;
 };
 
 //static const bool verbose = false;
@@ -269,8 +270,11 @@ bool TemplateAStar<state,action,environment,openList>::InitializeSearch(environm
 	{
 		return false;
 	}
-	
-	openClosedList.AddOpenNode(start, env->GetStateHash(start), 0, weight*theHeuristic->HCost(start, goal));
+	double h_cost = weight*theHeuristic->HCost(start, goal);
+	if (!env->GoalTest(start,goal)){
+		h_cost = std::max(h_cost,epsilon);
+	}
+	openClosedList.AddOpenNode(start, env->GetStateHash(start), 0, h_cost);
 	
 	return true;
 }
@@ -283,7 +287,11 @@ bool TemplateAStar<state,action,environment,openList>::InitializeSearch(environm
 template <class state, class action, class environment, class openList>
 void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(state& newState)
 {
-	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), 0, weight*theHeuristic->HCost(start, goal));
+	double h_cost = weight*theHeuristic->HCost(newState, goal);
+	if (!env->GoalTest(newState,goal)){
+		h_cost = std::max(h_cost,epsilon);
+	}
+	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), 0, h_cost);
 }
 
 /**
@@ -294,7 +302,11 @@ void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(s
 template <class state, class action, class environment, class openList>
 void TemplateAStar<state,action,environment,openList>::AddAdditionalStartState(state& newState, double cost)
 {
-	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), cost, weight*theHeuristic->HCost(start, goal));
+	double h_cost = weight*theHeuristic->HCost(newState, goal);
+	if (!env->GoalTest(newState,goal)){
+		h_cost = std::max(h_cost,epsilon);
+	}
+	openClosedList.AddOpenNode(newState, env->GetStateHash(newState), cost, h_cost);
 }
 
 /**
@@ -473,10 +485,14 @@ bool TemplateAStar<state,action,environment,openList>::DoSingleSearchStep(std::v
 												   nodeid);
 					}
 					else {
+						double h_cost = weight*theHeuristic->HCost(neighbors[x], goal);
+						if (!env->GoalTest(neighbors[x],goal)){
+							h_cost = std::max(h_cost,epsilon);
+						}
 						openClosedList.AddOpenNode(neighbors[x],
 												   env->GetStateHash(neighbors[x]),
 												   openClosedList.Lookup(nodeid).g+edgeCosts[x],
-												   weight*theHeuristic->HCost(neighbors[x], goal),
+												   h_cost,
 												   nodeid);
 					}
 //					if (loc == -1)

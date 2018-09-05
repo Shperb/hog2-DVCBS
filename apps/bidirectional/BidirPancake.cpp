@@ -197,31 +197,67 @@ void TestPancakeRandom()
 				std::swap(original.puzzle[x], original.puzzle[x+random()%(N-x)]);
 			
 			
-			if (gap ==3/* || count+1 != 1*/){
-				continue;
-			}
+			//if (gap !=2 || count+1 != 50){
+			//	continue;
+			//}
 			
 			printf("Problem %d of %d\n", count+1, 50);
 			std::cout << original << "\n";
 						
-			// A*
-			
-			/*
-			
-			if(gap != 3)
-			{
-				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar;
-				start = original;
-				t1.StartTimer();
-				astar.GetPath(&pancake, start, goal, astarPath);
-				t1.EndTimer();
-				printf("GAP-%d A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(astarPath),
-					   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
-				astarOpenClose = astar.openClosedList.elements;
+			// A*	
+			if (0){
+				if(gap != 3)
+				{
+					TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar;
+					start = original;
+					t1.StartTimer();
+					astar.GetPath(&pancake, start, goal, astarPath);
+					t1.EndTimer();
+					printf("GAP-%d A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(astarPath),
+						   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+					astarOpenClose = astar.openClosedList.elements;
+				}
+				// A*-A
+				if(gap != 3)
+				{
+					TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar(true);
+					start = original;
+					t1.StartTimer();
+					astar.GetPath(&pancake, start, goal, astarPath);
+					t1.EndTimer();
+					printf("GAP-%d A*-A found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(astarPath),
+						   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+					astarOpenClose = astar.openClosedList.elements;
+				}
 			}
-			
+			if (1){			
+				// A*	
+				if(gap != 3)
+				{
+					TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar(false,1);
+					start = original;
+					t1.StartTimer();
+					astar.GetPath(&pancake, start, goal, astarPath);
+					t1.EndTimer();
+					printf("GAP-%d A*-E found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(astarPath),
+						   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+					astarOpenClose = astar.openClosedList.elements;
+				}
+				// A*-A
+				if(gap != 3)
+				{
+					TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar(true,1);
+					start = original;
+					t1.StartTimer();
+					astar.GetPath(&pancake, start, goal, astarPath);
+					t1.EndTimer();
+					printf("GAP-%d A*-A-E found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(astarPath),
+						   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+					astarOpenClose = astar.openClosedList.elements;
+				}	
+			}			
 			// R-A*
-			
+			/*
 			if(gap != 3)
 			{
 				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> rastar;
@@ -260,6 +296,9 @@ void TestPancakeRandom()
 					printf("GAP-%d NBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(nbsPath),
 						   nbsLEQ.GetNodesExpanded(), nbsLEQ.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsLEQ.getForwardMeetingPoint(),nbsLEQ.getBackwardMeetingPoint(),nbsLEQ.getForwardUnnecessaryNodesInPath(),nbsLEQ.getBackwardUnnecessaryNodesInPath(),nbsLEQ.GetExpansionUntilFirstSolution());
 				}
+				
+				
+				
 				{
 					NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,NBSQueue<PancakePuzzleState<N>,1,false>> nbsEpsilon(false);
 					goal.Reset();
@@ -341,6 +380,7 @@ void TestPancakeRandom()
 					}
 
 				}
+				
 			}
 			
 			//ALL Solution
@@ -451,7 +491,7 @@ void TestPancakeRandom()
 				}
 			}
 		
-			if (1){
+			if (0){
 				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar(true);
 				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> rastar(true);
 				astar.SetHeuristic(&pancake);
@@ -459,6 +499,10 @@ void TestPancakeRandom()
 				goal.Reset();
 				start = original;
 				astar.GetPath(&pancake, start, goal, astarPath);
+				int C = pancake.GetPathLength(astarPath);
+				CalculateWVC<PancakePuzzleState<N>> calculateWVC;
+				std::map<int,int> gCountMapForwardSingle = calculateWVC.initGCountMap(astar.openClosedList.elements,C);
+				std::map<int,int> gCountMapForwardAll = calculateWVC.initGCountMap(astar.openClosedList.elements,C+1);
 				//timer.EndTimer();
 				//printf("A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),toh.GetPathLength(thePath),timer.GetElapsedTime());
 				goal.Reset();
@@ -466,16 +510,16 @@ void TestPancakeRandom()
 				rastar.SetHeuristic(&pancake2);
 				//timer.StartTimer();
 				rastar.GetPath(&pancake, goal, start, rastarPath);
+				
+				std::map<int,int> gCountMapBackwardSingle = calculateWVC.initGCountMap(rastar.openClosedList.elements,C);
+				std::map<int,int> gCountMapBackwardAll = calculateWVC.initGCountMap(rastar.openClosedList.elements,C+1);
+
 				//timer.EndTimer();
 				//printf("R-A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions(),toh.GetPathLength(thePath), timer.GetElapsedTime());
-				std::vector<AStarOpenClosedData<PancakePuzzleState<N>>> astarOpenClose  = astar.openClosedList.elements;
-				std::vector<AStarOpenClosedData<PancakePuzzleState<N>>> rastarOpenClose = rastar.openClosedList.elements;
-				CalculateWVC<PancakePuzzleState<N>> calculateWVC;
-				int C = pancake.GetPathLength(astarPath);
-				printf("Optimal-Necessary-L %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 0,false));
-				printf("Optimal-Necessary-E-L %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 1,false));
-				printf("Optimal-Necessary-LEQ %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 0,true));
-				printf("Optimal-Necessary-E-LEQ %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 1,true));
+				printf("Optimal-Necessary-L %f\n",calculateWVC.CalcWVC(gCountMapForwardSingle, gCountMapBackwardSingle, C, 0,false));
+				printf("Optimal-Necessary-E-L %f\n",calculateWVC.CalcWVC(gCountMapForwardSingle, gCountMapBackwardSingle, C, 1,false));
+				printf("Optimal-Necessary-LEQ %f\n",calculateWVC.CalcWVC(gCountMapForwardAll, gCountMapBackwardAll, C, 0,true));
+				printf("Optimal-Necessary-E-LEQ %f\n",calculateWVC.CalcWVC(gCountMapForwardAll, gCountMapBackwardAll, C, 1,true));
 			
 			}
 			
