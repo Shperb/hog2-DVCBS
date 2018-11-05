@@ -329,7 +329,8 @@ private:
 			//case 14 : return computeFullMaxGTieBreakingOld(minimalVertexCovers,forwardCluster,backwardCluster);
 			case 9 : return computeMajorityMinNodesTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
 			case 10: return computeSingleClusterMinNodesMaxGFTieBreaking(minimalVertexCovers,forwardCluster,backwardCluster);
-			
+			case 11 : return computeSingleClusterCardNoMVC(minimalVertexCovers,forwardCluster,backwardCluster);
+			case 12: return computeSingleClusterMinGNoMVC(minimalVertexCovers,forwardCluster,backwardCluster);			
 			default: assert(false);
 					 return std::make_pair(-1,-1);
 		}	
@@ -448,6 +449,28 @@ private:
 			return std::make_pair(-1,0);
 		}
 		return maxPair;
+	}
+	
+	std::pair<int,int> computeSingleClusterCardNoMVC(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<double,uint64_t> >& forwardCluster, std::vector<std::pair<double,uint64_t> >& backwardCluster){
+		int maxF = forwardCluster[0].second;
+		int maxB = backwardCluster[0].second;
+		if (maxF < maxB){
+			return std::make_pair(0,-1);
+		}
+		else{
+			return std::make_pair(-1,0);
+		}
+	}
+	
+	std::pair<int,int> computeSingleClusterMinGNoMVC(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<double,uint64_t> >& forwardCluster, std::vector<std::pair<double,uint64_t> >& backwardCluster){
+		double maxF = forwardCluster[0].first;
+		double maxB = backwardCluster[0].first;
+		if (maxF < maxB){
+			return std::make_pair(0,-1);
+		}
+		else{
+			return std::make_pair(-1,0);
+		}
 	}
 
 	std::pair<int,int> computeSingleClusterMinNodesMaxGFTieBreaking(std::vector<std::pair<int,int> >& minimalVertexCovers,std::vector<std::pair<double,uint64_t> >& forwardCluster, std::vector<std::pair<double,uint64_t> >& backwardCluster){
