@@ -10,7 +10,7 @@
 #include "TOH.h"
 #include "TemplateAStar.h"
 #include "NBS.h"
-#include "CBBS.h"
+#include "DVCBS.h"
 #include "MM.h"
 #include "BSStar.h"
 #include "CalculateWVC.h"
@@ -98,97 +98,52 @@ void TestTOH(int first, int last)
 		//b = BuildPDB<N, pdb1Disks>(s);
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		//Single Solution
-		if(0){
+		if(1){
 			if (1)
 			{
-				for (int i = 1; i<=16; i++){
-					if (i !=4){
-						continue;
-					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,0,false>> cbbs(i,false);
-					//printf("-=-=-CBBS-=-=-\n");
+        DVCBS<TOHState<N>, TOHMove, TOH<N>,DVCBSQueue<TOHState<N>,0,false>> dvcbs(false);
 					timer.StartTimer();
-					cbbs.GetPath(&toh, s, g, f, b, thePath);
+        dvcbs.GetPath(&toh, s, g, f, b, thePath);
 					timer.EndTimer();
-					//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-					//printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-					//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-					printf("CBBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
-						cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), timer.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());	
-					//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
-				}
-
+        printf("DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+          dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), timer.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());	
 			}
 
 			if (1)
 			{
-				for (int i = 1; i<=16; i++){
-					if (i !=4){
-						continue;
-					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,0,true>> cbbs(i,false,true);
-					//printf("-=-=-CBBS-=-=-\n");
+        DVCBS<TOHState<N>, TOHMove, TOH<N>,DVCBSQueue<TOHState<N>,0,true>> dvcbs(false,true);
 					timer.StartTimer();
-					cbbs.GetPath(&toh, s, g, f, b, thePath);
+        dvcbs.GetPath(&toh, s, g, f, b, thePath);
 					timer.EndTimer();
-					//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-					//printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-					//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-					printf("CBBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
-						cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), timer.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());	
-					//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
-				}
+        printf("DVCBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+          dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), timer.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());	
 
 			}		
 			if (1)
 			{
-				for (int i = 1; i<=16; i++){
-					if (i !=4){
-						continue;
-					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,1,false>> cbbs(i,false);
-					//printf("-=-=-CBBS-=-=-\n");
+        DVCBS<TOHState<N>, TOHMove, TOH<N>,DVCBSQueue<TOHState<N>,1,false>> dvcbs(false);
 					timer.StartTimer();
-					cbbs.GetPath(&toh, s, g, f, b, thePath);
+        dvcbs.GetPath(&toh, s, g, f, b, thePath);
 					timer.EndTimer();
-					//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-					//printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-					//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-					printf("CBBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
-						cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), timer.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());	
-					//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
-				}
+        printf("DVCBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+          dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), timer.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());		
 			}
 			if (1)
 			{
-				for (int i = 1; i<=16; i++){
-					if (i !=4){
-						continue;
-					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,1,true>> cbbs(i,false,true);
-					//printf("-=-=-CBBS-=-=-\n");
+        DVCBS<TOHState<N>, TOHMove, TOH<N>,DVCBSQueue<TOHState<N>,1,true>> dvcbs(false,true);
 					timer.StartTimer();
-					cbbs.GetPath(&toh, s, g, f, b, thePath);
+        dvcbs.GetPath(&toh, s, g, f, b, thePath);
 					timer.EndTimer();
-					//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-					//printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-					//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-					printf("CBBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
-						cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), timer.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());	
-					//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
-				}
+        printf("DVCBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+          dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), timer.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());	
 			}
 
 			if (1)
 			{
-				//printf("-=-=-NBS-=-=-\n");
 				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,false>> nbs(false);
 				timer.StartTimer();
 				nbs.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
-				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-				//printf("NBS %llu nodes %llu necessary ", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-				//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 				printf("NBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 					nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());
 				
@@ -196,41 +151,29 @@ void TestTOH(int first, int last)
 			if (1)
 			{
 				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,true>> nbs(false,true);
-				//printf("-=-=-NBS-=-=-\n");
 				timer.StartTimer();
 				nbs.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
-				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-				//printf("NBS %llu nodes %llu necessary ", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-				//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 				printf("NBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 					nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());
 				
 			}
 			if (1)
 			{
-				//printf("-=-=-NBS-=-=-\n");
 				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,false>> nbsEpsilon(false);
 				timer.StartTimer();
 				nbsEpsilon.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
-				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-				//printf("NBS %llu nodes %llu necessary ", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-				//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 				printf("NBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 					nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), timer.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 				
 			}
 			if (1)
 			{
-				//printf("-=-=-NBS-=-=-\n");
 				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,true>> nbsEpsilon(false,true);
 				timer.StartTimer();
 				nbsEpsilon.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
-				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-				//printf("NBS %llu nodes %llu necessary ", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-				//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 				printf("NBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 					nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), timer.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 				
@@ -241,94 +184,49 @@ void TestTOH(int first, int last)
 		if(0){
 			if (1)
 			{
-				for (int i = 1; i<=16; i++){
-					if (i !=4){
-						continue;
-					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,0,false>> cbbs(i,true);
-					//printf("-=-=-CBBS-=-=-\n");
+					DVCBS<TOHState<N>, TOHMove, TOH<N>,DVCBSQueue<TOHState<N>,0,false>> dvcbs(true);
 					timer.StartTimer();
-					cbbs.GetPath(&toh, s, g, f, b, thePath);
+					dvcbs.GetPath(&toh, s, g, f, b, thePath);
 					timer.EndTimer();
-					//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-					//printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-					//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-					printf("CBBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
-						cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), timer.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());	
-					//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
-				}
-
+					printf("DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+						dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), timer.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());	
 			}
 
 			if (1)
 			{
-				for (int i = 1; i<=16; i++){
-					if (i !=4){
-						continue;
-					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,0,true>> cbbs(i,true,true);
-					//printf("-=-=-CBBS-=-=-\n");
+					DVCBS<TOHState<N>, TOHMove, TOH<N>,DVCBSQueue<TOHState<N>,0,true>> dvcbs(true,true);
 					timer.StartTimer();
-					cbbs.GetPath(&toh, s, g, f, b, thePath);
+					dvcbs.GetPath(&toh, s, g, f, b, thePath);
 					timer.EndTimer();
-					//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-					//printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-					//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-					printf("CBBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
-						cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), timer.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());	
-					//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
-				}
-
+					printf("DVCBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+						dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), timer.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());	
 			}		
 			if (1)
 			{
-				for (int i = 1; i<=16; i++){
-					if (i !=4){
-						continue;
-					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,1,false>> cbbs(i,true);
-					//printf("-=-=-CBBS-=-=-\n");
+        DVCBS<TOHState<N>, TOHMove, TOH<N>,DVCBSQueue<TOHState<N>,1,false>> dvcbs(true);
 					timer.StartTimer();
-					cbbs.GetPath(&toh, s, g, f, b, thePath);
+        dvcbs.GetPath(&toh, s, g, f, b, thePath);
 					timer.EndTimer();
-					//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-					//printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-					//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-					printf("CBBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
-						cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), timer.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());	
-					//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
-				}
+        printf("DVCBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+          dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), timer.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());	
 			}
 			if (1)
 			{
-				for (int i = 1; i<=16; i++){
-					if (i !=4){
-						continue;
-					}
-					CBBS<TOHState<N>, TOHMove, TOH<N>,CBBSQueue<TOHState<N>,1,true>> cbbs(i,true,true);
-					//printf("-=-=-CBBS-=-=-\n");
+        DVCBS<TOHState<N>, TOHMove, TOH<N>,DVCBSQueue<TOHState<N>,1,true>> dvcbs(true,true);
 					timer.StartTimer();
-					cbbs.GetPath(&toh, s, g, f, b, thePath);
+        dvcbs.GetPath(&toh, s, g, f, b, thePath);
 					timer.EndTimer();
-					//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-					//printf("CBBS %d %llu nodes %llu necessary ", i,cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions());
-					//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
-					printf("CBBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
-						cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), timer.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());	
-					//printf(" OPT: %d",cbbs.getOptimalNumberOfExpantions());
-				}
+        printf("DVCBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+          dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), timer.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());	
+				
 			}
 
 			if (1)
 			{
-				//printf("-=-=-NBS-=-=-\n");
 				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,false>> nbs(true);
 				timer.StartTimer();
 				nbs.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
-				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-				//printf("NBS %llu nodes %llu necessary ", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-				//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 				printf("NBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 					nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());
 				
@@ -336,47 +234,35 @@ void TestTOH(int first, int last)
 			if (1)
 			{
 				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,true>> nbs(true,true);
-				//printf("-=-=-NBS-=-=-\n");
 				timer.StartTimer();
 				nbs.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
-				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-				//printf("NBS %llu nodes %llu necessary ", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-				//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 				printf("NBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 					nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), timer.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());
 				
 			}
 			if (1)
 			{
-				//printf("-=-=-NBS-=-=-\n");
 				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,false>> nbsEpsilon(true);
 				timer.StartTimer();
 				nbsEpsilon.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
-				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-				//printf("NBS %llu nodes %llu necessary ", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-				//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 				printf("NBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 					nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), timer.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 				
 			}
 			if (1)
 			{
-				//printf("-=-=-NBS-=-=-\n");
 				NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,true>> nbsEpsilon(true,true);
 				timer.StartTimer();
 				nbsEpsilon.GetPath(&toh, s, g, f, b, thePath);
 				timer.EndTimer();
-				//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
-				//printf("NBS %llu nodes %llu necessary ", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions());
-				//printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 				printf("NBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 					nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), timer.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
 				
 			}
 		}
-		/*
+		
 		if (1)
 		{
 			//printf("-=-=-BS-=-=-\n");
@@ -387,17 +273,8 @@ void TestTOH(int first, int last)
 			printf("BS %llu nodes %llu necessary ", bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		*/
-		if (0)
- 		{
- 			timer.StartTimer();
- 			bs.GetPath(&toh, s, g, f, b, thePath);
- 			timer.EndTimer();
- 			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
- 			printf("BS %llu nodes\t%llu necessary\t", bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
- 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
- 		}
-		if (0)
+		
+		if (1)
 		{
 			//printf("-=-=-MM-=-=-\n");
 			timer.StartTimer();
@@ -407,7 +284,7 @@ void TestTOH(int first, int last)
 			printf("MM %llu nodes %llu necessary", mm.GetNodesExpanded(),mm.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (0)
+		if (1)
 		{
 			//printf("-=-=-A*-=-=-\n");
 			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
@@ -419,7 +296,7 @@ void TestTOH(int first, int last)
 			printf("A* %llu nodes %llu necessary", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
 			printf(" %1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (0)
+		if (1)
 		{
 			//printf("-=-=-A*-=-=-\n");
 			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(true);
@@ -467,6 +344,7 @@ void TestTOH(int first, int last)
 			printf("R-A* %llu nodes %llu necessary", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions());
 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
 		}
+    //fMM
 		if (0){
 			
 			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(true);

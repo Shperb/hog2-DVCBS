@@ -19,7 +19,7 @@
 #include "NBSQueueGF.h"
 #include "NBS.h"
 #include "BSStar.h"
-#include "CBBS.h"
+#include "DVCBS.h"
 #include "CalculateWVC.h"
 #include "fMM.h"
 
@@ -967,7 +967,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 		std::vector<xyLoc> mm0Path;
 		std::vector<xyLoc> nbsPath;
 		std::vector<xyLoc> bsPath;
-		std::vector<xyLoc> cbbsPath;
+		std::vector<xyLoc> dvcbsPath;
 		std::vector<xyLoc> astarPath;
 		std::vector<xyLoc> rastarPath;
 		//astar.SetHeuristic(me);
@@ -977,7 +977,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 		//printf("%d %1.1f BS nodes: %llu necessary %llu\n", x, me->GetPathLength(bsPath), bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
 		//mm.GetPath(me, start, goal, me, me, mmPath);
 		//printf("%d %1.1f MM nodes: %llu necessary %llu\n", x, me->GetPathLength(mmPath), mm.GetNodesExpanded(), mm.GetNecessaryExpansions());
-		if(0)
+		if(1)
 			{
 			// NBS		
 				{
@@ -1019,59 +1019,47 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				}
 				
 				
-							// CBBS
+							// DVCBS
 				{
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,0,false>> cbbs(i,false);
+          {
+						DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,0,false>> dvcbs(false);
 						t6.StartTimer();
-						cbbs.GetPath(me, start, goal, me, me, cbbsPath);
+						dvcbs.GetPath(me, start, goal, me, me, dvcbsPath);
 						t6.EndTimer();
 						std::cout << map << "-" << start << "-" << goal;
-						printf("CBBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-							   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
+						printf("DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(dvcbsPath),
+							   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());
 					}
 					
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,0,true>> cbbs(i,false,true);
+					{
+						DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,0,true>> dvcbs(false,true);
 						t6.StartTimer();
-						cbbs.GetPath(me, start, goal, me, me, cbbsPath);
+						dvcbs.GetPath(me, start, goal, me, me, dvcbsPath);
 						t6.EndTimer();
 						std::cout << map << "-" << start << "-" << goal;
-						printf("CBBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-							   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
+						printf("DVCBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(dvcbsPath),
+							   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());
 					}
 				}
-										// CBBS
+				// DVCBS
 				{
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,1,false>> cbbsEpsilon(i,false);
+					{
+						DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,1,false>> dvcbsEpsilon(false);
 						t6.StartTimer();
-						cbbsEpsilon.GetPath(me, start, goal, me, me, cbbsPath);
+						dvcbsEpsilon.GetPath(me, start, goal, me, me, dvcbsPath);
 						t6.EndTimer();
 						std::cout << map << "-" << start << "-" << goal;
-						printf("CBBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-							   cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
-					}
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
+						printf("DVCBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(dvcbsPath),
+							   dvcbsEpsilon.GetNodesExpanded(), dvcbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbsEpsilon.getForwardMeetingPoint(),dvcbsEpsilon.getBackwardMeetingPoint(),dvcbsEpsilon.getForwardUnnecessaryNodesInPath(),dvcbsEpsilon.getBackwardUnnecessaryNodesInPath(),dvcbsEpsilon.GetExpansionUntilFirstSolution());
 						}
-						CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,1,true>> cbbsEpsilon(i,false,true);
+					{
+						DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,1,true>> dvcbsEpsilon(false,true);
 						t6.StartTimer();
-						cbbsEpsilon.GetPath(me, start, goal, me, me, cbbsPath);
+						dvcbsEpsilon.GetPath(me, start, goal, me, me, dvcbsPath);
 						t6.EndTimer();
 						std::cout << map << "-" << start << "-" << goal;
-						printf("CBBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-							   cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
+						printf("DVCBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(dvcbsPath),
+							   dvcbsEpsilon.GetNodesExpanded(), dvcbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbsEpsilon.getForwardMeetingPoint(),dvcbsEpsilon.getBackwardMeetingPoint(),dvcbsEpsilon.getForwardUnnecessaryNodesInPath(),dvcbsEpsilon.getBackwardUnnecessaryNodesInPath(),dvcbsEpsilon.GetExpansionUntilFirstSolution());
 					}
 
 				}
@@ -1120,59 +1108,47 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				}
 				
 				
-							// CBBS
+							// DVCBS
 				{
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,0,false>> cbbs(i,true);
+					{
+						DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,0,false>> dvcbs(true);
 						t6.StartTimer();
-						cbbs.GetPath(me, start, goal, me, me, cbbsPath);
+						dvcbs.GetPath(me, start, goal, me, me, dvcbsPath);
 						t6.EndTimer();
 						std::cout << map << "-" << start << "-" << goal;
-						printf("CBBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-							   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
+						printf("DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(dvcbsPath),
+							   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());
 					}
 					
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,0,true>> cbbs(i,true,true);
+					{
+						DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,0,true>> dvcbs(true,true);
 						t6.StartTimer();
-						cbbs.GetPath(me, start, goal, me, me, cbbsPath);
+						dvcbs.GetPath(me, start, goal, me, me, dvcbsPath);
 						t6.EndTimer();
 						std::cout << map << "-" << start << "-" << goal;
-						printf("CBBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-							   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
+						printf("DVCBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(dvcbsPath),
+							   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());
 					}
 				}
-										// CBBS
+										// DVCBS
 				{
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,1,false>> cbbsEpsilon(i,true);
+					{
+						DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,1,false>> dvcbsEpsilon(true);
 						t6.StartTimer();
-						cbbsEpsilon.GetPath(me, start, goal, me, me, cbbsPath);
+						dvcbsEpsilon.GetPath(me, start, goal, me, me, dvcbsPath);
 						t6.EndTimer();
 						std::cout << map << "-" << start << "-" << goal;
-						printf("CBBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-							   cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
+						printf("DVCBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(dvcbsPath),
+							   dvcbsEpsilon.GetNodesExpanded(), dvcbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbsEpsilon.getForwardMeetingPoint(),dvcbsEpsilon.getBackwardMeetingPoint(),dvcbsEpsilon.getForwardUnnecessaryNodesInPath(),dvcbsEpsilon.getBackwardUnnecessaryNodesInPath(),dvcbsEpsilon.GetExpansionUntilFirstSolution());
 					}
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,1,true>> cbbsEpsilon(i,true,true);
+					{
+						DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,1,true>> dvcbsEpsilon(true,true);
 						t6.StartTimer();
-						cbbsEpsilon.GetPath(me, start, goal, me, me, cbbsPath);
+						dvcbsEpsilon.GetPath(me, start, goal, me, me, dvcbsPath);
 						t6.EndTimer();
 						std::cout << map << "-" << start << "-" << goal;
-						printf("CBBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-							   cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
+						printf("DVCBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(dvcbsPath),
+							   dvcbsEpsilon.GetNodesExpanded(), dvcbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbsEpsilon.getForwardMeetingPoint(),dvcbsEpsilon.getBackwardMeetingPoint(),dvcbsEpsilon.getForwardUnnecessaryNodesInPath(),dvcbsEpsilon.getBackwardUnnecessaryNodesInPath(),dvcbsEpsilon.GetExpansionUntilFirstSolution());
 					}
 
 				}
@@ -1246,142 +1222,6 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				t1.EndTimer();
 				printf("A*-A-E %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),me->GetPathLength(astarPath),t1.GetElapsedTime());
 			}
-			
-			/*
-		{
-			
-		CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,0,false>> cbbs(4);
-		t1.StartTimer();
-		cbbs.GetPath(me, start, goal, me, me, cbbsPath);
-		t1.EndTimer();
-		cout << map;
-		//printf(" %d %1.1f CBBS nodes: %llu necessary %llu %1.2fs elapsed\n", x, me->GetPathLength(cbbsPath), cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(),t1.GetElapsedTime());
-		printf(" CBBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-					cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t1.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
-					t1.StartTimer();
-		}
-		{
-		CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,0,true>> cbbs(4);
-		t1.StartTimer();
-		cbbs.GetPath(me, start, goal, me, me, cbbsPath);
-		t1.EndTimer();
-		cout << map;
-		//printf(" %d %1.1f CBBS nodes: %llu necessary %llu %1.2fs elapsed\n", x, me->GetPathLength(cbbsPath), cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(),t1.GetElapsedTime());
-		printf(" CBBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-					cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t1.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
-					t1.StartTimer();
-		}
-		{
-		CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,1,false>> cbbsEpsilon(4);
-		cbbsEpsilon.GetPath(me, start, goal, me, me, cbbsPath);
-		t1.EndTimer();
-		cout << map;
-		//printf(" %d %1.1f CBBS nodes: %llu necessary %llu %1.2fs elapsed\n", x, me->GetPathLength(cbbsPath), cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(),t1.GetElapsedTime());
-		printf(" CBBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-					cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t1.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
-		
-		}
-		{
-		CBBS<xyLoc, tDirection, MapEnvironment,CBBSQueue<xyLoc,1,true>> cbbsEpsilon(4);
-		cbbsEpsilon.GetPath(me, start, goal, me, me, cbbsPath);
-		t1.EndTimer();
-		cout << map;
-		//printf(" %d %1.1f CBBS nodes: %llu necessary %llu %1.2fs elapsed\n", x, me->GetPathLength(cbbsPath), cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(),t1.GetElapsedTime());
-		printf(" CBBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(cbbsPath),
-					cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t1.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
-		
-		}
-		
-		{
-		NBS<xyLoc, tDirection, MapEnvironment,NBSQueue<xyLoc,0,false>> nbs;
-		t1.StartTimer();
-		nbs.GetPath(me, start, goal, me, me, nbsPath);
-		t1.EndTimer();
-		cout << map;
-		//printf(" %d %1.1f NBS nodes: %llu necessary %llu %1.2fs elapsed\n", x, me->GetPathLength(nbsPath), nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		printf(" NBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(nbsPath),
-				nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());	
-		}
-
-		{
-		NBS<xyLoc, tDirection, MapEnvironment,NBSQueue<xyLoc,0,true>> nbs;
-		t1.StartTimer();
-		nbs.GetPath(me, start, goal, me, me, nbsPath);
-		t1.EndTimer();
-		cout << map;
-		//printf(" %d %1.1f NBS nodes: %llu necessary %llu %1.2fs elapsed\n", x, me->GetPathLength(nbsPath), nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		printf(" NBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(nbsPath),
-				nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime(),nbs.getForwardMeetingPoint(),nbs.getBackwardMeetingPoint(),nbs.getForwardUnnecessaryNodesInPath(),nbs.getBackwardUnnecessaryNodesInPath(),nbs.GetExpansionUntilFirstSolution());	
-		}
-		
-		{
-		NBS<xyLoc, tDirection, MapEnvironment,NBSQueue<xyLoc,1,false>> nbsEpsilon;
-		t1.StartTimer();
-		nbsEpsilon.GetPath(me, start, goal, me, me, nbsPath);
-		t1.EndTimer();
-		cout << map;
-		//printf(" %d %1.1f NBS nodes: %llu necessary %llu %1.2fs elapsed\n", x, me->GetPathLength(nbsPath), nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		printf(" NBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(nbsPath),
-				nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), t1.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
-		}
-
-				{
-		NBS<xyLoc, tDirection, MapEnvironment,NBSQueue<xyLoc,1,true>> nbsEpsilon;
-		t1.StartTimer();
-		nbsEpsilon.GetPath(me, start, goal, me, me, nbsPath);
-		t1.EndTimer();
-		cout << map;
-		//printf(" %d %1.1f NBS nodes: %llu necessary %llu %1.2fs elapsed\n", x, me->GetPathLength(nbsPath), nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		printf(" NBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(nbsPath),
-				nbsEpsilon.GetNodesExpanded(), nbsEpsilon.GetNecessaryExpansions(), t1.GetElapsedTime(),nbsEpsilon.getForwardMeetingPoint(),nbsEpsilon.getBackwardMeetingPoint(),nbsEpsilon.getForwardUnnecessaryNodesInPath(),nbsEpsilon.getBackwardUnnecessaryNodesInPath(),nbsEpsilon.GetExpansionUntilFirstSolution());
-		}
-		//mm0.GetPath(me, start, goal, &z, &z, mm0Path);
-		//printf("%d %1.1f MM0 nodes: %llu necessary %llu\n", x, me->GetPathLength(mm0Path), mm0.GetNodesExpanded(), mm0.GetNecessaryExpansions());
-		*/
-	/*
-		printf("NBSNecessaryRatios: NBS/A* %1.2f NBS/BS %1.2f NBS/MM %1.2f NBS/MM0 %1.2f\n",
-			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions(),
-			   (double)nbs.GetNecessaryExpansions()/bs.GetNecessaryExpansions(),
-			   (double)nbs.GetNecessaryExpansions()/mm.GetNecessaryExpansions(),
-			   (double)nbs.GetNecessaryExpansions()/mm0.GetNecessaryExpansions()
-			   );
-		printf("SelfNecessaryRatios: A* %1.2f BS %1.2f MM %1.2f NBS %1.2f MM0 %1.2f\n",
-			   (double)astar.GetNodesExpanded()/astar.GetNecessaryExpansions(),
-			   (double)bs.GetNodesExpanded()/bs.GetNecessaryExpansions(),
-			   (double)mm.GetNodesExpanded()/mm.GetNecessaryExpansions(),
-			   (double)nbs.GetNodesExpanded()/nbs.GetNecessaryExpansions(),
-			   (double)mm0.GetNodesExpanded()/mm0.GetNecessaryExpansions()
-			   );
-*/
-//		std::cout << "A*\t" << astar.GetNodesExpanded() << "\tNBS:\t" << nbs.GetNodesExpanded() << "\tBS*:\t" << bs.GetNodesExpanded();
-//		std::cout << "\tMM:\t" << mm.GetNodesExpanded() << "\n";
-//		printf("NBS* total\t%llu\tnecessary\t%llu\tdoubles\t%llu\t", nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetDoubleExpansions());
-//		printf("A* total\t%llu\tnecessary\t%llu\tratio\t%1.3f\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),
-//			   (double)nbs.GetNecessaryExpansions()/astar.GetNecessaryExpansions());
-		//if (!fequal)
-			/*
-		if (!fequal(me->GetPathLength(nbsPath), me->GetPathLength(correctPath)))
-		{
-			std::cout << "error solution cost:\t expected cost\n";
-			std::cout << me->GetPathLength(nbsPath) << "\t" << me->GetPathLength(correctPath) << "\n";
-			double d;
-			for (auto x : correctPath)
-			{
-				astar.GetClosedListGCost(x, d);
-				auto t = nbs.GetNodeForwardLocation(x);
-				auto u = nbs.GetNodeBackwardLocation(x);
-				std::cout << x << " is on " << t << " and " << u << "\n";
-				std::cout << "True g: " << d;
-				if (t != kUnseen)
-					std::cout << " forward g: " << nbs.GetNodeForwardG(x);
-				if (u != kUnseen)
-					std::cout << " backward g: " << nbs.GetNodeBackwardG(x);
-				std::cout << "\n";
-			}
-			exit(0);
-		}
-		*/
-		
 	}
 	//printf("Exiting with no errors\n");
 	//exit(0);

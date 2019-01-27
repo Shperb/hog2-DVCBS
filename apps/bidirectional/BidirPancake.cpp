@@ -13,7 +13,7 @@
 #include "IDAStar.h"
 #include "MM.h"
 #include "BSStar.h"
-#include "CBBS.h"
+#include "DVCBS.h"
 #include "PancakeInstances.h"
 #include "CalculateWVC.h"
 #include "fMM.h"
@@ -75,13 +75,13 @@ void TestPancakeTR()
 		PancakePuzzle<S> pancake2(gap);
 		
 		NBS<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> nbs;
-		CBBS<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> cbbs(1);
+		DVCBS<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> dvcbs(1);
 		MM<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> mm;
 		TemplateAStar<PancakePuzzleState<S>, PancakePuzzleAction, PancakePuzzle<S>> astar;
 		IDAStar<PancakePuzzleState<S>, PancakePuzzleAction, false> idastar;
 		
 		std::vector<PancakePuzzleState<S>> nbsPath;
-		std::vector<PancakePuzzleState<S>> cbbsPath;
+		std::vector<PancakePuzzleState<S>> dvcbsPath;
 		std::vector<PancakePuzzleState<S>> astarPath;
 		std::vector<PancakePuzzleState<S>> mmPath;
 		std::vector<PancakePuzzleAction> idaPath;
@@ -121,10 +121,10 @@ void TestPancakeTR()
 		for (int x = 0; x < S; x++)
 			start.puzzle[x] = arrangement[x];
 		t5.StartTimer();
-		cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
+		dvcbs.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsPath);
 		t5.EndTimer();
-		printf("CBBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", pancake.GetPathLength(cbbsPath),
-			   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t5.GetElapsedTime());
+		printf("DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", pancake.GetPathLength(dvcbsPath),
+			   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t5.GetElapsedTime());
 		
 		goal.Reset();
 		
@@ -146,12 +146,12 @@ void TestPancakeTR()
 		printf("MM found path length %1.0f; %llu expanded; %1.2fs elapsed\n", pancake.GetPathLength(mmPath),
 			   mm.GetNodesExpanded(), t4.GetElapsedTime());
 		
-		printf("Problem & IDA* & & A* & & MM & & NBS* & CBBS & \\\\\n");
+		printf("Problem & IDA* & & A* & & MM & & NBS* & DVCBS & \\\\\n");
 		printf("%d G-%d & %llu & %1.2fs & %llu & %1.2fs & %llu & %1.2fs & %llu & %1.2fs & %llu & %1.2fs \\\\ \n", S, gap,
 			   idastar.GetNodesExpanded(), t3.GetElapsedTime(),
 			   astar.GetNodesExpanded(), t1.GetElapsedTime(),
 			   mm.GetNodesExpanded(), t4.GetElapsedTime(),
-			   nbs.GetNodesExpanded(), t2.GetElapsedTime(),cbbs.GetNodesExpanded(), t5.GetElapsedTime());
+			   nbs.GetNodesExpanded(), t2.GetElapsedTime(),dvcbs.GetNodesExpanded(), t5.GetElapsedTime());
 	}
 	exit(0);
 }
@@ -170,9 +170,9 @@ void TestPancakeRandom()
 		
 		
 		std::vector<PancakePuzzleState<N>> nbsPath;
-		std::vector<PancakePuzzleState<N>> cbbsPath;
+		std::vector<PancakePuzzleState<N>> dvcbsPath;
 		std::vector<PancakePuzzleState<N>> nbsEpsilonPath;
-		std::vector<PancakePuzzleState<N>> cbbsEpsilonPath;
+		std::vector<PancakePuzzleState<N>> dvcbsEpsilonPath;
 		std::vector<PancakePuzzleState<N>> bsPath;
 		std::vector<PancakePuzzleState<N>> astarPath;
 		std::vector<PancakePuzzleState<N>> rastarPath;
@@ -205,7 +205,7 @@ void TestPancakeRandom()
 			std::cout << original << "\n";
 						
 			// A*	
-			if (0){
+			if (1){
 				if(gap != 3)
 				{
 					TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar;
@@ -256,8 +256,8 @@ void TestPancakeRandom()
 					astarOpenClose = astar.openClosedList.elements;
 				}	
 			}			
+      if (1){			
 			// R-A*
-			/*
 			if(gap != 3)
 			{
 				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> rastar;
@@ -270,9 +270,10 @@ void TestPancakeRandom()
 					   rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions(), t1.GetElapsedTime());   
 				rastarOpenClose = rastar.openClosedList.elements;
 			}
-			*/
+      }
+			
 			//Single Solution
-			if(0)
+			if(1)
 			{
 			// NBS
 			
@@ -320,67 +321,49 @@ void TestPancakeRandom()
 				}
 				
 				
-							// CBBS
+							// DVCBS
 				{
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,0,false>> cbbs(i,false);
+          DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,DVCBSQueue<PancakePuzzleState<N>,0,false>> dvcbs(false);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();
-						cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
+          dvcbs.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsPath);
 						t6.EndTimer();
-						printf("GAP-%d CBBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(cbbsPath),
-							   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
+          printf("GAP-%d DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(dvcbsPath),
+               dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());
 					}
 					
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,0,true>> cbbs(i,false,true);
-						goal.Reset();
-						start = original;
-						t6.StartTimer();
-						cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
-						t6.EndTimer();
-						printf("GAP-%d CBBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(cbbsPath),
-							   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
-					}
-				}
-										// CBBS
 				{
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,1,false>> cbbsEpsilon(i,false);
+          DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,DVCBSQueue<PancakePuzzleState<N>,0,true>> dvcbs(false,true);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();
-						cbbsEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsEpsilonPath);
+          dvcbs.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsPath);
 						t6.EndTimer();
-						printf("GAP-%d CBBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(cbbsEpsilonPath),
-							   cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
-					}
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,1,true>> cbbsEpsilon(i,false,true);
-						goal.Reset();
-						start = original;
-						t6.StartTimer();
-						cbbsEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsEpsilonPath);
-						t6.EndTimer();
-						printf("GAP-%d CBBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(cbbsEpsilonPath),
-							   cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
-					}
-
+          printf("GAP-%d DVCBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(dvcbsPath),
+               dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());
 				}
-				
+										// DVCBS
+				{
+						DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,DVCBSQueue<PancakePuzzleState<N>,1,false>> dvcbsEpsilon(false);
+						goal.Reset();
+						start = original;
+						t6.StartTimer();
+						dvcbsEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsEpsilonPath);
+						t6.EndTimer();
+						printf("GAP-%d DVCBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(dvcbsEpsilonPath),
+							   dvcbsEpsilon.GetNodesExpanded(), dvcbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbsEpsilon.getForwardMeetingPoint(),dvcbsEpsilon.getBackwardMeetingPoint(),dvcbsEpsilon.getForwardUnnecessaryNodesInPath(),dvcbsEpsilon.getBackwardUnnecessaryNodesInPath(),dvcbsEpsilon.GetExpansionUntilFirstSolution());
+					}
+        {
+          DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,DVCBSQueue<PancakePuzzleState<N>,1,true>> dvcbsEpsilon(false,true);
+						goal.Reset();
+						start = original;
+						t6.StartTimer();
+          dvcbsEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsEpsilonPath);
+						t6.EndTimer();
+          printf("GAP-%d DVCBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(dvcbsEpsilonPath),
+               dvcbsEpsilon.GetNodesExpanded(), dvcbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbsEpsilon.getForwardMeetingPoint(),dvcbsEpsilon.getBackwardMeetingPoint(),dvcbsEpsilon.getForwardUnnecessaryNodesInPath(),dvcbsEpsilon.getBackwardUnnecessaryNodesInPath(),dvcbsEpsilon.GetExpansionUntilFirstSolution());
+				}
 			}
 			
 			//ALL Solution
@@ -429,68 +412,52 @@ void TestPancakeRandom()
 				}
 				
 				
-							// CBBS
+							// DVCBS
 				{
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,0,false>> cbbs(i,true);
+          DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,DVCBSQueue<PancakePuzzleState<N>,0,false>> dvcbs(true);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();
-						cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
+          dvcbs.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsPath);
 						t6.EndTimer();
-						printf("GAP-%d CBBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(cbbsPath),
-							   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
+          printf("GAP-%d DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(dvcbsPath),
+               dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());
 					}
-					
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,0,true>> cbbs(i,true,true);
-						goal.Reset();
-						start = original;
-						t6.StartTimer();
-						cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
-						t6.EndTimer();
-						printf("GAP-%d CBBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(cbbsPath),
-							   cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbs.getForwardMeetingPoint(),cbbs.getBackwardMeetingPoint(),cbbs.getForwardUnnecessaryNodesInPath(),cbbs.getBackwardUnnecessaryNodesInPath(),cbbs.GetExpansionUntilFirstSolution());
-					}
-				}
-										// CBBS
 				{
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,1,false>> cbbsEpsilon(i,true);
+          DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,DVCBSQueue<PancakePuzzleState<N>,0,true>> dvcbs(true,true);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();
-						cbbsEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsEpsilonPath);
+          dvcbs.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsPath);
 						t6.EndTimer();
-						printf("GAP-%d CBBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(cbbsEpsilonPath),
-							   cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
+          printf("GAP-%d DVCBS-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(dvcbsPath),
+               dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbs.getForwardMeetingPoint(),dvcbs.getBackwardMeetingPoint(),dvcbs.getForwardUnnecessaryNodesInPath(),dvcbs.getBackwardUnnecessaryNodesInPath(),dvcbs.GetExpansionUntilFirstSolution());
 					}
-					for (int i = 1; i<=15;i++){
-						if (i !=4){
-							continue;
-						}
-						CBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,CBBSQueue<PancakePuzzleState<N>,1,true>> cbbsEpsilon(i,true,true);
+				// DVCBS
+				{
+          DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,DVCBSQueue<PancakePuzzleState<N>,1,false>> dvcbsEpsilon(true);
 						goal.Reset();
 						start = original;
 						t6.StartTimer();
-						cbbsEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsEpsilonPath);
+          dvcbsEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsEpsilonPath);
 						t6.EndTimer();
-						printf("GAP-%d CBBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(cbbsEpsilonPath),
-							   cbbsEpsilon.GetNodesExpanded(), cbbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),cbbsEpsilon.getForwardMeetingPoint(),cbbsEpsilon.getBackwardMeetingPoint(),cbbsEpsilon.getForwardUnnecessaryNodesInPath(),cbbsEpsilon.getBackwardUnnecessaryNodesInPath(),cbbsEpsilon.GetExpansionUntilFirstSolution());
+          printf("GAP-%d DVCBS-E-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(dvcbsEpsilonPath),
+               dvcbsEpsilon.GetNodesExpanded(), dvcbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbsEpsilon.getForwardMeetingPoint(),dvcbsEpsilon.getBackwardMeetingPoint(),dvcbsEpsilon.getForwardUnnecessaryNodesInPath(),dvcbsEpsilon.getBackwardUnnecessaryNodesInPath(),dvcbsEpsilon.GetExpansionUntilFirstSolution());
 					}
+        {
+						DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,DVCBSQueue<PancakePuzzleState<N>,1,true>> dvcbsEpsilon(true,true);
+						goal.Reset();
+						start = original;
+						t6.StartTimer();
+						dvcbsEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsEpsilonPath);
+						t6.EndTimer();
+						printf("GAP-%d DVCBS-E-LEQ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", gap, pancake.GetPathLength(dvcbsEpsilonPath),
+							   dvcbsEpsilon.GetNodesExpanded(), dvcbsEpsilon.GetNecessaryExpansions(), t6.GetElapsedTime(),dvcbsEpsilon.getForwardMeetingPoint(),dvcbsEpsilon.getBackwardMeetingPoint(),dvcbsEpsilon.getForwardUnnecessaryNodesInPath(),dvcbsEpsilon.getBackwardUnnecessaryNodesInPath(),dvcbsEpsilon.GetExpansionUntilFirstSolution());
+				
 
 				}
 			}
-		
+      //fMM
 			if (0){
 				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar(true);
 				TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> rastar(true);
@@ -503,8 +470,6 @@ void TestPancakeRandom()
 				CalculateWVC<PancakePuzzleState<N>> calculateWVC;
 				std::map<int,int> gCountMapForwardSingle = calculateWVC.initGCountMap(astar.openClosedList.elements,C);
 				std::map<int,int> gCountMapForwardAll = calculateWVC.initGCountMap(astar.openClosedList.elements,C+1);
-				//timer.EndTimer();
-				//printf("A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),toh.GetPathLength(thePath),timer.GetElapsedTime());
 				goal.Reset();
 				start = original;
 				rastar.SetHeuristic(&pancake2);
@@ -514,8 +479,6 @@ void TestPancakeRandom()
 				std::map<int,int> gCountMapBackwardSingle = calculateWVC.initGCountMap(rastar.openClosedList.elements,C);
 				std::map<int,int> gCountMapBackwardAll = calculateWVC.initGCountMap(rastar.openClosedList.elements,C+1);
 
-				//timer.EndTimer();
-				//printf("R-A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions(),toh.GetPathLength(thePath), timer.GetElapsedTime());
 				printf("Optimal-Necessary-L %f\n",calculateWVC.CalcWVC(gCountMapForwardSingle, gCountMapBackwardSingle, C, 0,false));
 				printf("Optimal-Necessary-E-L %f\n",calculateWVC.CalcWVC(gCountMapForwardSingle, gCountMapBackwardSingle, C, 1,false));
 				printf("Optimal-Necessary-LEQ %f\n",calculateWVC.CalcWVC(gCountMapForwardAll, gCountMapBackwardAll, C, 0,true));
@@ -523,9 +486,9 @@ void TestPancakeRandom()
 			
 			}
 			
-			/*
-			// BS*
 			
+			// BS*
+			if(1)
 			{
 				BSStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> bs;
 				goal.Reset();
@@ -536,9 +499,9 @@ void TestPancakeRandom()
 				printf("GAP-%d BS* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(bsPath),
 					   bs.GetNodesExpanded(), bs.GetNecessaryExpansions(), t2.GetElapsedTime());
 			}
-			*/
+			
 			// IDA*
-			/*
+			if(0)
 			{
 				IDAStar<PancakePuzzleState<N>, PancakePuzzleAction, false> idastar;
 				goal.Reset();
@@ -549,91 +512,9 @@ void TestPancakeRandom()
 				printf("GAP-%d IDA* found path length %ld; %llu expanded; %llu generated; %1.2fs elapsed\n", gap, idaPath.size(),
 					   idastar.GetNodesExpanded(), idastar.GetNodesTouched(), t3.GetElapsedTime());
 			}
-			*/
 			
-			/*
-			if(gap != 3)
-			{
-				int C = pancake.GetPathLength(astarPath);
-				
-				CalculateWVC<PancakePuzzleState<N>> calculateWVCEpsilon;
-				double minWVCEpsilon = calculateWVCEpsilon.CalcWVC(astarOpenClose, rastarOpenClose, C, 1);
-				pEpsilon = calculateWVCEpsilon.getOptimalP();
-				
-				CalculateWVC<PancakePuzzleState<N>> calculateWVC;
-				double minWVC = calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 0);
-				p = calculateWVC.getOptimalP();
-				//printf("minWVC is: %f\n", minWVC);
-				//printf("Optimal P is: %f\n", p);
-			
-				fMM<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, AStarOpenClosed<PancakePuzzleState<N>, fMMCompare<PancakePuzzleState<N>,1>, FMMOpenClosedData<PancakePuzzleState<N>>>> fmm(p,0);
-				//fmm.SetFraction(p);
-				goal.Reset();
-				start = original;
-				t7.StartTimer();
-				fmm.GetPath(&pancake, start, goal, &pancake, &pancake2, fmmPath);
-				t7.EndTimer();
-				printf("GAP-%d fMM found path length %1.0f; %llu expanded; %f necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
-					   fmm.GetNodesExpanded(), minWVC, t7.GetElapsedTime());
-			
-			
-				fMM<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, AStarOpenClosed<PancakePuzzleState<N>, fMMCompare<PancakePuzzleState<N>,1>, FMMOpenClosedData<PancakePuzzleState<N>>>> fmmEpsilon(pEpsilon,1);
-				//fmm.SetFraction(p);
-				goal.Reset();
-				start = original;
-				t7.StartTimer();
-				fmmEpsilon.GetPath(&pancake, start, goal, &pancake, &pancake2, fmmPath);
-				t7.EndTimer();
-				printf("GAP-%d fMM-E found path length %1.0f; %llu expanded; %f necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
-					   fmmEpsilon.GetNodesExpanded(), minWVCEpsilon, t7.GetElapsedTime());
-					   
-				
-			}
-			
-			// fMM
-			/*
-			{
-				fMM<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm;
-				fmm.SetFraction(0.5);
-				goal.Reset();
-				start = original;
-				t4.StartTimer();
-				fmm.GetPath(&pancake, start, goal, &pancake, &pancake2, mmPath);
-				t4.EndTimer();
-				printf("GAP-%d fMM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
-					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t4.GetElapsedTime());
-			}
-	
-			// fMM
-			
-			{
-				fMM<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm;
-				fmm.SetFraction(0);
-				goal.Reset();
-				start = original;
-				t4.StartTimer();
-				fmm.GetPath(&pancake, start, goal, &pancake, &pancake2, mmPath);
-				t4.EndTimer();
-				printf("GAP-%d fMM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
-					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t4.GetElapsedTime());
-			}
-			
-			// fMM
-			
-			{
-				fMM<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm;
-				fmm.SetFraction(1);
-				goal.Reset();
-				start = original;
-				t4.StartTimer();
-				fmm.GetPath(&pancake, start, goal, &pancake, &pancake2, mmPath);
-				t4.EndTimer();
-				printf("GAP-%d fMM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
-					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t4.GetElapsedTime());
-			}
-			*/
 			// MM
-			/*
+			if(1)
 			{
 				MM<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> mm;
 				goal.Reset();
@@ -644,9 +525,8 @@ void TestPancakeRandom()
 				printf("GAP-%d MM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(mmPath),
 					   mm.GetNodesExpanded(), mm.GetNecessaryExpansions(), t4.GetElapsedTime());
 			}
-			*/
 			// MM0
-			/*
+			if(0){
 			if (gap == 3)
 			{
 				MM<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> mm;
@@ -659,7 +539,7 @@ void TestPancakeRandom()
 				printf("GAP-%d MM0 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake.GetPathLength(mmPath),
 					   mm.GetNodesExpanded(), mm.GetNecessaryExpansions(), t4.GetElapsedTime());
 			}
-			*/
+			}
 		}
 	}
 }
@@ -676,7 +556,7 @@ void TestPancakeHard()
 	
 	
 	std::vector<PancakePuzzleState<CNT>> nbsPath;
-	std::vector<PancakePuzzleState<CNT>> cbbsPath;
+	std::vector<PancakePuzzleState<CNT>> dvcbsPath;
 	std::vector<PancakePuzzleState<CNT>> bsPath;
 	std::vector<PancakePuzzleState<CNT>> astarPath;
 	std::vector<PancakePuzzleState<CNT>> mmPath;
@@ -755,21 +635,21 @@ void TestPancakeHard()
 			GetWeightedVertexGraph<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>(start, goal, &pancake, &pancake, &pancake);
 		}
 		*/
-		// CBBS
+		// DVCBS
 		if (1)
 		{
 			for (int i = 1; i<=15;i++){
 				if (i != 4){
 					continue;
 				}
-				CBBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> cbbs(i);
+				DVCBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> dvcbs(i);
 				goal.Reset();
 				start = original;
 				t2.StartTimer();
-				cbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, cbbsPath);
+				dvcbs.GetPath(&pancake, start, goal, &pancake, &pancake2, dvcbsPath);
 				t2.EndTimer();
-				printf("HARD-%d CBBS %d found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; \n", count, i, pancake.GetPathLength(cbbsPath),
-					cbbs.GetNodesExpanded(), cbbs.GetNecessaryExpansions(), t2.GetElapsedTime());
+				printf("HARD-%d DVCBS %d found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed; \n", count, i, pancake.GetPathLength(dvcbsPath),
+					dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t2.GetElapsedTime());
 			}
 			
 		}
