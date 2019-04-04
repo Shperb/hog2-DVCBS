@@ -716,7 +716,7 @@ void TestPancakeRandom()
 				printf("GAP-%d improved-fMM-0.75-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}  
-			if (1){
+			if (0){
 				BPHA<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm(false,false,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -727,7 +727,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BPHA-Min found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}      
-			if (1){
+			if (0){
 				BPHA<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm(true,false,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -738,7 +738,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BPHA-alt found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			} 
-			if (1){
+			if (0){
 				BPHA<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm(false,true,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -749,7 +749,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BPHA-Min-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}      
-			if (1){
+			if (0){
 				BPHA<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm(true,true,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -805,7 +805,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BPHA-alt-improved-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}  
-			if (1){
+			if (0){
 				BPHA<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,1> fmm(false,false,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -816,7 +816,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BPHA-Min-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}      
-			if (1){
+			if (0){
 				BPHA<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,1> fmm(true,false,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -827,7 +827,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BPHA-alt-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			} 
-			if (1){
+			if (0){
 				BPHA<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,1> fmm(false,true,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -838,7 +838,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BPHA-Min-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}      
-			if (1){
+			if (0){
 				BPHA<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,1> fmm(true,true,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -895,7 +895,7 @@ void TestPancakeRandom()
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}      
     
-			if (1){
+			if (0){
 				BST<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm(false,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -906,7 +906,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BST found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}      
-			if (1){
+			if (0){
 				BST<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> fmm(true,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -940,7 +940,7 @@ void TestPancakeRandom()
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}  
 
-			if (1){
+			if (0){
 				BST<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,1> fmm(false,false);
 				//fmm.SetFraction(p);
 				goal.Reset();
@@ -951,7 +951,7 @@ void TestPancakeRandom()
 				printf("GAP-%d BST-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", gap, pancake.GetPathLength(fmmPath),
 					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t7.GetElapsedTime());
 			}      
-			if (1){
+			if (0){
 				BST<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>,1> fmm(true,false);
 				//fmm.SetFraction(p);
 				goal.Reset();

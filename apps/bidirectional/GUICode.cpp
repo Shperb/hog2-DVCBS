@@ -24,6 +24,8 @@
 #include "CBBS.h"
 #include "CalculateWVC.h"
 #include "fMM.h"
+#include "BST.h"
+#include "BPHA.h"
 
 
 Map *map = 0;
@@ -1191,7 +1193,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				std::map<int,int> gCountMapForwardSingle = calculateWVC.initGCountMap(astar.openClosedList.elements,C);
 				std::map<int,int> gCountMapForwardAll = calculateWVC.initGCountMap(astar.openClosedList.elements,C+1);
 				//timer.EndTimer();
-				//printf("A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),toh.GetPathLength(thePath),timer.GetElapsedTime());
+				//printf("A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),me->GetPathLength(astarPath),timer.GetElapsedTime());
 				rastar.SetHeuristic(me);
 				//timer.StartTimer();
 				rastar.GetPath(me, goal, start, rastarPath);
@@ -1200,7 +1202,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				std::map<int,int> gCountMapBackwardAll = calculateWVC.initGCountMap(rastar.openClosedList.elements,C+1);
 
 				//timer.EndTimer();
-				//printf("R-A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions(),toh.GetPathLength(thePath), timer.GetElapsedTime());
+				//printf("R-A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", rastar.GetNodesExpanded(), rastar.GetNecessaryExpansions(),me->GetPathLength(astarPath), timer.GetElapsedTime());
 				std::cout << map << "-" << start << "-" << goal << " ";
 				printf("Optimal Single No-Epsilon %f\n",calculateWVC.CalcWVC(gCountMapForwardSingle, gCountMapBackwardSingle, C, 0,false));
 				std::cout << map << "-" << start << "-" << goal << " ";
@@ -1277,7 +1279,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 			}			
 			
 
-      if(1){
+      if(0){
 				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.5,false);;
 				//astar.SetHeuristic(me);
 				t1.StartTimer();
@@ -1286,7 +1288,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				printf("fmm found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(),t1.GetElapsedTime());
 			}	
 
-      if(1){
+      if(0){
 				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.5,true);;
 				//astar.SetHeuristic(me);
 				t1.StartTimer();
@@ -1294,7 +1296,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				t1.EndTimer();
 				printf("fmm found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(),t1.GetElapsedTime());
 			}	
-      if(1){
+      if(0){
 				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.5,false);;
 				//astar.SetHeuristic(me);
 				t1.StartTimer();
@@ -1302,7 +1304,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				t1.EndTimer();
 				printf("fmm found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(),t1.GetElapsedTime());
 			}	
-      if(1){
+      if(0){
 				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.5,true);;
 				//astar.SetHeuristic(me);
 				t1.StartTimer();
@@ -1328,6 +1330,371 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				printf("NewBS-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(nbsPath),
 					   nbsLEQ.GetNodesExpanded(), nbsLEQ.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsLEQ.getForwardMeetingPoint(),nbsLEQ.getBackwardMeetingPoint(),nbsLEQ.getForwardUnnecessaryNodesInPath(),nbsLEQ.getBackwardUnnecessaryNodesInPath(),nbsLEQ.GetExpansionUntilFirstSolution());
 			}
+      
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.5,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid fMM-0.5 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.5,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid improved-fMM-0.5 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.5,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid fMM-0.5-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.5,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid improved-fMM-0.5-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.25,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid fMM-0.25 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.25,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid improved-fMM-0.25 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.25,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid fMM-0.25-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.25,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid improved-fMM-0.25-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.75,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid fMM-0.75 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.75,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid improved-fMM-0.75 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.75,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid fMM-0.75-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}
+			if (1){
+				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.75,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid improved-fMM-0.75-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}  
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment> fmm(false,false,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-Min found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment> fmm(true,false,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-alt found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			} 
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment> fmm(false,true,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-Min-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment> fmm(true,true,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-alt-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}  
+
+      if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment> fmm(false,false,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-Min-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment> fmm(true,false,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-alt-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			} 
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment> fmm(false,true,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-Min-improved-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment> fmm(true,true,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-alt-improved-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}  
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment,1> fmm(false,false,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-Min-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment,1> fmm(true,false,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-alt-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			} 
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment,1> fmm(false,true,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-Min-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment,1> fmm(true,true,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-alt-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}  
+
+      if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment,1> fmm(false,false,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-Min-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment,1> fmm(true,false,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-alt-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			} 
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment,1> fmm(false,true,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-Min-improved-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<xyLoc, tDirection, MapEnvironment,1> fmm(true,true,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BPHA-alt-improved-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+    
+			if (1){
+				BST<xyLoc, tDirection, MapEnvironment> fmm(false,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BST found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BST<xyLoc, tDirection, MapEnvironment> fmm(true,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BST-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			} 
+			if (1){
+				BST<xyLoc, tDirection, MapEnvironment> fmm(false,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BST-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BST<xyLoc, tDirection, MapEnvironment> fmm(true,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BST-+-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}  
+
+			if (1){
+				BST<xyLoc, tDirection, MapEnvironment,1> fmm(false,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BST-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BST<xyLoc, tDirection, MapEnvironment,1> fmm(true,false);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BST-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			} 
+			if (1){
+				BST<xyLoc, tDirection, MapEnvironment,1> fmm(false,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BST-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			}      
+			if (1){
+				BST<xyLoc, tDirection, MapEnvironment,1> fmm(true,true);
+				//fmm.SetFraction(p);
+								
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Grid BST-+-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",  me->GetPathLength(astarPath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), t1.GetElapsedTime());
+			} 
 			
 			/*
 		{
@@ -1476,16 +1843,16 @@ void tmp()
 	Timer t;
 	RubiksCube cube;
 	RubiksState start, goal;
-	std::vector<RubiksState> thePath;
-	thePath.clear();
+	std::vector<RubiksState> astarPath;
+	astarPath.clear();
 	ZeroHeuristic<RubiksState> z;
 	t.StartTimer();
 	NBS<RubiksState, RubiksAction, RubiksCube> nbs;
-	nbs.GetPath(&cube, start, goal, &z, &z, thePath);
+	nbs.GetPath(&cube, start, goal, &z, &z, astarPath);
 	
 	t.EndTimer();
 	printf("%llu nodes expanded\n", nbs.GetNodesExpanded());
 	printf("%llu neccesary nodes expanded\n", nbs.GetNecessaryExpansions());
-	printf("Solution path length %1.0f\n", cube.GetPathLength(thePath));
+	printf("Solution path length %1.0f\n", cube.GetPathLength(astarPath));
 	printf("%1.2f elapsed\n", t.GetElapsedTime());
 }
