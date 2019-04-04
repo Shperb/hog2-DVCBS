@@ -1,5 +1,5 @@
 //
-//	CBBS.h
+//	NBS.h
 //	This file derived from MM.h by Nathan Sturtevant
 //	The following is the original claim
 //
@@ -10,58 +10,62 @@
 //  Copyright © 2015 University of Denver. All rights reserved.
 //
 
-#ifndef CBBS_H
-#define CBBS_H
+#ifndef NewBS_H
+#define NewBS_H
 
-#include "CBBSOpenClosed.h"
+#include "BDOpenClosed.h"
 #include "FPUtil.h"
 #include <unordered_map>
-#include "CBBSQueue.h"
+#include "NBSQueue.h"
 #include "NBSQueueGF.h"
-#include <algorithm>
 
-#define EPSILON 1
 
 using std::cout;
 
 
-template <class state, class action, class environment, class dataStructure = CBBSQueue<state>,
-          class priorityQueue = CBBSOpenClosed<state> >
-class CBBS {
+template <class state, class action, class environment, class dataStructure = NBSQueue<state>,
+          class priorityQueue = BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>>>
+class NewBS {
 public:
-	CBBS(int tieBreaking)
+	NewBS(bool allSolutions = false,bool leq = false)
 	{
 		forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount();
-		tieBreakingPolicy = tieBreaking;
+		isAllSolutions = allSolutions;
+		isLEQ = leq;
 	}
-	virtual ~CBBS() {}
+	virtual ~NewBS() {}
 	void GetPath(environment *env, const state& from, const state& to,
 				 Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);
 	bool InitializeSearch(environment *env, const state& from, const state& to,
 						  Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);
-	bool ExpandAVertexCover(std::vector<state> &thePath);
+	bool ExpandAPair(std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	
-	uint64_t getOptimalNumberOfExpantions(){
-		//uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(middleNode), theID);
-		//double cost = queue.forwardQueue.Lookup(theID).g;
-		//queue.backwardQueue.Lookup(env->GetStateHash(middleNode), theID);
-		//double cost2 = queue.backwardQueue.Lookup(theID).g;
-		printf("curr Cost: %d\n",currentCost);
-		//printf("cost: %d\n",cost);
-		//printf("cost2: %d\n",cost2);
-		return queue.getMinimalVertexCover(currentCost);
+	
+	uint64_t getForwardUnnecessaryNodesInPath(){
+		return forwardUnnecessaryNodesInPath;
 	}
 	
+	uint64_t getBackwardUnnecessaryNodesInPath(){
+		return backwardUnnecessaryNodesInPath;
+	}
 	
-	virtual const char *GetName() { return "CBBS"; }
+	uint64_t getForwardMeetingPoint(){
+		return forwardMeetingPoint;
+	}
+	
+	uint64_t getBackwardMeetingPoint(){
+		return backwardMeetingPoint;
+	}
+	
+	virtual const char *GetName() { return "NewBS"; }
 	
 	void ResetNodeCount() { nodesExpanded = nodesTouched = 0; counts.clear(); }
 	
 	inline const int GetNumForwardItems() { return queue.forwardQueue.size(); }
-	inline const CBBSOpenClosedData<state> &GetForwardItem(unsigned int which) { return queue.forwardQueue.Lookat(which); }
+	inline const BDOpenClosedData<state> &GetForwardItem(unsigned int which) { return queue.forwardQueue.Lookat(which); }
 	inline const int GetNumBackwardItems() { return queue.backwardQueue.size(); }
-	inline const CBBSOpenClosedData<state> &GetBackwardItem(unsigned int which) { return queue.backwardQueue.Lookat(which); }
+	inline const BDOpenClosedData<state> &GetBackwardItem(unsigned int which) { return queue.backwardQueue.Lookat(which); }
 	
 	void SetForwardHeuristic(Heuristic<state> *h) { forwardHeuristic = h; }
 	void SetBackwardHeuristic(Heuristic<state> *h) { backwardHeuristic = h; }
@@ -102,20 +106,27 @@ public:
 		for (const auto &i : counts)
 		{
 			//std::cout << "first =" << i.first << "second =" << i.second <<" ";
-			if (i.first < currentCost)
-				necessary+=i.second;
+			if (isAllSolutions){
+				if (i.first <= currentCost)
+					necessary+=i.second;
+			}
+			else{
+				if (i.first < currentCost)
+					necessary+=i.second;
+			}
 		}
 		//std::cout << "currentCost =" << currentCost << "necessary =" << necessary <<std::endl;
 		return necessary;
 	}
 	double GetSolutionCost() const { return currentCost; }
+	double GetExpansionUntilFirstSolution() const { return expansionsUntilSolution; }
+
 	
 	void OpenGLDraw() const;
 	
 	//	void SetWeight(double w) {weight = w;}
 private:
 	void ExtractFromMiddle(std::vector<state> &thePath);
-	double ExtractCostFromMiddle();
 	void ExtractPathToGoal(state &node, std::vector<state> &thePath)
 	{ uint64_t theID; queue.backwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToGoalFromID(theID, thePath); }
 	void ExtractPathToGoalFromID(uint64_t node, std::vector<state> &thePath)
@@ -123,23 +134,17 @@ private:
 		do {
 			thePath.push_back(queue.backwardQueue.Lookup(node).data);
 			node = queue.backwardQueue.Lookup(node).parentID;
+			backwardMeetingPoint++;
+			if (queue.backwardQueue.Lookup(node).g+queue.backwardQueue.Lookup(node).h == currentCost){
+				backwardUnnecessaryNodesInPath++;
+			}
 		} while (queue.backwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(queue.backwardQueue.Lookup(node).data);
+		
+		
 	}
 	
-	double ExtractCostToGoal(state &node)
-	{ uint64_t theID; queue.backwardQueue.Lookup(env->GetStateHash(node), theID); return ExtractCostToGoalFromID(theID); }
-	double ExtractCostToGoalFromID(uint64_t node)
-	{
-		double cost = 0;
-		do {
-			cost += queue.backwardQueue.Lookup(node).g;
-			node = queue.backwardQueue.Lookup(node).parentID;
-		} while (queue.backwardQueue.Lookup(node).parentID != node);
-		cost += queue.backwardQueue.Lookup(node).g;
-		return cost;
-	}
-		
+	
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
 	{ uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
@@ -147,22 +152,12 @@ private:
 		do {
 			thePath.push_back(queue.forwardQueue.Lookup(node).data);
 			node = queue.forwardQueue.Lookup(node).parentID;
+			forwardMeetingPoint++;
+			if (queue.forwardQueue.Lookup(node).g+queue.forwardQueue.Lookup(node).h == currentCost){
+				forwardUnnecessaryNodesInPath++;
+			}
 		} while (queue.forwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(queue.forwardQueue.Lookup(node).data);
-	}
-	
-	double  ExtractCostToStart(state &node)
-	{ uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(node), theID); return ExtractCostToStartFromID(theID); }
-	double ExtractCostToStartFromID(uint64_t node)
-	{
-		double cost = 0;
-		do {
-			cost += queue.forwardQueue.Lookup(node).g;
-			printf("cost: %d ",cost);
-			node = queue.forwardQueue.Lookup(node).parentID;
-		} while (queue.forwardQueue.Lookup(node).parentID != node);
-		cost += queue.forwardQueue.Lookup(node).g;
-		return cost;
 	}
 	
 	void OpenGLDraw(const priorityQueue &queue) const;
@@ -176,6 +171,7 @@ private:
 	uint64_t nodesTouched, nodesExpanded;
 	state middleNode;
 	double currentCost;
+	double expansionsUntilSolution;
 	double currentSolutionEstimate;
 	std::vector<state> neighbors;
 	environment *env;
@@ -195,24 +191,28 @@ private:
 	
 	double currentPr;
 	
-	int tieBreakingPolicy;
-	
+	uint64_t forwardUnnecessaryNodesInPath;
+	uint64_t backwardUnnecessaryNodesInPath;
+	uint64_t forwardMeetingPoint;
+	uint64_t backwardMeetingPoint;
+	bool isAllSolutions;
+	bool isLEQ;
 	
 };
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-void CBBS<state, action, environment, dataStructure, priorityQueue>::GetPath(environment *env, const state& from, const state& to,
+void NewBS<state, action, environment, dataStructure, priorityQueue>::GetPath(environment *env, const state& from, const state& to,
 																			 Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath)
 {
 	if (InitializeSearch(env, from, to, forward, backward, thePath) == false)
 		return;
 	
-	while (!ExpandAVertexCover(thePath))
+	while (!ExpandAPair(thePath))
 	{ }
 }
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-bool CBBS<state, action, environment, dataStructure, priorityQueue>::InitializeSearch(environment *env, const state& from, const state& to,
+bool NewBS<state, action, environment, dataStructure, priorityQueue>::InitializeSearch(environment *env, const state& from, const state& to,
 																					  Heuristic<state> *forward, Heuristic<state> *backward,
 																					  std::vector<state> &thePath)
 {
@@ -221,7 +221,12 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::InitializeS
 	backwardHeuristic = backward;
 	currentSolutionEstimate = 0;
 	currentCost = DBL_MAX;
+	expansionsUntilSolution = 0;
 	queue.Reset();
+	backwardUnnecessaryNodesInPath = 0;
+	forwardUnnecessaryNodesInPath = 0;
+	forwardMeetingPoint = 0;
+	backwardMeetingPoint = 0;
 //	queue.forwardQueue.Reset();
 //	queue.backwardQueue.Reset();
 	ResetNodeCount();
@@ -238,262 +243,51 @@ bool CBBS<state, action, environment, dataStructure, priorityQueue>::InitializeS
 }
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-bool CBBS<state, action, environment, dataStructure, priorityQueue>::ExpandAVertexCover(std::vector<state> &thePath)
+bool NewBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(std::vector<state> &thePath)
 {
-	std::vector<uint64_t> nForward, nBackward;
-	bool result = queue.getVertexCover(nForward, nBackward,tieBreakingPolicy);
+	uint64_t nForward, nBackward;
+	bool result = queue.GetNextPair(nForward, nBackward);
 	// if failed, see if we have optimal path (but return)
 	if (result == false)
 	{
 		if (currentCost == DBL_MAX)
 		{
+			//printf("here1");
 			thePath.resize(0);
-			printf("here1");
 			return true;
 		}
 		ExtractFromMiddle(thePath);
-		printf("here2");
+		//printf("here2");
 		return true;
 	}
-	/*
-	else if (nForward.size() > 0 && //check if correct
-			 nBackward.size()> 0)
+	else if (!isAllSolutions && queue.forwardQueue.Lookup(nForward).data == queue.backwardQueue.Lookup(nBackward).data) // if success, see if nodes are the same (return path)
 	{
-		for (int i=0; i< nForward.size();i++){
-			for(int j=0; j< nBackward.size();j++){
-				if (queue.forwardQueue.Lookup(nForward[i]).data == queue.backwardQueue.Lookup(nBackward[j]).data){ // if success, see if nodes are the same (return path)
-					ExtractFromMiddle(thePath);
-					return true;
-				}
-			}
-		}
-
-	}
-	*/
-	
-	else if (nForward.size() > 0 && //check if correct
-			 nBackward.size()> 0)
-	{
-		std::unordered_map<state*,bool> mapData;
-		for (int i =0; i< nForward.size(); i++){
-			mapData[&(queue.forwardQueue.Lookup(nForward[i]).data)] = true;
-		}
-		for (int j =0; j< nBackward.size(); j++){
-			if (mapData.find(&(queue.backwardQueue.Lookup(nBackward[j]).data)) != mapData.end()){
-				ExtractFromMiddle(thePath);
-				printf("here3");
-				return true;
-			}
-		}
-		
-	}
-	struct compareBackward {
-		compareBackward(dataStructure currQueue) : queue(currQueue) {}
-		bool operator () (uint64_t i, uint64_t j) { return (queue.backwardQueue.Lookup(i).h<queue.backwardQueue.Lookup(j).h); }
-		dataStructure queue;
-	};
-	struct compareForward {
-		compareForward(dataStructure currQueue) : queue(currQueue) {}
-		bool operator () (uint64_t i, uint64_t j) { return (queue.forwardQueue.Lookup(i).h<queue.forwardQueue.Lookup(j).h); }
-		dataStructure queue;
-	};
-	double currentLowerBound = queue.GetLowerBound();
-	
-	if (nForward.size() == 0){
-		//std::sort (nBackward.begin(), nBackward.end(),compareBackward(queue));
-		for (int j =0; j< ((int)nBackward.size());j++){
-			if (queue.backwardQueue.Lookup(nBackward[j]).where != kClosed){
-					counts[currentLowerBound]++;
-					Expand(nBackward[j], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
-			}
-			if (!fless(queue.GetLowerBound(), currentCost)){
-					ExtractFromMiddle(thePath);
-					std::cout << "currentCost =" << currentCost << "queue.GetLowerBound() =" << queue.GetLowerBound() <<std::endl;
-					return true;
-			}
-			if (currentLowerBound != queue.GetLowerBound()){
-				return false;
-			}
-		}
-	}
-	
-	else if (nBackward.size() == 0){
-		//std::sort (nForward.begin(), nForward.end(),compareForward(queue));
-		for (int i =0; i< ((int)nForward.size());i++){
-			if (queue.forwardQueue.Lookup(nForward[i]).where != kClosed){
-				counts[currentLowerBound]++;
-				Expand(nForward[i], queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
-			}
-			if (!fless(queue.GetLowerBound(), currentCost)){
-					ExtractFromMiddle(thePath);
-					std::cout << "currentCost =" << currentCost << "queue.GetLowerBound() =" << queue.GetLowerBound() <<std::endl;
-					return true;
-			}
-			if (currentLowerBound != queue.GetLowerBound()){
-				return false;
-			}
-		}
-	}
-	else{
-		printf("heredfdgdfgdgdg");
-		int i = nForward.size()-1;
-		int j = nBackward.size()-1;
-		while (i >= 0 || j >=0 ){
-			if (!fless(queue.GetLowerBound(), currentCost))
-			{
-				ExtractFromMiddle(thePath);
-				return true;
-			}
-			bool expandForward;
-			if (i < 0){
-				expandForward = false;
-			}
-			else if (j < 0){
-				expandForward = true;
-			}
-			else {
-				if (queue.forwardQueue.Lookup(nForward[i]).g >= queue.backwardQueue.Lookup(nBackward[j]).g){
-					expandForward = true;
-				}
-				else{
-					expandForward = false;
-				}
-			}
-			if (expandForward){
-				if (queue.forwardQueue.Lookup(nForward[i]).where != kClosed){
-					counts[currentLowerBound]++;
-					Expand(nForward[i], queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
-				}
-				i--;
-			}
-			else{
-				if (queue.backwardQueue.Lookup(nBackward[j]).where != kClosed){
-					counts[currentLowerBound]++;
-					Expand(nBackward[j], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
-				}
-				j--;
-			}
-			if (currentLowerBound != queue.GetLowerBound()){
-				return false;
-			}
-		}
-	}
-	
-	/*
-	uint64_t i = 0;
-	uint64_t j = 0;
-	while (i < nForward.size() || j < nBackward.size() ){
-		if (!fless(queue.GetLowerBound(), currentCost))
-		{
-			ExtractFromMiddle(thePath);
-			printf("here4,i:%d,j:%d,fs:%d,bs:%d\n",i,j,nForward.size(),nBackward.size());
-			return true;
-		}
-		bool expandForward;
-		if (i >= nForward.size()){
-			expandForward = false;
-		}
-		else if (j >= nBackward.size()){
-			expandForward = true;
-		}
-		else {
-			if (queue.forwardQueue.Lookup(nForward[i]).g <= queue.backwardQueue.Lookup(nBackward[j]).g){
-				expandForward = true;
-			}
-			else{
-				expandForward = false;
-			}
-		}
-		if (expandForward){
-			if (queue.forwardQueue.Lookup(nForward[i]).where != kClosed){
-				counts[currentLowerBound] = counts[currentLowerBound]+1;
-				Expand(nForward[i], queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
-			}
-			i++;
-		}
-		else{
-			if (queue.backwardQueue.Lookup(nBackward[j]).where != kClosed){
-				counts[currentLowerBound] = counts[currentLowerBound]+1;
-				Expand(nBackward[j], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
-			}
-			j++;
-		}
-		if (currentLowerBound != queue.GetLowerBound()){
-			return false;
-		}
-	}
-	*/
-	/*
-	for(int i = 0; i< nForward.size(); i++){
-		counts[currentLowerBound]++;
-		Expand(nForward[i], queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
-		if (!fless(currentLowerBound, currentCost))
-		{
-			ExtractFromMiddle(thePath);
-			return true;
-		}
-	}
-	
-	for(int i = 0; i< nBackward.size(); i++){
-		counts[currentLowerBound]++;
-		Expand(nBackward[i], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
-		if (!fless(currentLowerBound, currentCost))
-		{
-			ExtractFromMiddle(thePath);
-			return true;
-		}
-	}
-	*/
-	return false;
-}
-	/*
-	else if (!fless(queue.GetLowerBound(), currentCost))
-	{
+		//printf("here3");
+		//printf("LB: %f",queue.GetLowerBound());
+		//printf("Cost: %f\n",currentCost);
 		ExtractFromMiddle(thePath);
 		return true;
 	}
-		
-		for(int i = 0; i< nBackward.size(); i++){
-		counts[currentLowerBound]++;
-		Expand(nBackward[i], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
-		if (!fless(queue.GetLowerBound(), currentCost))
-		{
-			ExtractFromMiddle(thePath);
-			return true;
-		}
-	}
-	return false;
-
-	
-	/*
-	counts[queue.GetLowerBound()]+=nForward.size()+nBackward.size();
-	for(int i = 0; i< nForward.size(); i++){
-		Expand(nForward[i], queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
-	}
-	for(int i = 0; i< nBackward.size(); i++){
-		Expand(nBackward[i], queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
+	else if ((!isAllSolutions && !fless(queue.GetLowerBound(), currentCost)) || (isAllSolutions && fgreater(queue.GetLowerBound(), currentCost)))
+	{
+		//printf("here4 ");
+		//printf("LB: %f",queue.GetLowerBound());
+		//printf("Cost: %f\n",currentCost);
+		ExtractFromMiddle(thePath);
+		return true;
 	}
 	
+	counts[queue.GetLowerBound()]+=1;
+	if (queue.forwardQueue.OpenReadySize() <= queue.backwardQueue.OpenReadySize())
+		Expand(nForward, queue.forwardQueue, queue.backwardQueue, forwardHeuristic, goal);
+	else
+		Expand(nBackward, queue.backwardQueue, queue.forwardQueue, backwardHeuristic, start);
 	return false;
-	*/
-
-
-template <class state, class action, class environment, class dataStructure, class priorityQueue>
-double CBBS<state, action, environment, dataStructure, priorityQueue>::ExtractCostFromMiddle()
-{
-	double cost = 0;
-	//printf("cost1: %d",cost);
-	cost += ExtractCostToGoal(middleNode);
-	//printf("cost2: %d",cost);
-	cost += ExtractCostToStart(middleNode);
-	//printf("cost3: %d",cost);
-	return cost;
 }
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-void CBBS<state, action, environment, dataStructure, priorityQueue>::ExtractFromMiddle(std::vector<state> &thePath)
+void NewBS<state, action, environment, dataStructure, priorityQueue>::ExtractFromMiddle(std::vector<state> &thePath)
 {
-	
 	std::vector<state> pFor, pBack;
 	ExtractPathToGoal(middleNode, pBack);
 	ExtractPathToStart(middleNode, pFor);
@@ -502,28 +296,29 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::ExtractFrom
 	thePath.insert( thePath.end(), pBack.begin()+1, pBack.end() );
 }
 
+
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-bool CBBS<state, action, environment, dataStructure, priorityQueue>::DoSingleSearchStep(std::vector<state> &thePath)
+bool NewBS<state, action, environment, dataStructure, priorityQueue>::DoSingleSearchStep(std::vector<state> &thePath)
 {
-	return ExpandAVertexCover(thePath);
+	return ExpandAPair(thePath);
 }
 
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint64_t nextID,
+void NewBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint64_t nextID,
 																			priorityQueue &current,
 																			priorityQueue &opposite,
 																			Heuristic<state> *heuristic, const state &target)
 {
-	if (current.Lookup(nextID).where == kClosed){
-		return;
-	}
-
-	uint64_t tmp = current.CloseAtIndex(nextID);
+	
+	//	uint64_t nextID = current.Peek(kOpenReady);
+	//
+	uint64_t tmp = current.Close();
 	assert(tmp == nextID);
-
+	
 	//this can happen when we expand a single node instead of a pair
-	if (fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost))
+	if ((!isAllSolutions && fgreatereq(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost)) ||
+			(isAllSolutions && fgreater(current.Lookup(nextID).g + current.Lookup(nextID).h, currentCost)))
 		return;
 	
 	nodesExpanded++;
@@ -536,8 +331,9 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 
 		// screening
 		double edgeCost = env->GCost(current.Lookup(nextID).data, succ);
-		if (fgreatereq(current.Lookup(nextID).g+edgeCost, currentCost))
+		if ( (!isAllSolutions && fgreatereq(current.Lookup(nextID).g+edgeCost, currentCost)) || (isAllSolutions && fgreater(current.Lookup(nextID).g+edgeCost, currentCost))){
 			continue;
+		}
 
 		switch (loc)
 		{
@@ -551,7 +347,7 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 					double oldGCost = current.Lookup(childID).g;
 					current.Lookup(childID).parentID = nextID;
 					current.Lookup(childID).g = current.Lookup(nextID).g+edgeCost;
-					current.KeyChanged(childID,oldGCost);
+					current.KeyChanged(childID);
 					
 					// TODO: check if we improved the current solution?
 					uint64_t reverseLoc;
@@ -567,6 +363,7 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 //								   current.Lookup(nextID).g+edgeCost+opposite.Lookup(reverseLoc).g,
 //								nodesExpanded);
 							currentCost = current.Lookup(nextID).g+edgeCost + opposite.Lookup(reverseLoc).g;
+							expansionsUntilSolution = nodesExpanded;
 							
 							middleNode = succ;
 						}
@@ -597,9 +394,9 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 					//		nextID,0);
 					//else
 					double newNodeF = current.Lookup(nextID).g + edgeCost + heuristic->HCost(succ, target);
-					if (fless(newNodeF , currentCost))
+					if ((!isAllSolutions && fless(newNodeF , currentCost)) || (isAllSolutions && flesseq(newNodeF , currentCost)))
 					{
-						if (fless(newNodeF, queue.GetLowerBound()))
+						if (fless(newNodeF , queue.GetLowerBound()) || (isLEQ && flesseq(newNodeF , queue.GetLowerBound())))
 							current.AddOpenNode(succ,
 												env->GetStateHash(succ),
 												current.Lookup(nextID).g + edgeCost,
@@ -624,6 +421,7 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 //								current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g,
 //								nodesExpanded);
 							currentCost = current.Lookup(nextID).g + edgeCost + opposite.Lookup(reverseLoc).g;
+							expansionsUntilSolution = nodesExpanded;
 							
 							middleNode = succ;
 						}
@@ -639,7 +437,7 @@ void CBBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint
 
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-uint64_t CBBS<state, action, environment, dataStructure, priorityQueue>::GetDoubleExpansions() const
+uint64_t NewBS<state, action, environment, dataStructure, priorityQueue>::GetDoubleExpansions() const
 {
 	uint64_t doubles = 0;
 	for (unsigned int x = 0; x < queue.forwardQueue.size(); x++)
@@ -658,15 +456,48 @@ uint64_t CBBS<state, action, environment, dataStructure, priorityQueue>::GetDoub
 }
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-void CBBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw() const
+void NewBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw() const
 {
 	OpenGLDraw(queue.forwardQueue);
 	OpenGLDraw(queue.backwardQueue);
 }
 
 template <class state, class action, class environment, class dataStructure, class priorityQueue>
-void CBBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw(const priorityQueue &queue) const
+void NewBS<state, action, environment, dataStructure, priorityQueue>::OpenGLDraw(const priorityQueue &queue) const
 {
+	double transparency = 0.9;
+	if (queue.size() == 0)
+		return;
+	uint64_t top = -1;
+	//	double minf = 1e9, maxf = 0;
+	if (queue.OpenReadySize() > 0)
+	{
+		top = queue.Peek(kOpenReady);
+	}
+	for (unsigned int x = 0; x < queue.size(); x++)
+	{
+		const auto &data = queue.Lookat(x);
+		if (x == top)
+		{
+			env->SetColor(1.0, 1.0, 0.0, transparency);
+			env->OpenGLDraw(data.data);
+		}
+		if (data.where == kOpenWaiting)
+		{
+			env->SetColor(0.0, 0.5, 0.5, transparency);
+			env->OpenGLDraw(data.data);
+		}
+		else if (data.where == kOpenReady)
+		{
+			env->SetColor(0.0, 1.0, 0.0, transparency);
+			env->OpenGLDraw(data.data);
+		}
+		else if (data.where == kClosed)
+		{
+			env->SetColor(1.0, 0.0, 0.0, transparency);
+			env->OpenGLDraw(data.data);
+		}
+	}
 }
 
-#endif /* CBBS_h */
+#endif /* NBS_h */

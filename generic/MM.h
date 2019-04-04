@@ -14,7 +14,7 @@
 #include "Timer.h"
 #include <unordered_map>
 
-template <class state, int epsilon = 1>
+template <class state, int epsilon = 0>
 struct MMCompare {
 	bool operator()(const AStarOpenClosedData<state> &i1, const AStarOpenClosedData<state> &i2) const
 	{
@@ -24,8 +24,8 @@ struct MMCompare {
 //		double p2 = i2.g+i2.h;
 		if (fequal(p1, p2))
 		{
-			//return (fgreater(i1.g, i2.g)); // low g-cost over high
-			return (fless(i1.g, i2.g)); // high g-cost over low
+			return (fgreater(i1.g, i2.g)); // low g-cost over high
+			//return (fless(i1.g, i2.g)); // high g-cost over low
 		}
 		return (fgreater(p1, p2)); // low priority over high
 	}
@@ -45,7 +45,7 @@ namespace std {
 template <class state, class action, class environment, class priorityQueue = AStarOpenClosed<state, MMCompare<state>> >
 class MM {
 public:
-	MM(double epsilon = 1.0):epsilon(epsilon) { forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); }
+	MM(double epsilon = 0.0):epsilon(epsilon) { forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); }
 	virtual ~MM() {}
 	void GetPath(environment *env, const state& from, const state& to,
 				 Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);

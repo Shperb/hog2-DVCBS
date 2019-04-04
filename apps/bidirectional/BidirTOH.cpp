@@ -12,7 +12,12 @@
 #include "NBS.h"
 #include "CBBS.h"
 #include "MM.h"
+#include "fMM.h"
 #include "BSStar.h"
+#include "BST.h"
+#include "BPHA.h"
+#include "NewBS.h"
+#include "ImprovedBSStar.h"
 #include "CalculateWVC.h"
 
 
@@ -394,10 +399,57 @@ void TestTOH(int first, int last)
  			bs.GetPath(&toh, s, g, f, b, thePath);
  			timer.EndTimer();
  			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
- 			printf("BS %llu nodes\t%llu necessary\t", bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
+ 			printf("BS found path length %1.0f; %llu nodes\t%llu necessary\t", toh.GetPathLength(thePath),bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
  			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
  		}
 		if (0)
+ 		{
+			ImprovedBSStar<TOHState<N>, TOHMove, TOH<N>> improvedbs(1);
+ 			timer.StartTimer();
+ 			improvedbs.GetPath(&toh, s, g, f, b, thePath);
+ 			timer.EndTimer();
+ 			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+ 			printf("Improved-BS-e found path length %1.0f; %llu nodes\t%llu necessary\t", toh.GetPathLength(thePath),improvedbs.GetNodesExpanded(), improvedbs.GetNecessaryExpansions());
+ 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+ 		}
+		if (0)
+ 		{
+			ImprovedBSStar<TOHState<N>, TOHMove, TOH<N>> improvedbs(0);
+ 			timer.StartTimer();
+ 			improvedbs.GetPath(&toh, s, g, f, b, thePath);
+ 			timer.EndTimer();
+ 			//printf("I%d-%d-%d\t%d\t", N, pdb1Disks, count, (int)toh.GetPathLength(thePath));
+ 			printf("Improved-BS found path length %1.0f; %llu nodes\t%llu necessary\t", toh.GetPathLength(thePath),improvedbs.GetNodesExpanded(), improvedbs.GetNecessaryExpansions());
+ 			printf("%1.2fs elapsed\n", timer.GetElapsedTime());
+ 		}
+		if (0)
+ 		{
+			NewBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,0,true>> newBs (false,true);
+			timer.StartTimer();
+			newBs.GetPath(&toh, s, g, f, b, thePath);
+			timer.EndTimer();
+			printf("newBs found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+				newBs.GetNodesExpanded(), newBs.GetNecessaryExpansions(), timer.GetElapsedTime(),newBs.getForwardMeetingPoint(),newBs.getBackwardMeetingPoint(),newBs.getForwardUnnecessaryNodesInPath(),newBs.getBackwardUnnecessaryNodesInPath(),newBs.GetExpansionUntilFirstSolution());
+ 		}
+		if (0)
+ 		{
+			NewBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,true>> newBs (false,true);
+			timer.StartTimer();
+			newBs.GetPath(&toh, s, g, f, b, thePath);
+			timer.EndTimer();
+			printf("newBs-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+				newBs.GetNodesExpanded(), newBs.GetNecessaryExpansions(), timer.GetElapsedTime(),newBs.getForwardMeetingPoint(),newBs.getBackwardMeetingPoint(),newBs.getForwardUnnecessaryNodesInPath(),newBs.getBackwardUnnecessaryNodesInPath(),newBs.GetExpansionUntilFirstSolution());
+ 		}
+		if (0)
+ 		{
+			NBS<TOHState<N>, TOHMove, TOH<N>,NBSQueue<TOHState<N>,1,true>> newBs (false,true);
+			timer.StartTimer();
+			newBs.GetPath(&toh, s, g, f, b, thePath);
+			timer.EndTimer();
+			printf("NBS-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
+				newBs.GetNodesExpanded(), newBs.GetNecessaryExpansions(), timer.GetElapsedTime(),newBs.getForwardMeetingPoint(),newBs.getBackwardMeetingPoint(),newBs.getForwardUnnecessaryNodesInPath(),newBs.getBackwardUnnecessaryNodesInPath(),newBs.GetExpansionUntilFirstSolution());
+ 		}
+		if (1)
 		{
 			//printf("-=-=-MM-=-=-\n");
 			timer.StartTimer();
@@ -431,7 +483,7 @@ void TestTOH(int first, int last)
 			printf("A*-A %llu nodes %llu necessary", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
 			printf(" %1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (1)
+		if (0)
 		{
 			//printf("-=-=-A*-=-=-\n");
 			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(false,1);
@@ -443,7 +495,7 @@ void TestTOH(int first, int last)
 			printf("A*-E %llu nodes %llu necessary", astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
 			printf(" %1.2fs elapsed\n", timer.GetElapsedTime());
 		}
-		if (1)
+		if (0)
 		{
 			//printf("-=-=-A*-=-=-\n");
 			TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar(true,1);
@@ -491,6 +543,413 @@ void TestTOH(int first, int last)
 			printf("Optimal-Necessary-E-LEQ %f\n",calculateWVC.CalcWVC(astarOpenClose, rastarOpenClose, C, 1,true));
 			
 		}
+    
+    if (0){
+				fMM<TOHState<N>, TOHMove, TOH<N>> fmm(0.5,false);
+				//fmm.SetFraction(p);
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (0){
+				fMM<TOHState<N>, TOHMove, TOH<N>> fmm(0.5,true);
+				//fmm.SetFraction(p);
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (0){
+				fMM<TOHState<N>, TOHMove, TOH<N>,1> fmm(0.5,false);
+				//fmm.SetFraction(p);
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (0){
+				fMM<TOHState<N>, TOHMove, TOH<N>,1> fmm(0.5,true);
+				//fmm.SetFraction(p);
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+      
+      
+      
+      
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>> fmm(0.5,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM-0.5 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>> fmm(0.5,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d improved-fMM-0.5 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>,1> fmm(0.5,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM-0.5-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>,1> fmm(0.5,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d improved-fMM-0.5-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>> fmm(0.25,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM-0.25 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>> fmm(0.25,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d improved-fMM-0.25 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>,1> fmm(0.25,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM-0.25-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>,1> fmm(0.25,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d improved-fMM-0.25-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>> fmm(0.75,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM-0.75 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>> fmm(0.75,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d improved-fMM-0.75 found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>,1> fmm(0.75,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d fMM-0.75-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}
+			if (1){
+				fMM<TOHState<N>, TOHMove, TOH<N>,1> fmm(0.75,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d improved-fMM-0.75-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}  
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>> fmm(false,false,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-Min found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>> fmm(true,false,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-alt found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			} 
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>> fmm(false,true,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-Min-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>> fmm(true,true,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-alt-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}  
+
+      if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>> fmm(false,false,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-Min-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>> fmm(true,false,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-alt-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			} 
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>> fmm(false,true,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-Min-improved-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>> fmm(true,true,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-alt-improved-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}  
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>,1> fmm(false,false,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-Min-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>,1> fmm(true,false,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-alt-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			} 
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>,1> fmm(false,true,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-Min-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>,1> fmm(true,true,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-alt-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}  
+
+      if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>,1> fmm(false,false,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-Min-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>,1> fmm(true,false,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-alt-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			} 
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>,1> fmm(false,true,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-Min-improved-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BPHA<TOHState<N>, TOHMove, TOH<N>,1> fmm(true,true,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BPHA-alt-improved-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+    
+			if (1){
+				BST<TOHState<N>, TOHMove, TOH<N>> fmm(false,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BST found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BST<TOHState<N>, TOHMove, TOH<N>> fmm(true,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BST-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			} 
+			if (1){
+				BST<TOHState<N>, TOHMove, TOH<N>> fmm(false,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BST-+ found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BST<TOHState<N>, TOHMove, TOH<N>> fmm(true,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BST-+-improved found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}  
+
+			if (1){
+				BST<TOHState<N>, TOHMove, TOH<N>,1> fmm(false,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BST-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BST<TOHState<N>, TOHMove, TOH<N>,1> fmm(true,false);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BST-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			} 
+			if (1){
+				BST<TOHState<N>, TOHMove, TOH<N>,1> fmm(false,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BST-+-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}      
+			if (1){
+				BST<TOHState<N>, TOHMove, TOH<N>,1> fmm(true,true);
+				//fmm.SetFraction(p);
+								
+				timer.StartTimer();
+				fmm.GetPath(&toh, s, g, f, b, thePath);
+				timer.EndTimer();
+				printf("TOH %d+%d BST-+-improved-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", N,pdb1Disks, toh.GetPathLength(thePath),
+					   fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(), timer.GetElapsedTime());
+			}        
+      
+    
 		while (b->heuristics.size() > 0)
 		{
 			delete b->heuristics.back();
@@ -509,10 +968,10 @@ void TestTOH(int first, int last)
 
 void TOHTest()
 {
-	TestTOH<12, 2>(0, 50);
-	TestTOH<12, 4>(0, 50);
-//	TestTOH<14, 5>(0, 50);
-	TestTOH<12, 6>(0, 50);
+  TestTOH<12, 2>(0, 50);
+  TestTOH<12, 4>(0, 50);
+//  TestTOH<14, 5>(0, 50);
+//  TestTOH<12, 6>(0, 50);
 //	TestTOH<14, 7>(0, 50);
 //	TestTOH<14, 8>(0, 50);
 //	TestTOH<14, 9>(0, 50);
@@ -534,13 +993,11 @@ void TOHTest()
 //
 //	ZeroHeuristic<TOHState<numDisks>> z;
 //	
-//	goal.Reset();
-//	pdb1.BuildPDB(goal, std::thread::hardware_concurrency());
+//	//	pdb1.BuildPDB(goal, std::thread::hardware_concurrency());
 //	pdb2.BuildPDB(goal, std::thread::hardware_concurrency());
 //	
 ////	s.Reset();
-////	goal.Reset();
-////	for (int x = 0; x < 100; x++)
+////	////	for (int x = 0; x < 100; x++)
 ////	{
 ////		std::vector<TOHMove> actionPath;
 ////		for (int x = 0; x < 20000; x++)
@@ -553,8 +1010,7 @@ void TOHTest()
 ////		std::cout << "H2: " << pdb2.HCost(s, goal) << "\n";
 ////	}
 ////	exit(0);
-//	goal.Reset();
-//	Heuristic<TOHState<numDisks>> h;
+//	//	Heuristic<TOHState<numDisks>> h;
 //	
 //	h.lookups.resize(0);
 //	h.lookups.push_back({kAddNode, 1, 2});

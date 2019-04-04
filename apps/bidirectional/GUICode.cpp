@@ -19,6 +19,8 @@
 #include "NBSQueueGF.h"
 #include "NBS.h"
 #include "BSStar.h"
+#include "NewBS.h"
+#include "ImprovedBSStar.h"
 #include "CBBS.h"
 #include "CalculateWVC.h"
 #include "fMM.h"
@@ -1211,7 +1213,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 			}
 			
 			//A*
-			if(1){
+			if(0){
 				TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
 				astar.SetHeuristic(me);
 				t1.StartTimer();
@@ -1220,7 +1222,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				printf("A* %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),me->GetPathLength(astarPath),t1.GetElapsedTime());
 			}
 			//A*-A
-			if(1){
+			if(0){
 				TemplateAStar<xyLoc, tDirection, MapEnvironment> astar(true);
 				astar.SetHeuristic(me);
 				t1.StartTimer();
@@ -1229,7 +1231,7 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				printf("A*-A %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),me->GetPathLength(astarPath),t1.GetElapsedTime());
 			}
 			//A*-E
-			if(1){
+			if(0){
 				TemplateAStar<xyLoc, tDirection, MapEnvironment> astar(false,1);
 				astar.SetHeuristic(me);
 				t1.StartTimer();
@@ -1238,13 +1240,93 @@ void AnalyzeNBS(const char *map, const char *scenario, double weight)
 				printf("A*-E %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),me->GetPathLength(astarPath),t1.GetElapsedTime());
 			}
 			//A*-A-E
-			if(1){
+			if(0){
 				TemplateAStar<xyLoc, tDirection, MapEnvironment> astar(true,1);
 				astar.SetHeuristic(me);
 				t1.StartTimer();
 				astar.GetPath(me, start, goal, astarPath);
 				t1.EndTimer();
 				printf("A*-A-E %llu nodes %llu necessary %1.0f path %1.2fs elapsed\n", astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),me->GetPathLength(astarPath),t1.GetElapsedTime());
+			}
+			//BSSTAR
+			if(0){
+				BSStar<xyLoc, tDirection, MapEnvironment> astar;
+				//astar.SetHeuristic(me);
+				t1.StartTimer();
+				astar.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("BS found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),t1.GetElapsedTime());
+			}
+			
+			if(0){
+				ImprovedBSStar<xyLoc, tDirection, MapEnvironment> astar(0);
+				//astar.SetHeuristic(me);
+				t1.StartTimer();
+				astar.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Improved-BS found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),t1.GetElapsedTime());
+			}
+
+			if(0){
+				ImprovedBSStar<xyLoc, tDirection, MapEnvironment> astar(1);
+				//astar.SetHeuristic(me);
+				t1.StartTimer();
+				astar.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("Improved-BS-e found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),astar.GetNodesExpanded(), astar.GetNecessaryExpansions(),t1.GetElapsedTime());
+			}			
+			
+
+      if(1){
+				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.5,false);;
+				//astar.SetHeuristic(me);
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("fmm found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(),t1.GetElapsedTime());
+			}	
+
+      if(1){
+				fMM<xyLoc, tDirection, MapEnvironment> fmm(0.5,true);;
+				//astar.SetHeuristic(me);
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("fmm found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(),t1.GetElapsedTime());
+			}	
+      if(1){
+				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.5,false);;
+				//astar.SetHeuristic(me);
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("fmm found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(),t1.GetElapsedTime());
+			}	
+      if(1){
+				fMM<xyLoc, tDirection, MapEnvironment,1> fmm(0.5,true);;
+				//astar.SetHeuristic(me);
+				t1.StartTimer();
+				fmm.GetPath(me, start, goal,me, me, astarPath);
+				t1.EndTimer();
+				printf("fmm found path length %1.0f; %llu nodes %llu necessary; %1.2fs elapsed\n", me->GetPathLength(astarPath),fmm.GetNodesExpanded(), fmm.GetNecessaryExpansions(),t1.GetElapsedTime());
+			}	      
+			if(0){
+				NewBS<xyLoc, tDirection, MapEnvironment, NBSQueue<xyLoc,0,true>> nbsLEQ(false,true);
+				t2.StartTimer();
+				nbsLEQ.GetPath(me, start, goal, me, me, nbsPath);
+				t2.EndTimer();
+				//std::cout << map << "-" << start << "-" << goal;
+				printf("NewBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(nbsPath),
+					   nbsLEQ.GetNodesExpanded(), nbsLEQ.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsLEQ.getForwardMeetingPoint(),nbsLEQ.getBackwardMeetingPoint(),nbsLEQ.getForwardUnnecessaryNodesInPath(),nbsLEQ.getBackwardUnnecessaryNodesInPath(),nbsLEQ.GetExpansionUntilFirstSolution());
+			}
+			if(0){
+				NewBS<xyLoc, tDirection, MapEnvironment, NBSQueue<xyLoc,1,true>> nbsLEQ(false,true);
+				t2.StartTimer();
+				nbsLEQ.GetPath(me, start, goal, me, me, nbsPath);
+				t2.EndTimer();
+				//std::cout << map << "-" << start << "-" << goal;
+				printf("NewBS-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", me->GetPathLength(nbsPath),
+					   nbsLEQ.GetNodesExpanded(), nbsLEQ.GetNecessaryExpansions(), t2.GetElapsedTime(),nbsLEQ.getForwardMeetingPoint(),nbsLEQ.getBackwardMeetingPoint(),nbsLEQ.getForwardUnnecessaryNodesInPath(),nbsLEQ.getBackwardUnnecessaryNodesInPath(),nbsLEQ.GetExpansionUntilFirstSolution());
 			}
 			
 			/*

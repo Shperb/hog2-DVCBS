@@ -1,13 +1,13 @@
 //
-//  fMM.h
+//  BPHA.h
 //  hog2
 //
 //  Created by Nathan Sturtevant on 10/27/15.
 //  Copyright © 2015 University of Denver. All rights reserved.
 //
 
-#ifndef FMM_h
-#define FMM_h
+#ifndef BPHA_h
+#define BPHA_h
 
 #include "FMMBDOpenClosed.h"
 #include "FPUtil.h"
@@ -15,84 +15,80 @@
 #include <unordered_map>
 
 
-template <class state, int epsilon = 0>
-struct fMMCompare {
-	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
-	{
-		// FIXME: Note that i2 happens (but isn't guaranteed) to be the uninitialized element,
-		// so we can use the fraction from i1 properly. But, this could be broken.
-//		printf("%f - %f\n", i1.frac, i2.frac);
-		double p1 = std::max((i1.g+i1.h), i1.g/i1.frac+epsilon);
-		double p2 = std::max((i2.g+i2.h), i2.g/i1.frac+epsilon);
-		if (fequal(p1, p2))
-		{
-			return (fgreater(i1.g, i2.g)); // low g-cost over high
-			//return (fless(i1.g/i1.frac, i2.g/i1.frac)); // high g-cost over low
-		}
-		return (fgreater(p1, p2)); // low priority over high
-	}
-};
 
-template <class state>
-struct Comparef {
-	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
-	{
-		double p1 = i1.g+i1.h;
-		double p2 = i2.g+i2.h;
-		if (fequal(p1, p2))
-		{
-			//return (fgreater(i1.g, i2.g)); // low g-cost over high
-			return (fless(i1.g, i2.g)); // high g-cost over low
-		}
-		return (fgreater(p1, p2)); // low priority over high
-	}
-};
+// template <class state>
+// struct Comparef {
+	// bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
+	// {
+		// double p1 = i1.g+i1.h;
+		// double p2 = i2.g+i2.h;
+		// if (fequal(p1, p2))
+		// {
+			// //return (fgreater(i1.g, i2.g)); // low g-cost over high
+			// return (fless(i1.g, i2.g)); // high g-cost over low
+		// }
+		// return (fgreater(p1, p2)); // low priority over high
+	// }
+// };
 
-template <class state>
-struct Compareg{
-	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
-	{
-		double p1 = i1.g;
-		double p2 = i2.g;
-		return (fgreater(p1, p2)); // low priority over high
-	}
-};
+// template <class state>
+// struct Compareg{
+	// bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
+	// {
+		// double p1 = i1.g;
+		// double p2 = i2.g;
+		// return (fgreater(p1, p2)); // low priority over high
+	// }
+// };
 
-template <class state, int epsilon = 0>
-struct improvedHeuristicCompare {
-  int g;
-  improvedHeuristicCompare(int g_value) : g(g_value)
-  {
-  }
-	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
-	{
-		// FIXME: Note that i2 happens (but isn't guaranteed) to be the uninitialized element,
-		// so we can use the fraction from i1 properly. But, this could be broken.
-//		printf("%f - %f\n", i1.frac, i2.frac);
-		double p1 = std::max((i1.g+i1.h)-g, i1.g+epsilon);
-		double p2 = std::max((i2.g+i2.h)-g, i2.g+epsilon);
-		if (fequal(p1, p2))
-		{
-			return (fgreater(i1.g, i2.g)); // low g-cost over high
-			//return (fless(i1.g/i1.frac, i2.g/i1.frac)); // high g-cost over low
-		}
-		return (fgreater(p1, p2)); // low priority over high
-	}
-};
+// struct fMMCompare {
+	// bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
+	// {
+		// // FIXME: Note that i2 happens (but isn't guaranteed) to be the uninitialized element,
+		// // so we can use the fraction from i1 properly. But, this could be broken.
+// //		printf("%f - %f\n", i1.frac, i2.frac);
+		// double p1 = std::max((i1.g+i1.h), i1.g/i1.frac+epsilon);
+		// double p2 = std::max((i2.g+i2.h), i2.g/i1.frac+epsilon);
+		// if (fequal(p1, p2))
+		// {
+			// return (fgreater(i1.g, i2.g)); // low g-cost over high
+			// //return (fless(i1.g/i1.frac, i2.g/i1.frac)); // high g-cost over low
+		// }
+		// return (fgreater(p1, p2)); // low priority over high
+	// }
+// };
+
+// template <class state, int epsilon = 0>
+// struct improvedHeuristicCompare {
+  // int g;
+  // improvedHeuristicCompare(int g_value) : g(g_value)
+  // {
+  // }
+	// bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
+	// {
+
+		// double p1 = std::max((i1.g+i1.h)-g, i1.g+epsilon);
+		// double p2 = std::max((i2.g+i2.h)-g, i2.g+epsilon);
+		// if (fequal(p1, p2))
+		// {
+			// return (fgreater(i1.g, i2.g)); // low g-cost over high
+		// }
+		// return (fgreater(p1, p2)); // low priority over high
+	// }
+// };
 
 template <class state, class action, class environment, int epsilon = 0,class priorityQueue = FMMBDOpenClosed<state,fMMCompare<state,epsilon>,Compareg<state>,Comparef<state>,improvedHeuristicCompare<state,epsilon>>>
-class fMM {
+class BPHA {
 public:
-	fMM(double frac = 0.5,bool imp = false){ forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); fraction = frac; improved = imp; }
-	void SetFraction(double frac) {fraction = frac; }
-	virtual ~fMM() {}
+	BPHA(bool alt = false,bool imp = false,bool newTB = false){ forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); alternate = alt; improved = imp; additionTB = newTB; }
+	virtual ~BPHA() {}
 	void GetPath(environment *env, const state& from, const state& to,
 				 Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);
 	bool InitializeSearch(environment *env, const state& from, const state& to,
 						  Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath);
 	bool DoSingleSearchStep(std::vector<state> &thePath);
 	
-	virtual const char *GetName() { return "fMM"; }
+	virtual const char *GetName() { return "BPHA"; }
 	
 	void ResetNodeCount() { nodesExpanded = nodesTouched = uniqueNodesExpanded = 0; }
 	
@@ -121,7 +117,7 @@ public:
 				d[h] += i->second;
 			}
 		}
-		printf("fMM Dynamic Distribution\n");
+		printf("BPHA Dynamic Distribution\n");
 		for (int x = 0; x < d.size(); x++)
 		{
 			if (d[x] != 0)
@@ -151,10 +147,12 @@ private:
 	void ExtractPathToGoalFromID(uint64_t node, std::vector<state> &thePath)
 	{
 		while (backwardQueue.Lookup(node).parentID != node) {
+      //printf("%llu,",node);
 			thePath.push_back(backwardQueue.Lookup(node).data);
 			node = backwardQueue.Lookup(node).parentID;
-		} 
+		}
 		thePath.push_back(backwardQueue.Lookup(node).data);
+    //printf("%llu\n",node);
 	}
 	
 	void ExtractPathToStart(state &node, std::vector<state> &thePath)
@@ -162,10 +160,12 @@ private:
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
 	{
 		while (forwardQueue.Lookup(node).parentID != node) {
+      //printf("%llu,",node);
 			thePath.push_back(forwardQueue.Lookup(node).data);
 			node = forwardQueue.Lookup(node).parentID;
 		} 
 		thePath.push_back(forwardQueue.Lookup(node).data);
+    //printf("%llu\n",node);
 	}
 	
 	
@@ -186,7 +186,9 @@ private:
 	double lastMinForwardG;
 	double lastMinBackwardG;
 	//double epsilon;
-	double fraction;
+	bool alternate;
+  bool additionTB;
+  bool expandForward;
 	
 	std::vector<state> neighbors;
 	environment *env;
@@ -201,7 +203,7 @@ private:
 };
 
 template <class state, class action, class environment, int epsilon, class priorityQueue>
-void fMM<state, action, environment, epsilon, priorityQueue>::GetPath(environment *env, const state& from, const state& to,
+void BPHA<state, action, environment, epsilon, priorityQueue>::GetPath(environment *env, const state& from, const state& to,
 															Heuristic<state> *forward, Heuristic<state> *backward, std::vector<state> &thePath)
 {
 	if (InitializeSearch(env, from, to, forward, backward, thePath) == false)
@@ -212,7 +214,7 @@ void fMM<state, action, environment, epsilon, priorityQueue>::GetPath(environmen
 }
 
 template <class state, class action, class environment, int epsilon, class priorityQueue>
-bool fMM<state, action, environment, epsilon, priorityQueue>::InitializeSearch(environment *env, const state& from, const state& to,
+bool BPHA<state, action, environment, epsilon, priorityQueue>::InitializeSearch(environment *env, const state& from, const state& to,
 																	 Heuristic<state> *forward, Heuristic<state> *backward,
 																	 std::vector<state> &thePath)
 {
@@ -222,6 +224,7 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::InitializeSearch(e
 	currentCost = DBL_MAX;
 	forwardQueue.Reset();
 	backwardQueue.Reset();
+  expandForward = true;
 	ResetNodeCount();
 	thePath.resize(0);
 	start = from;
@@ -236,16 +239,12 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::InitializeSearch(e
 	uint64_t i;
 	if(!improved){
 		i = forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, forwardHeuristic->HCost(start, goal));
-		forwardQueue.Lookup(i).frac = fraction;
 		backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start));
-		backwardQueue.Lookup(i).frac = 1-fraction;		
 	}
 	else{
 		double hur = std::max(forwardHeuristic->HCost(start, goal),backwardHeuristic->HCost(goal, start));
 		i = forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, hur);
-		forwardQueue.Lookup(i).frac = fraction;
 		backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, hur);
-		backwardQueue.Lookup(i).frac = 1-fraction;	
 	}
 
 
@@ -256,7 +255,7 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::InitializeSearch(e
 }
 
 template <class state, class action, class environment, int epsilon, class priorityQueue>
-bool fMM<state, action, environment, epsilon, priorityQueue>::DoSingleSearchStep(std::vector<state> &thePath)
+bool BPHA<state, action, environment, epsilon, priorityQueue>::DoSingleSearchStep(std::vector<state> &thePath)
 {
 	if (forwardQueue.OpenSize() == 0 || backwardQueue.OpenSize() == 0)
 	{
@@ -271,103 +270,53 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::DoSingleSearchStep
 	//		//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
 	//		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
 	
-	uint64_t forward = forwardQueue.Peek(fmmpriority);
-	uint64_t backward = backwardQueue.Peek(fmmpriority);
+	uint64_t forward = forwardQueue.Peek(fpriority);
+	uint64_t backward = backwardQueue.Peek(fpriority);
 	
 	const FMMBDOpenClosedData<state> &nextForward = forwardQueue.Lookat(forward);
 	const FMMBDOpenClosedData<state> &nextBackward = backwardQueue.Lookat(backward);
 	
-	double p1 = std::max(nextForward.g + nextForward.h, nextForward.g/nextForward.frac + epsilon);
-	if (nextForward.frac == 0)
-		p1 = DBL_MAX;
-	double p2 = std::max(nextBackward.g + nextBackward.h, nextBackward.g/nextBackward.frac + epsilon);
-	if (nextBackward.frac == 0)
-		p2 = DBL_MAX;
-	if (p1 > oldp1)
-	{
-		//		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
-		oldp1 = p1;
-		//PrintOpenStats(f);
-	}
-	if (p2 > oldp2)
-	{
-		//		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
-		oldp2 = p2;
-		//PrintOpenStats(b);
-	}
-	//printf("%f,%f,%f,%f,%f,%f,%f,%f,%f\n",p1,p2,nextForward.f, nextForward.g,nextForward.frac, epsilon,nextBackward.f, nextBackward.g,nextBackward.frac);
-	if (fless(p1, p2))
-	{
-//		printf("Next state priority %f (f)\n", p1);
-		//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
-		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
-	}
-	else
-	{
-//		printf("Next state priority %f (b)\n", p2);
-		//Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
-		Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
-	}
-	/*
-	else { // equal priority
-//		printf("Next state priority %f (t)\n", p1);
-//		printf("   * f: %f/%f=%f ", nextForward.g, nextForward.frac, nextForward.g/nextForward.frac);
-//		std::cout << nextForward.data << "\n";
-//		printf("   * b: %f/%f=%f ", nextBackward.g, nextBackward.frac, nextBackward.g/nextBackward.frac);
-//		std::cout << nextBackward.data << "\n";
-		if (!fequal(nextForward.g/nextForward.frac, p1))
-		{
-			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
-		}
-		else if (!fequal(nextBackward.g/nextBackward.frac, p2))
-		{
-			Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
-		}
-		else {
-			Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
-			//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
-		}
-	}
-	*/
-	// check if we can terminate
+	double p1 = nextForward.g + nextForward.h;
+	double p2 = nextBackward.g + nextBackward.h;
+  if (!alternate)
+  {
+    if (p1 > oldp1)
+    {
+      //		printf("Forward priority to %1.2f [%llu expanded - %1.2fs]\n", p1, GetNodesExpanded(), t.EndTimer());
+      oldp1 = p1;
+      //PrintOpenStats(f);
+    }
+    if (p2 > oldp2)
+    {
+      //		printf("Backward priority to %1.2f [%llu expanded - %1.2fs]\n", p2, GetNodesExpanded(), t.EndTimer());
+      oldp2 = p2;
+      //PrintOpenStats(b);
+    }
+    //printf("%f,%f,%f,%f,%f,%f,%f,%f,%f\n",p1,p2,nextForward.f, nextForward.g,nextForward.frac, epsilon,nextBackward.f, nextBackward.g,nextBackward.frac);
+    if (fless(p1, p2))
+    {
+  //		printf("Next state priority %f (f)\n", p1);
+      //Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
+      Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
+    }
+    else
+    {
+  //		printf("Next state priority %f (b)\n", p2);
+      //Expand(backwardQueue, forwardQueue, backwardHeuristic, start, g_b, f_b);
+      Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
+    }
+  }
+  else if (expandForward){
+    Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
+  }
+  else{
+    Expand(backwardQueue, forwardQueue, backwardHeuristic, start, b);
+  }
+  expandForward = !expandForward;
+
 	if (true)
 	{
 		recheckPath = false;
-		// TODO: make this more efficient
-
-		/*
-		for (auto i = f.begin(); i != f.end(); i++)
-		{
-			if (i->second > 0) // some elements
-			{
-				if ((i->first.first + i->first.second < currentCost) && // termination only stopped by lower f-cost
-					(i->first.first + lastMinBackwardG + epsilon < currentCost))
-				{
-					minForwardG = std::min(minForwardG, i->first.first);
-					minForwardF = std::min(minForwardF, i->first.first+i->first.second);
-				}
-			}
-		}
-		for (auto i = b.begin(); i != b.end(); i++)
-		{
-			if (i->second > 0) // some elements
-			{
-				if ((i->first.first + i->first.second < currentCost) && // termination only stopped by lower f-cost
-					(i->first.first + lastMinForwardG + epsilon < currentCost))
-				{
-					minBackwardG = std::min(minBackwardG, i->first.first);
-					minBackwardF = std::min(minBackwardF, i->first.first+i->first.second);
-				}
-			}
-		}
-		
-		{
-			auto iB = backwardQueue.Lookat(backwardQueue.Peek());
-			backwardP = std::max(iB.g+iB.h, iB.g/iB.frac);
-			auto iF = forwardQueue.Lookat(forwardQueue.Peek());
-			forwardP = std::max(iF.g+iF.h, iF.g/iF.frac);
-		}
-		*/
 		bool done = false;
 		double minForwardG = DBL_MIN;
 		double minForwardF = DBL_MAX;
@@ -387,22 +336,31 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::DoSingleSearchStep
 		}
 		if (minBackwardF == DBL_MAX)
 		{
-			minBackwardF  = currentCost+1;
+			minBackwardF = currentCost+1;
 		}
     //printf("CurrentCost: %f, minForwardG: %f, minForwardF: %f,minBackwardG: %f,minBackwardF: %f\n", currentCost,minForwardG, minForwardF, minBackwardG,minBackwardF);
 		if (!fgreater(currentCost, minForwardF))
 		{
-			//			printf("Terminated on forwardf (%f >= %f)\n", minForwardF, currentCost);
+						//printf("Terminated on forwardf (%f >= %f)\n", minForwardF, currentCost);
 			done = true;
 		}
 		if (!fgreater(currentCost, minBackwardF))
 		{
-			//			printf("Terminated on backwardf (%f >= %f)\n", minBackwardF, currentCost);
+						//printf("Terminated on backwardf (%f >= %f)\n", minBackwardF, currentCost);
 			done = true;
 		}
-		if (!fgreater(currentCost, minForwardG+minBackwardG+epsilon)) // TODO: epsilon
+		if (additionTB && !fgreater(currentCost, minForwardG+minBackwardG+epsilon)) // TODO: epsilon
 		{
-			//			printf("Terminated on g+g+epsilon (%f+%f+%f >= %f)\n", minForwardG, minBackwardG, epsilon, currentCost);
+						// printf("Terminated on g+g+epsilon (%f+%f+%d = %f >= %f)\n", minForwardG, minBackwardG, epsilon,minForwardG+minBackwardG+epsilon, currentCost);
+            // printf("backwardf (%f >= %f)\n", minBackwardF, currentCost);
+            // printf("forwardf (%f >= %f)\n", minForwardF, currentCost);
+            // double gval = forwardQueue.PeekAt(fpriority).g;
+            // printf("should be h %f\n", std::max(forwardQueue.PeekAt(fpriority).h,std::max(backwardQueue.PeekAtG(gval).g + epsilon,backwardQueue.PeekAtG(gval).g + backwardQueue.PeekAtG(gval).h - gval)));
+            // printf("my h %f\n", forwardQueue.PeekAt(gpriority).h);
+            // printf("should be h %f\n", std::max(forwardQueue.PeekAt(gpriority).h,std::max(backwardQueue.PeekAtG(gval).g + epsilon,backwardQueue.PeekAtG(gval).g + backwardQueue.PeekAtG(gval).h - gval)));
+            // printf("other-g %f\n", backwardQueue.PeekAtG(gval).g + epsilon);
+            // printf("other-f %f\n", epsilon,backwardQueue.PeekAtG(gval).g + backwardQueue.PeekAtG(gval).h - gval);
+            // printf("where %d\n", backwardQueue.Lookup(backwardQueue.priorityMap[gval][0]).where);
 			done = true;
 		}
 		/*
@@ -439,28 +397,21 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::DoSingleSearchStep
 }
 
 template <class state, class action, class environment, int epsilon, class priorityQueue>
-void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQueue &current,
+void BPHA<state, action, environment, epsilon, priorityQueue>::Expand(priorityQueue &current,
 														   priorityQueue &opposite,
 														   Heuristic<state> *heuristic, const state &target,
 														   std::unordered_map<std::pair<double, double>, int> &count)
 {
   bool toUpdate = false;
   double currentSum = current.GetPrioritySum(epsilon);
-	uint64_t nextID = current.Close(fmmpriority);
+	uint64_t nextID = current.Close(fpriority);
   if (currentSum!= current.GetPrioritySum(epsilon)){
     toUpdate = true;
   }
 	nodesExpanded++;
 	if (current.Lookup(nextID).reopened == false)
 		uniqueNodesExpanded++;
-	
-	if (0)
-	{
-		auto &i = current.Lookup(nextID);
-		std::cout << "Expanding " << i.data << "\n";
-		printf("g: %1.1f, h:%1.1f, pr:%1.1f\n", current.Lookup(nextID).g, current.Lookup(nextID).h, std::max((i.g+i.h), i.g/i.frac));
-	}
-	
+		
 	// decrease count from parent
 	{
 		auto &parentData = current.Lookup(nextID);
@@ -470,6 +421,7 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 			recheckPath = true;
 		}
 	}
+	
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
 	for (auto &succ : neighbors)
 	{
@@ -584,10 +536,6 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
             }
           }
 				}
-				if (&current == &forwardQueue)
-					current.Lookup(i).frac = fraction;
-				else
-					current.Lookup(i).frac = 1-fraction;
         //printf("%f ",current.Lookup(i).g);
 				// check for solution
 				uint64_t reverseLoc;
@@ -651,19 +599,19 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 }
 
 template <class state, class action, class environment, int epsilon, class priorityQueue>
-uint64_t fMM<state, action, environment, epsilon, priorityQueue>::GetNecessaryExpansions() const
+uint64_t BPHA<state, action, environment, epsilon, priorityQueue>::GetNecessaryExpansions() const
 {
 	uint64_t count = 0;
 	for (unsigned int x = 0; x < forwardQueue.size(); x++)
 	{
 		const FMMBDOpenClosedData<state> &data = forwardQueue.Lookat(x);
-		if ((data.where == flocClosed) && (fless(data.g+data.h, currentCost)) && fless(data.g / data.frac + epsilon, currentCost))
+		if ((data.where == flocClosed) && (fless(data.g+data.h, currentCost)))
 			count++;
 	}
 	for (unsigned int x = 0; x < backwardQueue.size(); x++)
 	{
 		const FMMBDOpenClosedData<state> &data = backwardQueue.Lookat(x);
-		if ((data.where == flocClosed) && (fless(data.g+data.h, currentCost)) && (fless(data.g / data.frac + epsilon, currentCost)))
+		if ((data.where == flocClosed) && (fless(data.g+data.h, currentCost)))
 			count++;
 	}
 	return count;
@@ -671,4 +619,4 @@ uint64_t fMM<state, action, environment, epsilon, priorityQueue>::GetNecessaryEx
 
 
 
-#endif /* FMM_h */
+#endif 

@@ -15,30 +15,12 @@
 #include <unordered_map>
 
 
-template <class state, int epsilon = 0>
-struct fMMCompare {
-	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
-	{
-		// FIXME: Note that i2 happens (but isn't guaranteed) to be the uninitialized element,
-		// so we can use the fraction from i1 properly. But, this could be broken.
-//		printf("%f - %f\n", i1.frac, i2.frac);
-		double p1 = std::max((i1.g+i1.h), i1.g/i1.frac+epsilon);
-		double p2 = std::max((i2.g+i2.h), i2.g/i1.frac+epsilon);
-		if (fequal(p1, p2))
-		{
-			return (fgreater(i1.g, i2.g)); // low g-cost over high
-			//return (fless(i1.g/i1.frac, i2.g/i1.frac)); // high g-cost over low
-		}
-		return (fgreater(p1, p2)); // low priority over high
-	}
-};
-
 template <class state>
 struct Comparef {
 	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
 	{
-		double p1 = i1.g+i1.h;
-		double p2 = i2.g+i2.h;
+		double p1 = i1.f;
+		double p2 = i2.f;
 		if (fequal(p1, p2))
 		{
 			//return (fgreater(i1.g, i2.g)); // low g-cost over high
@@ -47,7 +29,6 @@ struct Comparef {
 		return (fgreater(p1, p2)); // low priority over high
 	}
 };
-
 template <class state>
 struct Compareg{
 	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
@@ -58,19 +39,40 @@ struct Compareg{
 	}
 };
 
+template <class state>
+struct ComparefMax {
+	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
+	{
+		double p1 = i1.f;
+		double p2 = i2.f;
+		if (fequal(p1, p2))
+		{
+			//return (fgreater(i1.g, i2.g));
+			return (fgreater(i1.g, i2.g)); 
+		}
+		return (fless(p1, p2)); // high priority over low
+	}
+};
+
+template <class state>
+struct ComparegMax{
+	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
+	{
+		double p1 = i1.g;
+		double p2 = i2.g;
+		return (fless(p1, p2)); // high priority over low
+	}
+};
+
 template <class state, int epsilon = 0>
-struct improvedHeuristicCompare {
-  int g;
-  improvedHeuristicCompare(int g_value) : g(g_value)
-  {
-  }
+struct fMMCompare {
 	bool operator()(const FMMBDOpenClosedData<state> &i1, const FMMBDOpenClosedData<state> &i2) const
 	{
 		// FIXME: Note that i2 happens (but isn't guaranteed) to be the uninitialized element,
 		// so we can use the fraction from i1 properly. But, this could be broken.
 //		printf("%f - %f\n", i1.frac, i2.frac);
-		double p1 = std::max((i1.g+i1.h)-g, i1.g+epsilon);
-		double p2 = std::max((i2.g+i2.h)-g, i2.g+epsilon);
+		double p1 = std::max((i1.f), i1.g/i1.frac+epsilon);
+		double p2 = std::max((i2.f), i2.g/i1.frac+epsilon);
 		if (fequal(p1, p2))
 		{
 			return (fgreater(i1.g, i2.g)); // low g-cost over high
@@ -80,7 +82,7 @@ struct improvedHeuristicCompare {
 	}
 };
 
-template <class state, class action, class environment, int epsilon = 0,class priorityQueue = FMMBDOpenClosed<state,fMMCompare<state,epsilon>,Compareg<state>,Comparef<state>,improvedHeuristicCompare<state,epsilon>>>
+template <class state, class action, class environment, int epsilon = 0,class priorityQueue = FMMBDOpenClosed<state, Comparef<state>, Compareg<state>,ComparefMax<state>, ComparegMax<state>,fMMCompare<state,epsilon>> >
 class fMM {
 public:
 	fMM(double frac = 0.5,bool imp = false){ forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); fraction = frac; improved = imp; }
@@ -150,10 +152,10 @@ private:
 	{ uint64_t theID; backwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToGoalFromID(theID, thePath); }
 	void ExtractPathToGoalFromID(uint64_t node, std::vector<state> &thePath)
 	{
-		while (backwardQueue.Lookup(node).parentID != node) {
+		do {
 			thePath.push_back(backwardQueue.Lookup(node).data);
 			node = backwardQueue.Lookup(node).parentID;
-		} 
+		} while (backwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(backwardQueue.Lookup(node).data);
 	}
 	
@@ -161,10 +163,10 @@ private:
 	{ uint64_t theID; forwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
 	{
-		while (forwardQueue.Lookup(node).parentID != node) {
+		do {
 			thePath.push_back(forwardQueue.Lookup(node).data);
 			node = forwardQueue.Lookup(node).parentID;
-		} 
+		} while (forwardQueue.Lookup(node).parentID != node);
 		thePath.push_back(forwardQueue.Lookup(node).data);
 	}
 	
@@ -235,16 +237,16 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::InitializeSearch(e
 //	backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start));
 	uint64_t i;
 	if(!improved){
-		i = forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, forwardHeuristic->HCost(start, goal));
+		i = forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, forwardHeuristic->HCost(start, goal),forwardHeuristic->HCost(start, goal));
 		forwardQueue.Lookup(i).frac = fraction;
-		backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start));
+		backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, backwardHeuristic->HCost(goal, start),backwardHeuristic->HCost(goal, start));
 		backwardQueue.Lookup(i).frac = 1-fraction;		
 	}
 	else{
 		double hur = std::max(forwardHeuristic->HCost(start, goal),backwardHeuristic->HCost(goal, start));
-		i = forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, hur);
+		i = forwardQueue.AddOpenNode(start, env->GetStateHash(start), 0, hur,hur);
 		forwardQueue.Lookup(i).frac = fraction;
-		backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, hur);
+		backwardQueue.AddOpenNode(goal, env->GetStateHash(goal), 0, hur,hur);
 		backwardQueue.Lookup(i).frac = 1-fraction;	
 	}
 
@@ -271,16 +273,16 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::DoSingleSearchStep
 	//		//Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, g_f, f_f);
 	//		Expand(forwardQueue, backwardQueue, forwardHeuristic, goal, f);
 	
-	uint64_t forward = forwardQueue.Peek(fmmpriority);
-	uint64_t backward = backwardQueue.Peek(fmmpriority);
+	uint64_t forward = forwardQueue.Peek(priority);
+	uint64_t backward = backwardQueue.Peek(priority);
 	
 	const FMMBDOpenClosedData<state> &nextForward = forwardQueue.Lookat(forward);
 	const FMMBDOpenClosedData<state> &nextBackward = backwardQueue.Lookat(backward);
 	
-	double p1 = std::max(nextForward.g + nextForward.h, nextForward.g/nextForward.frac + epsilon);
+	double p1 = std::max(nextForward.f, nextForward.g/nextForward.frac + epsilon);
 	if (nextForward.frac == 0)
 		p1 = DBL_MAX;
-	double p2 = std::max(nextBackward.g + nextBackward.h, nextBackward.g/nextBackward.frac + epsilon);
+	double p2 = std::max(nextBackward.f, nextBackward.g/nextBackward.frac + epsilon);
 	if (nextBackward.frac == 0)
 		p2 = DBL_MAX;
 	if (p1 > oldp1)
@@ -369,25 +371,25 @@ bool fMM<state, action, environment, epsilon, priorityQueue>::DoSingleSearchStep
 		}
 		*/
 		bool done = false;
-		double minForwardG = DBL_MIN;
+		double minForwardG = DBL_MAX;
 		double minForwardF = DBL_MAX;
-		double minBackwardG = DBL_MIN;
+		double minBackwardG = DBL_MAX;
 		double minBackwardF = DBL_MAX;
 		if (forwardQueue.OpenSize()>0){
 			minForwardG = forwardQueue.PeekAt(gpriority).g;
-			minForwardF = forwardQueue.PeekAt(fpriority).g + forwardQueue.PeekAt(fpriority).h;
+			minForwardF = forwardQueue.PeekAt(fpriority).f;
 		}
 		if (backwardQueue.OpenSize()>0){
 			minBackwardG = backwardQueue.PeekAt(gpriority).g;
-			minBackwardF = backwardQueue.PeekAt(fpriority).g + backwardQueue.PeekAt(fpriority).h;
+			minBackwardF = backwardQueue.PeekAt(fpriority).f;
 		}
 		if (minForwardF == DBL_MAX)
 		{
-			minForwardF  = currentCost+1;
+			minForwardF = minForwardG = currentCost+1;
 		}
 		if (minBackwardF == DBL_MAX)
 		{
-			minBackwardF  = currentCost+1;
+			minBackwardF = minBackwardG = currentCost+1;
 		}
     //printf("CurrentCost: %f, minForwardG: %f, minForwardF: %f,minBackwardG: %f,minBackwardF: %f\n", currentCost,minForwardG, minForwardF, minBackwardG,minBackwardF);
 		if (!fgreater(currentCost, minForwardF))
@@ -444,12 +446,10 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 														   Heuristic<state> *heuristic, const state &target,
 														   std::unordered_map<std::pair<double, double>, int> &count)
 {
-  bool toUpdate = false;
-  double currentSum = current.GetPrioritySum(epsilon);
-	uint64_t nextID = current.Close(fmmpriority);
-  if (currentSum!= current.GetPrioritySum(epsilon)){
-    toUpdate = true;
-  }
+	double minGF = forwardQueue.PeekAt(gpriority).g;
+	double minGB = backwardQueue.PeekAt(gpriority).g;
+	double maxMinF = std::max(backwardQueue.PeekAt(fpriority).f,forwardQueue.PeekAt(fpriority).f);
+	uint64_t nextID = current.Close(priority);
 	nodesExpanded++;
 	if (current.Lookup(nextID).reopened == false)
 		uniqueNodesExpanded++;
@@ -470,6 +470,7 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 			recheckPath = true;
 		}
 	}
+	
 	env->GetSuccessors(current.Lookup(nextID).data, neighbors);
 	for (auto &succ : neighbors)
 	{
@@ -488,9 +489,11 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 					childData.h = std::max(childData.h, parentData.h-edgeCost);
 					childData.parentID = nextID;
 					childData.g = parentData.g+edgeCost;
+					childData.f = childData.h + childData.g;
 					count[{childData.g,childData.h}]++;
 					dist[{childData.g,childData.h}]++;
-					current.ReOpen(childID);				}
+					current.ReOpen(childID);
+				}
 				break;
 			case flocOpen: // update cost if needed
 			{
@@ -556,9 +559,10 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 				// 1-step BPMX
         if (parentData.h < h-edgeCost){
           parentData.h = std::max(h-edgeCost, parentData.h);
-          //if (improved)
-          //  parentData.f = std::max(parentData.h + parentData.g,parentData.f);
-          //else
+          if (improved)
+            parentData.f = std::max(parentData.h + parentData.g,parentData.f);
+          else
+            parentData.f = parentData.h + parentData.g;
         }
 
 				
@@ -567,22 +571,15 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 					i = current.AddOpenNode(succ, // This may invalidate our references
 											hash,
 											g,
-											h,
+											h,h+g,
 											nextID);
 				}
 				else{
-          double newh = std::max(h,std::max(opposite.PeekAtG(g).g + epsilon,opposite.PeekAtG(g).g + opposite.PeekAtG(g).h - g));
 					i = current.AddOpenNode(succ, // This may invalidate our references
 						hash,
 						g,
-            newh,
+						h,std::max(h+g,maxMinF),
 						nextID);
-          for (auto it = current.Lookup(i).indexMap.begin(); it != current.Lookup(i).indexMap.end(); ++it){
-            if (it->second == 0){
-              toUpdate = true;
-              break;
-            }
-          }
 				}
 				if (&current == &forwardQueue)
 					current.Lookup(i).frac = fraction;
@@ -613,40 +610,95 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 		}
 	}
 	
-	if (toUpdate && improved){
-    bool keepGoing = true;
-    while (keepGoing){
-      keepGoing = false;
-      size_t currentSize = current.OpenSize();
-      size_t opositeSize = opposite.OpenSize();
-      bool loop = false;
-      for (uint64_t i = 0; i< opositeSize; i++){
-        double myG = opposite.Lookup(opposite.GetOpenItem(i)).g;             
-        double maxOther = std::max(opposite.Lookup(opposite.GetOpenItem(i)).h,std::max(current.PeekAtG(myG).g + epsilon,current.PeekAtG(myG).g + current.PeekAtG(myG).h - myG));
-        if (opposite.Lookup(opposite.GetOpenItem(i)).h < maxOther){
-          double sum = opposite.GetPrioritySum(epsilon);
-          opposite.Lookup(opposite.GetOpenItem(i)).h = maxOther;
-          opposite.KeyChanged(opposite.GetOpenItem(i));
-          if (sum!= opposite.GetPrioritySum(epsilon)){
-            loop = true;
-          }
-        }            
-      }   
-      if (loop){
-        for (uint64_t i = 0; i< currentSize; i++){
-          double myG = current.Lookup(current.GetOpenItem(i)).g;             
-          double maxOther = std::max(current.Lookup(current.GetOpenItem(i)).h,std::max(opposite.PeekAtG(myG).g + epsilon,opposite.PeekAtG(myG).g + opposite.PeekAtG(myG).h - myG));
-          if (current.Lookup(current.GetOpenItem(i)).h < maxOther){
-            double sum = current.GetPrioritySum(epsilon);
-            current.Lookup(current.GetOpenItem(i)).h = maxOther;
-            current.KeyChanged(current.GetOpenItem(i));
-            if (sum!= current.GetPrioritySum(epsilon)){
-              keepGoing = true;
-            }
-          }            
-        }   
-      }     
-    }
+	if (improved && (forwardQueue.OpenSize() > 0 && backwardQueue.OpenSize() > 0) && (minGF != forwardQueue.PeekAt(gpriority).g || minGB != backwardQueue.PeekAt(gpriority).g || maxMinF != std::max(backwardQueue.PeekAt(fpriority).f,forwardQueue.PeekAt(fpriority).f))){
+		bool changed = true;
+		int count = 0;
+		while (changed){
+			changed = false;
+
+			double minGF = forwardQueue.PeekAt(gpriority).g;
+			double minGB = backwardQueue.PeekAt(gpriority).g;
+			while (forwardQueue.OpenSize() > 0){
+				FMMBDOpenClosedData<state> &data = forwardQueue.PeekAt(prioritygMax);
+				if (fgreater(data.g + minGB + epsilon, data.f))
+				{
+					if (data.where == flocOpen){
+						data.f = data.g + minGB + epsilon;
+						changed = true;
+						forwardQueue.KeyChanged(forwardQueue.Peek(prioritygMax));
+					}
+					else{
+						break;
+					}
+
+				}
+				else{
+					break;
+				}
+			}
+			
+			while (backwardQueue.OpenSize() > 0){
+				FMMBDOpenClosedData<state> &data = backwardQueue.PeekAt(prioritygMax);
+				if (fgreater(data.g + minGF + epsilon, data.f))
+				{
+					if (data.where == flocOpen){
+						data.f = data.g + minGF + epsilon;
+						changed = true;
+						backwardQueue.KeyChanged(backwardQueue.Peek(prioritygMax));
+					}
+					else{
+						break;
+					}
+
+				}
+				else{
+					break;
+				}
+			}
+		
+			if (forwardQueue.OpenSize() > 0 && backwardQueue.OpenSize() > 0){
+				
+				double maxMinF = std::max(backwardQueue.PeekAt(fpriority).f,forwardQueue.PeekAt(fpriority).f);
+				
+				while (forwardQueue.OpenSize() > 0){
+					FMMBDOpenClosedData<state> &data = forwardQueue.PeekAt(fpriority);
+					if (fless(data.f, maxMinF)){
+						if (data.where == flocOpen){
+							//printf("%f %f %f %f %f \n",data.f, maxMinF,backwardQueue.PeekAt(kf).f,forwardQueue.PeekAt(kf).f,currentCost);
+							data.f = maxMinF;
+							//data.h = maxMinF - data.g;
+							forwardQueue.KeyChanged(forwardQueue.Peek(fpriority));
+							changed = true;
+						}
+						else{
+							break;
+						}
+					}
+					else{
+						break;
+					}
+				}
+				
+				while (backwardQueue.OpenSize() > 0){
+					FMMBDOpenClosedData<state> &data = backwardQueue.PeekAt(fpriority);
+					if (fless(data.f, maxMinF)){
+						if (data.where == flocOpen){
+							//printf("%f %f %f %f %f \n",data.f, maxMinF,backwardQueue.PeekAt(kf).f,forwardQueue.PeekAt(kf).f,currentCost);
+							data.f = maxMinF;
+							//data.h = maxMinF - data.g;
+							backwardQueue.KeyChanged(backwardQueue.Peek(fpriority));
+							changed = true;
+						}
+						else{
+							break;
+						}
+					}
+					else{
+						break;
+					}
+				}
+			}
+		}
 	}
 }
 

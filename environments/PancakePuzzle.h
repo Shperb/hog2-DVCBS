@@ -222,7 +222,9 @@ void PancakePuzzle<N>::GetSuccessors(const PancakePuzzleState<N> &parent,
 								  std::vector<PancakePuzzleState<N>> &children) const
 {
 	children.resize(0);
-	
+	//for (int i = 0; i < N; i++) 
+	//	printf("%llu ",parent.puzzle[i]);
+	//printf("\n");
 	// all operators are applicable in all states
 	for (unsigned i = 0; i < operators.size(); i++)
 	{
