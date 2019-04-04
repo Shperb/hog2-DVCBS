@@ -613,7 +613,7 @@ void fMM<state, action, environment, epsilon, priorityQueue>::Expand(priorityQue
 		}
 	}
 	
-	if (toUpdate && improved){
+  if (toUpdate && improved && current.OpenSize() > 0 && opposite.OpenSize() > 0){
     bool keepGoing = true;
     while (keepGoing){
       keepGoing = false;

@@ -103,6 +103,7 @@ void TestTOH(int first, int last)
 		//b = BuildPDB<N, pdb1Disks>(s);
 		//printf("Starting heuristics: %f %f\n", f->HCost(s, g), b->HCost(g, s));
 		//Single Solution
+    printf("starting problem: %d",count);
 		if(0){
 			if (1)
 			{
@@ -449,7 +450,7 @@ void TestTOH(int first, int last)
 			printf("NBS-e found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed %llu forwardMeeting %llu backwardMeeting %llu forwardDistance %llu backwardDistance %f ExpansionUntilSolution\n", toh.GetPathLength(thePath),
 				newBs.GetNodesExpanded(), newBs.GetNecessaryExpansions(), timer.GetElapsedTime(),newBs.getForwardMeetingPoint(),newBs.getBackwardMeetingPoint(),newBs.getForwardUnnecessaryNodesInPath(),newBs.getBackwardUnnecessaryNodesInPath(),newBs.GetExpansionUntilFirstSolution());
  		}
-		if (1)
+		if (0)
 		{
 			//printf("-=-=-MM-=-=-\n");
 			timer.StartTimer();
@@ -968,8 +969,8 @@ void TestTOH(int first, int last)
 
 void TOHTest()
 {
-  TestTOH<12, 2>(0, 50);
-  TestTOH<12, 4>(0, 50);
+  TestTOH<10, 2>(0, 50);
+  TestTOH<10, 4>(0, 50);
 //  TestTOH<14, 5>(0, 50);
 //  TestTOH<12, 6>(0, 50);
 //	TestTOH<14, 7>(0, 50);
