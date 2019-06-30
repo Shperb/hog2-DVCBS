@@ -143,14 +143,14 @@ private:
 	{ uint64_t theID; queue.backwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToGoalFromID(theID, thePath); }
 	void ExtractPathToGoalFromID(uint64_t node, std::vector<state> &thePath)
 	{
-		do {
+		while (queue.backwardQueue.Lookup(node).parentID != node) {
 			thePath.push_back(queue.backwardQueue.Lookup(node).data);
 			backwardMeetingPoint++;
 			if (queue.backwardQueue.Lookup(node).g+queue.backwardQueue.Lookup(node).h == currentCost){
 				backwardUnnecessaryNodesInPath++;
 			}
 			node = queue.backwardQueue.Lookup(node).parentID;
-		} while (queue.backwardQueue.Lookup(node).parentID != node);
+		} 
 		thePath.push_back(queue.backwardQueue.Lookup(node).data);
 
 	}
@@ -172,14 +172,14 @@ private:
 	{ uint64_t theID; queue.forwardQueue.Lookup(env->GetStateHash(node), theID); ExtractPathToStartFromID(theID, thePath); }
 	void ExtractPathToStartFromID(uint64_t node, std::vector<state> &thePath)
 	{
-		do {
+		while (queue.forwardQueue.Lookup(node).parentID != node) {
 			thePath.push_back(queue.forwardQueue.Lookup(node).data);
 			forwardMeetingPoint++;
 			if (queue.forwardQueue.Lookup(node).g+queue.forwardQueue.Lookup(node).h == currentCost){
 				forwardUnnecessaryNodesInPath++;
 			}
 			node = queue.forwardQueue.Lookup(node).parentID;
-		} while (queue.forwardQueue.Lookup(node).parentID != node);
+		} 
 		thePath.push_back(queue.forwardQueue.Lookup(node).data);
 	}
 	
