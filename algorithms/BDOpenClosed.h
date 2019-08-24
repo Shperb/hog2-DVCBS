@@ -112,6 +112,7 @@ public:
 			return false;
 		return ValidateOpenWaiting(child1) && ValidateOpenWaiting(child2);
 	}
+  std::vector<dataStructure> elements;
 private:
 	bool HeapifyUp(unsigned int index, stateLocation whichQueue);
 	void HeapifyDown(unsigned int index, stateLocation whichQueue);
@@ -127,7 +128,7 @@ private:
 	
 	IndexTable table;
 	//all the elements, open or closed
-	std::vector<dataStructure> elements;
+	
 };
 
 #ifdef ADMISSIBLE

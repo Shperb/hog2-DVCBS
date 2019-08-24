@@ -386,6 +386,9 @@ int MyCLHandler(char *argument[], int maxNumArgs)
 	{
 		TestSTP(atoi(argument[1]));
 	}
+  else if (strcmp(argument[0], "-stp") == 0){
+    TestSTP_PDB_overall();
+  }
 	else if (maxNumArgs > 2 && strcmp(argument[0], "-nbs") == 0)
 	{
 		double weight = 1.0;

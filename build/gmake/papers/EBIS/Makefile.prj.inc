@@ -58,4 +58,4 @@ endif
 default : all
 
 SRC_CPP = \
-	papers/EBIS/Driver.cpp \
+	papers/IBEX/Driver.cpp \

@@ -111,6 +111,8 @@ public:
 	void OpenGLDraw() const;
 	void Draw(Graphics::Display &d) const;
 	void DrawBipartiteGraph(Graphics::Display &d) const;
+  
+  dataStructure queue;
 	
 	//	void SetWeight(double w) {weight = w;}
 private:
@@ -158,7 +160,7 @@ private:
 	environment *env;
 	std::unordered_map<double, int> counts;
 	
-	dataStructure queue;
+	
 	//	priorityQueue queue.forwardQueue, queue.backwardQueue;
 	//priorityQueue2 queue.forwardQueue, queue.backwardQueue;
 	

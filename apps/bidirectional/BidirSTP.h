@@ -12,5 +12,6 @@
 #include <stdio.h>
 
 void TestSTP(int algorithm);
+void TestSTP_PDB_overall();
 
 #endif /* BidirSTP_hpp */
