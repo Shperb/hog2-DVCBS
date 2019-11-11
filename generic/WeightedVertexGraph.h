@@ -19,8 +19,8 @@ template <class state, class action, class environment>
 class BidirectionalProblemAnalyzer {
 public:
 	BidirectionalProblemAnalyzer(const state &s, const state &g, environment *e,
-								 Heuristic<state> *f, Heuristic<state> *b)
-	:start(s), goal(g), e(e), f(f), b(b)
+								 Heuristic<state> *f, Heuristic<state> *b, int eps = 0)
+	:start(s), goal(g), e(e), f(f), b(b), epsilon(eps)
 	{
 		drawFullGraph = false;
 		drawProblemInstance = true;
@@ -259,7 +259,7 @@ public:
 		
 		const int kNodeRadius = 25;
 		const int kNodeGap = 75;
-		const int epsilon = 0;
+		//const int epsilon = 0;
 		
 		height = kNodeGap*std::max(m_f.size(), m_b.size())+kBottomMargin;
 		if (eshed) height += kNodeGap;
@@ -610,9 +610,9 @@ public:
 	}
 
 	
-	static uint64_t GetWeightedVertexGraph(const state &start, const state &goal, environment *e, Heuristic<state> *f, Heuristic<state> *b, const char *filename = 0)
+	static uint64_t GetWeightedVertexGraph(const state &start, const state &goal, environment *e, Heuristic<state> *f, Heuristic<state> *b, const char *filename = 0,int epsilon = 0)
 	{
-		BidirectionalProblemAnalyzer analyze(start, goal, e, f, b);
+		BidirectionalProblemAnalyzer analyze(start, goal, e, f, b,epsilon);
 		if (filename != 0)
 			analyze.SaveSVG(filename);
 		return analyze.totalWork;
@@ -628,6 +628,7 @@ private:
 	int forwardSum;
 	int backwardSum;
 	int totalWork;
+  int epsilon;
 	double optCost;
 	int height, width;
 	std::string optCostStr;

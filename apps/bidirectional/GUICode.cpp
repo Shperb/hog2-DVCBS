@@ -923,6 +923,284 @@ const char *strip(const char *str)
 	return s.c_str();
 }
 
+void AnalyzeHeuristics(int rad)
+{
+  std::string daoMapFolder = "../../maps/dao/";
+  std::string mazeMapFolder = "../../maps/mazes/";
+  std::string daoSceneriosFolder = "../../scenarios/dao/";
+  std::string mazeSceneriosFolder = "../../scenarios/mazes/";
+  std::vector<std::string> mazeMaps = {"maze512-1-0.map","maze512-1-1.map","maze512-1-2.map","maze512-1-3.map","maze512-1-4.map","maze512-1-5.map","maze512-1-6.map","maze512-1-7.map","maze512-1-8.map","maze512-1-9.map","maze512-16-0.map","maze512-16-1.map","maze512-16-2.map","maze512-16-3.map","maze512-16-4.map","maze512-16-5.map","maze512-16-6.map","maze512-16-7.map","maze512-16-8.map","maze512-16-9.map","maze512-2-0.map","maze512-2-1.map","maze512-2-2.map","maze512-2-3.map","maze512-2-4.map","maze512-2-5.map","maze512-2-6.map","maze512-2-7.map","maze512-2-8.map","maze512-2-9.map","maze512-32-0.map","maze512-32-1.map","maze512-32-2.map","maze512-32-3.map","maze512-32-4.map","maze512-32-5.map","maze512-32-6.map","maze512-32-7.map","maze512-32-8.map","maze512-32-9.map","maze512-4-0.map","maze512-4-1.map","maze512-4-2.map","maze512-4-3.map","maze512-4-4.map","maze512-4-5.map","maze512-4-6.map","maze512-4-7.map","maze512-4-8.map","maze512-4-9.map","maze512-8-0.map","maze512-8-1.map","maze512-8-2.map","maze512-8-3.map","maze512-8-4.map","maze512-8-5.map","maze512-8-6.map","maze512-8-7.map","maze512-8-8.map","maze512-8-9.map"};
+  std::vector<std::string> mazeMapsScen = {"maze512-1-0.map.scen","maze512-1-1.map.scen","maze512-1-2.map.scen","maze512-1-3.map.scen","maze512-1-4.map.scen","maze512-1-5.map.scen","maze512-1-6.map.scen","maze512-1-7.map.scen","maze512-1-8.map.scen","maze512-1-9.map.scen","maze512-16-0.map.scen","maze512-16-1.map.scen","maze512-16-2.map.scen","maze512-16-3.map.scen","maze512-16-4.map.scen","maze512-16-5.map.scen","maze512-16-6.map.scen","maze512-16-7.map.scen","maze512-16-8.map.scen","maze512-16-9.map.scen","maze512-2-0.map.scen","maze512-2-1.map.scen","maze512-2-2.map.scen","maze512-2-3.map.scen","maze512-2-4.map.scen","maze512-2-5.map.scen","maze512-2-6.map.scen","maze512-2-7.map.scen","maze512-2-8.map.scen","maze512-2-9.map.scen","maze512-32-0.map.scen","maze512-32-1.map.scen","maze512-32-2.map.scen","maze512-32-3.map.scen","maze512-32-4.map.scen","maze512-32-5.map.scen","maze512-32-6.map.scen","maze512-32-7.map.scen","maze512-32-8.map.scen","maze512-32-9.map.scen","maze512-4-0.map.scen","maze512-4-1.map.scen","maze512-4-2.map.scen","maze512-4-3.map.scen","maze512-4-4.map.scen","maze512-4-5.map.scen","maze512-4-6.map.scen","maze512-4-7.map.scen","maze512-4-8.map.scen","maze512-4-9.map.scen","maze512-8-0.map.scen","maze512-8-1.map.scen","maze512-8-2.map.scen","maze512-8-3.map.scen","maze512-8-4.map.scen","maze512-8-5.map.scen","maze512-8-6.map.scen","maze512-8-7.map.scen","maze512-8-8.map.scen","maze512-8-9.map.scen"};
+  std::vector<std::string> daoMaps = {"arena2.map","arena.map","brc000d.map","brc100d.map","brc101d.map","brc200d.map","brc201d.map","brc202d.map","brc203d.map","brc204d.map","brc300d.map","brc501d.map","brc502d.map","brc503d.map","brc504d.map","brc505d.map","brc997d.map","brc999d.map","combat2.map","combat.map","den000d.map","den001d.map","den005d.map","den009d.map","den011d.map","den012d.map","den020d.map","den101d.map","den200d.map","den200n.map","den201d.map","den202d.map","den203d.map","den204d.map","den206d.map","den207d.map","den308d.map","den312d.map","den400d.map","den401d.map","den403d.map","den404d.map","den405d.map","den407d.map","den408d.map","den500d.map","den501d.map","den502d.map","den504d.map","den505d.map","den510d.map","den520d.map","den600d.map","den601d.map","den602d.map","den900d.map","den901d.map","den998d.map","hrt000d.map","hrt001d.map","hrt002d.map","hrt201d.map","hrt201n.map","isound1.map","lak100c.map","lak100d.map","lak100n.map","lak101d.map","lak102d.map","lak103d.map","lak104d.map","lak105d.map","lak106d.map","lak107d.map","lak108d.map","lak109d.map","lak110d.map","lak200d.map","lak201d.map","lak202d.map","lak203d.map","lak250d.map","lak300d.map","lak302d.map","lak303d.map","lak304d.map","lak307d.map","lak308d.map","lak400d.map","lak401d.map","lak403d.map","lak404d.map","lak405d.map","lak503d.map","lak504d.map","lak505d.map","lak506d.map","lak507d.map","lak510d.map","lak511d.map","lak512d.map","lak513d.map","lak514d.map","lak515d.map","lak519d.map","lak526d.map","lgt101d.map","lgt300d.map","lgt600d.map","lgt601d.map","lgt602d.map","lgt603d.map","lgt604d.map","lgt605d.map","orz000d.map","orz100d.map","orz101d.map","orz102d.map","orz103d.map","orz105d.map","orz106d.map","orz107d.map","orz200d.map","orz201d.map","orz203d.map","orz300d.map","orz301d.map","orz302d.map","orz303d.map","orz304d.map","orz500d.map","orz601d.map","orz700d.map","orz701d.map","orz702d.map","orz703d.map","orz704d.map","orz800d.map","orz900d.map","orz901d.map","orz999d.map","ost000a.map","ost000t.map","ost001d.map","ost002d.map","ost003d.map","ost004d.map","ost100d.map","ost101d.map","ost102d.map","oth000d.map","oth001d.map","oth999d.map","rmtst01.map","rmtst03.map","rmtst.map"};
+  std::vector<std::string> daoMapsScen = {"arena2.map.scen","arena.map.scen","brc000d.map.scen","brc100d.map.scen","brc101d.map.scen","brc200d.map.scen","brc201d.map.scen","brc202d.map.scen","brc203d.map.scen","brc204d.map.scen","brc300d.map.scen","brc501d.map.scen","brc502d.map.scen","brc503d.map.scen","brc504d.map.scen","brc505d.map.scen","brc997d.map.scen","brc999d.map.scen","combat2.map.scen","combat.map.scen","den000d.map.scen","den001d.map.scen","den005d.map.scen","den009d.map.scen","den011d.map.scen","den012d.map.scen","den020d.map.scen","den101d.map.scen","den200d.map.scen","den200n.map.scen","den201d.map.scen","den202d.map.scen","den203d.map.scen","den204d.map.scen","den206d.map.scen","den207d.map.scen","den308d.map.scen","den312d.map.scen","den400d.map.scen","den401d.map.scen","den403d.map.scen","den404d.map.scen","den405d.map.scen","den407d.map.scen","den408d.map.scen","den500d.map.scen","den501d.map.scen","den502d.map.scen","den504d.map.scen","den505d.map.scen","den510d.map.scen","den520d.map.scen","den600d.map.scen","den601d.map.scen","den602d.map.scen","den900d.map.scen","den901d.map.scen","den998d.map.scen","hrt000d.map.scen","hrt001d.map.scen","hrt002d.map.scen","hrt201d.map.scen","hrt201n.map.scen","isound1.map.scen","lak100c.map.scen","lak100d.map.scen","lak100n.map.scen","lak101d.map.scen","lak102d.map.scen","lak103d.map.scen","lak104d.map.scen","lak105d.map.scen","lak106d.map.scen","lak107d.map.scen","lak108d.map.scen","lak109d.map.scen","lak110d.map.scen","lak200d.map.scen","lak201d.map.scen","lak202d.map.scen","lak203d.map.scen","lak250d.map.scen","lak300d.map.scen","lak302d.map.scen","lak303d.map.scen","lak304d.map.scen","lak307d.map.scen","lak308d.map.scen","lak400d.map.scen","lak401d.map.scen","lak403d.map.scen","lak404d.map.scen","lak405d.map.scen","lak503d.map.scen","lak504d.map.scen","lak505d.map.scen","lak506d.map.scen","lak507d.map.scen","lak510d.map.scen","lak511d.map.scen","lak512d.map.scen","lak513d.map.scen","lak514d.map.scen","lak515d.map.scen","lak519d.map.scen","lak526d.map.scen","lgt101d.map.scen","lgt300d.map.scen","lgt600d.map.scen","lgt601d.map.scen","lgt602d.map.scen","lgt603d.map.scen","lgt604d.map.scen","lgt605d.map.scen","orz000d.map.scen","orz100d.map.scen","orz101d.map.scen","orz102d.map.scen","orz103d.map.scen","orz105d.map.scen","orz106d.map.scen","orz107d.map.scen","orz200d.map.scen","orz201d.map.scen","orz203d.map.scen","orz300d.map.scen","orz301d.map.scen","orz302d.map.scen","orz303d.map.scen","orz304d.map.scen","orz500d.map.scen","orz601d.map.scen","orz700d.map.scen","orz701d.map.scen","orz702d.map.scen","orz703d.map.scen","orz704d.map.scen","orz800d.map.scen","orz900d.map.scen","orz901d.map.scen","orz999d.map.scen","ost000a.map.scen","ost000t.map.scen","ost001d.map.scen","ost002d.map.scen","ost003d.map.scen","ost004d.map.scen","ost100d.map.scen","ost101d.map.scen","ost102d.map.scen","oth000d.map.scen","oth001d.map.scen","oth999d.map.scen","rmtst01.map.scen","rmtst03.map.scen","rmtst.map.scen"};
+  
+  
+  std::vector<xyLoc> thePath;
+  TemplateAStar<xyLoc, tDirection, MapEnvironment> astar;
+  int hcount,ihcount,totcount,mapStateSpace;
+  hcount = ihcount = totcount = 0;
+  Timer t1;
+  OnlineStats stats;
+  std::unordered_map<double,int> countStats;
+  std::vector<std::string> types = {"maze512-1-","maze512-4-","maze512-16-"};
+  for (auto type : types){
+    for (int i = 0; i< mazeMaps.size();i++){
+      std::string map = mazeMaps[i];
+    // for (int i = 0; i< daoMaps.size();i++){
+      // std::string map = daoMaps[i];
+      // if (map.find("brc") == std::string::npos) {
+          // continue;
+      // }
+      if (map.find(type) == std::string::npos) {
+          continue;
+      }
+      //printf("Loading %s with scenario %s\n", map, scenario);
+      
+      std::string scenario = mazeMapsScen[i];
+      ScenarioLoader s((mazeSceneriosFolder + scenario).c_str());
+      Map *m = new Map((mazeMapFolder + map).c_str());
+      // std::string scenario = daoMapsScen[i];
+      // ScenarioLoader s((daoSceneriosFolder + scenario).c_str());
+      // Map *m = new Map((daoMapFolder + map).c_str());
+      me = new MapEnvironment(m);
+      me->SetDiagonalCost(1.5);
+  //	me->SetDiagonalCost(ROOT_TWO);
+      Timer t;
+      ZeroHeuristic<xyLoc> z;
+      if(0){
+        mapStateSpace = 0;
+        for (long wd = 0; wd < m->GetMapWidth(); wd++){
+          for (long ht = 0; ht < m->GetMapHeight(); ht++){
+            if(m->GetTerrainType(wd,ht) == kGround){
+              mapStateSpace++;
+            }
+          }
+        }
+        printf("%s %d\n", map.c_str(), mapStateSpace);
+      }
+      
+    // 406 is bad!
+      
+      if (1){
+        for (int x = s.GetNumExperiments()-1; x >= 0; x=x-10) // 547 to 540
+        //for (int x = s.GetNumExperiments()-1; x >= 0; x--) // 547 to 540  
+        {
+          if (fequal(s.GetNthExperiment(x).GetDistance(), 0))
+            continue;
+          xyLoc start, goal;
+          start.x = s.GetNthExperiment(x).GetStartX();
+          start.y = s.GetNthExperiment(x).GetStartY();
+          goal.x = s.GetNthExperiment(x).GetGoalX();
+          goal.y = s.GetNthExperiment(x).GetGoalY();
+          if (1){
+            {
+              double gmax = dijkstraUptoLimit(me,start,100);
+              stats.Push(gmax);
+              auto it = countStats.find(gmax);
+              if (it == countStats.end()){
+                countStats.insert(std::make_pair(gmax,1));
+              }
+              else{
+                countStats[gmax]++;
+              }
+            }
+            {
+              double gmax = dijkstraUptoLimit(me,goal,100);
+              stats.Push(gmax);
+              auto it = countStats.find(dijkstraUptoLimit(me,goal,100));
+              if (it == countStats.end()){
+                countStats.insert(std::make_pair(gmax,1));
+              }
+              else{
+                countStats[gmax]++;
+              }
+            }
+            //stats.Push(dijkstraUptoLimit(me,goal,100));
+          }
+      //		printf("Problem %d of %d from ", x, s.GetNumExperiments());
+      //		std::cout << start << " to " << goal << "\n";
+          std::vector<xyLoc> thePath;
+            //		astar.GetPath(me, start, goal, correctPath);
+      //		printf("%d %1.1f A* nodes: %llu necessary %llu\n", x, me->GetPathLength(correctPath), astar.GetNodesExpanded(), astar.GetNecessaryExpansions());
+      //		bs.GetPath(me, start, goal, me, me, bsPath);
+      //		printf("%d %1.1f BS nodes: %llu necessary %llu\n", x, me->GetPathLength(bsPath), bs.GetNodesExpanded(), bs.GetNecessaryExpansions());
+      //		mm.GetPath(me, start, goal, me, me, mmPath);
+      //		printf("%d %1.1f MM nodes: %llu necessary %llu\n", x, me->GetPathLength(mmPath), mm.GetNodesExpanded(), mm.GetNecessaryExpansions());
+          //nbs.GetPath(me, start, goal, me, me, nbsPath);
+          //printf("%d %1.1f NBS nodes: %llu necessary %llu meeting: %f\n", x, me->GetPathLength(nbsPath), nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetMeetingPoint());
+          
+          if(0){
+            int hcounter,ihcounter;
+            hcounter = ihcounter = 0;
+            astar.SetHeuristic(me);
+            for (long wd = -rad; wd <= rad; wd++){
+              for (long ht = -rad; ht <= rad; ht++){
+                if(m->GetTerrainType(goal.x+wd,goal.y+ht) == kGround){
+                  if (me->HCost(xyLoc(goal.x+wd,goal.y+ht),goal) <= rad){
+                    hcounter++;
+                    astar.SetHeuristic(me);
+                    astar.GetPath(me, xyLoc(goal.x+wd,goal.y+ht), goal, thePath);
+                    if (me->GetPathLength(thePath)!= me->HCost(xyLoc(goal.x+wd,goal.y+ht),goal)){
+                      ihcounter++;
+                    }
+                  }
+                }
+              }
+            }
+            printf("goal %d %d\n", hcounter, ihcounter);
+          }   
+          if(0){
+            int hcounter,ihcounter;
+            hcounter = ihcounter = 0;
+            astar.SetHeuristic(me);
+            for (long wd = -rad; wd <= rad; wd++){
+              for (long ht = -rad; ht <= rad; ht++){
+                if(m->GetTerrainType(start.x+wd,start.y+ht) == kGround){
+                  if (me->HCost(xyLoc(start.x+wd,start.y+ht),start) <= rad){
+                    hcounter++;
+                    astar.SetHeuristic(me);
+                    astar.GetPath(me, xyLoc(start.x+wd,start.y+ht), start, thePath);
+                    if (me->GetPathLength(thePath)!= me->HCost(xyLoc(start.x+wd,start.y+ht),start)){
+                      ihcounter++;
+                    }
+                  }
+                }
+              }
+            }
+            printf("start %d %d\n", hcounter, ihcounter);
+          }            
+          if(0){
+            astar.SetHeuristic(me);
+            astar.GetPath(me, start, goal, thePath);
+            totcount++;
+            if (me->HCost(start,goal) <= rad){
+              hcount++;
+              if (me->GetPathLength(thePath)!= me->HCost(start,goal)){
+                ihcount++;
+              }
+            }
+          }
+          if(0){ //run algorithms
+            if(1){
+              t1.StartTimer();
+              astar.SetHeuristic(me);
+              astar.GetPath(me, start, goal, thePath);
+              t1.EndTimer();
+              printf("%s %d Octile A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x,  me->GetPathLength(thePath),
+                   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+              // totcount++;
+              // if (me->HCost(start,goal) <= rad){
+                // hcount++;
+                // if (me->GetPathLength(thePath)!= me->HCost(start,goal)){
+                  // ihcount++;
+                // }
+              // }
+              
+              t1.StartTimer();
+              astar.SetHeuristic(&z);
+              astar.GetPath(me, start, goal, thePath);
+              t1.EndTimer();
+              printf("%s %d Zero A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+            }
+            if(1){
+              t1.StartTimer();
+              astar.SetHeuristic(me);
+              astar.GetPath(me, goal,start, thePath);
+              t1.EndTimer();
+              printf("%s %d Octile r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+                   
+              t1.StartTimer();
+              astar.SetHeuristic(&z);
+              astar.GetPath(me, goal,start, thePath);
+              t1.EndTimer();
+              printf("%s %d Zero r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+            }
+            if(1){
+              NBS<xyLoc, tDirection, MapEnvironment,NBSQueue<xyLoc, 1, true>> nbs(true);
+              t1.StartTimer();
+              nbs.GetPath(me, start, goal,me,me, thePath);
+              t1.EndTimer();
+              printf("%s %d Octile NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+                   
+              t1.StartTimer();
+              nbs.GetPath(me, start, goal,&z,&z, thePath);
+              t1.EndTimer();
+              printf("%s %d Zero NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+            }
+            if(1){
+              DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,1,true>> dvcbs(false,true);
+              t1.StartTimer();
+              dvcbs.GetPath(me, start, goal,me,me, thePath);
+              t1.EndTimer();
+              printf("%s %d Octile DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+                   
+              t1.StartTimer();
+              dvcbs.GetPath(me, start, goal,&z,&z, thePath);
+              t1.EndTimer();
+              printf("%s %d Zero DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+            }      
+            if(1){
+              DVCBS<xyLoc, tDirection, MapEnvironment,DVCBSQueue<xyLoc,1,false>> dvcbs(false,false);
+              t1.StartTimer();
+              dvcbs.GetPath(me, start, goal,me,me, thePath);
+              t1.EndTimer();
+              printf("%s %d Octile DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+                   
+              t1.StartTimer();
+              dvcbs.GetPath(me, start, goal,&z,&z, thePath);
+              t1.EndTimer();
+              printf("%s %d Zero DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", map.c_str(), x, me->GetPathLength(thePath),
+                   dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+            }         
+          }
+        
+          if(0){ //Analyze VC
+            BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, me, me);
+            BidirectionalProblemAnalyzer<xyLoc, tDirection, MapEnvironment>::GetWeightedVertexGraph(start, goal, me, &z, &z);
+          }
+          // f = MeasureHeuristicErrors(me, (graphState)goal, me, 5, 4, [](float i){return i <1;});
+          // printf("Roads-%s Forward Error percentame (5,4): %1.1f\n", roadType.c_str(),f*100);
+          // f = MeasureHeuristicErrors(me, (graphState)start, me, 5, 4, [](float i){return i <1;});
+          // printf("Roads-%s Backward Error percentame (5,4): %1.1f\n", roadType.c_str(),f*100);
+          
+          if(0){ //measure distance from goal
+            printf("goal ");
+            StateNeighborsUpToDistance(me, goal,me,rad);
+            // printf("goal ");
+            // StateNeighborsUpToDistance(me, goal,&z,rad);
+            printf("start ");
+            StateNeighborsUpToDistance(me, start,me,rad);  
+            // printf("start ");
+            // StateNeighborsUpToDistance(me, start,&z,rad);
+          }
+
+        }
+      }
+
+
+
+    }
+    printf("%d %d %d\n",hcount,ihcount,totcount);	
+    printf("variance %1.2f\n", stats.Variance());
+    int currentMax = 0;
+    int totalNum = 0;
+    for(auto it = countStats.begin(); it != countStats.end(); ++it ){
+        if (it ->second > currentMax) {
+            currentMax = it->second;
+        }
+        totalNum+= it->second;;
+    }
+    printf("variance-2 %d %d %1.2f\n", currentMax, totalNum, currentMax/totalNum);
+  }
+}
 void AnalyzeProblem(Map *m, int whichProblem, Experiment e, double weight)
 {
 	

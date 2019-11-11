@@ -31,9 +31,9 @@ template <class state, class action, class environment, class dataStructure = NB
           class priorityQueue = BDOpenClosed<state, NBSCompareOpenReady<state>, NBSCompareOpenWaiting<state>>>
 class NBS {
 public:
-	NBS()
+	NBS(bool isLeqInOpen = false)
 	{
-		forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount();
+		forwardHeuristic = 0; backwardHeuristic = 0; env = 0; ResetNodeCount(); isLeq = isLeqInOpen;
 	}
 	virtual ~NBS() {}
 	void GetPath(environment *env, const state& from, const state& to,
@@ -111,7 +111,6 @@ public:
 	void OpenGLDraw() const;
 	void Draw(Graphics::Display &d) const;
 	void DrawBipartiteGraph(Graphics::Display &d) const;
-  
   dataStructure queue;
 	
 	//	void SetWeight(double w) {weight = w;}
@@ -171,7 +170,7 @@ private:
 	
 	//keep track of whether we expand a node or put it back to open
 	bool expand;
-	
+	bool isLeq;
 	double currentPr;
 	
 	
@@ -232,8 +231,8 @@ bool NBS<state, action, environment, dataStructure, priorityQueue>::ExpandAPair(
 	}
 	else if (queue.forwardQueue.Lookup(nForward).data == queue.backwardQueue.Lookup(nBackward).data) // if success, see if nodes are the same (return path)
 	{
-		if (queue.TerminateOnG())
-			printf("NBS: Lower Bound on C* from g+g (gsum)\n");
+		//if (queue.TerminateOnG())
+		//	printf("NBS: Lower Bound on C* from g+g (gsum)\n");
 		ExtractFromMiddle(thePath);
 		return true;
 	}
@@ -410,7 +409,7 @@ void NBS<state, action, environment, dataStructure, priorityQueue>::Expand(uint6
 					double newNodeF = current.Lookup(nextID).g + edgeCost + heuristic->HCost(succ, target);
 					if (fless(newNodeF, currentCost))
 					{
-						if (fless(newNodeF, queue.GetLowerBound()))
+						if (fless(newNodeF, queue.GetLowerBound()) || (isLeq && flesseq(newNodeF, queue.GetLowerBound())))
 							current.AddOpenNode(succ,
 												env->GetStateHash(succ),
 												current.Lookup(nextID).g + edgeCost,

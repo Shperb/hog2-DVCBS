@@ -8,23 +8,30 @@
 
 #include "BidirPancake.h"
 #include "PancakePuzzle.h"
+#include "PancakePuzzleGapVector.h"
 #include "TemplateAStar.h"
 #include "NBS.h"
+#include "DVCBS.h"
 #include "IDAStar.h"
 #include "MM.h"
 #include "BSStar.h"
 #include "PancakeInstances.h"
 #include "WeightedVertexGraph.h"
 #include "HeuristicError.h"
+#include "OnlineStats.h"
 
 const int S = 10; // must be factor of sizes below
 
 void TestPancakeTR();
 void TestPancakeRandom();
 void TestPancakeHard(int gap = 0);
+void TestPancakeLowHeuristic(int rad);
+void TestPancakeDensityVariance(int samplesAmount,int sampleDepth);
+void TestPancakeHeuristic();
 void TestRob();
 void TestVariants();
 void TestError();
+void TestPancake_overall();
 
 void TestPancake()
 {
@@ -33,8 +40,13 @@ void TestPancake()
 
 //	TestPancakeHard(0); // GAP heuristic #
 //	TestPancakeHard(1);
-	TestPancakeHard(2);
-//	TestError();
+//	TestPancakeHard(2);
+//    TestPancakeHeuristic();
+    TestPancakeLowHeuristic(5);
+  //TestPancake_overall();
+	//TestError();
+  //TestPancakeDensityVariance(1000,100);
+
 //	TestVariants();
 	exit(0);
 }
@@ -148,7 +160,7 @@ void TestPancakeTR()
 	exit(0);
 }
 
-const int N = 20;
+const int N = 12;
 void TestPancakeRandom()
 {
 	for (int gap = 0; gap < 1; gap++)
@@ -165,6 +177,7 @@ void TestPancakeRandom()
 		std::vector<PancakePuzzleState<N>> bsPath;
 		std::vector<PancakePuzzleState<N>> astarPath;
 		std::vector<PancakePuzzleState<N>> mmPath;
+    std::vector<PancakePuzzleState<N>> dPath;
 		std::vector<PancakePuzzleAction> idaPath;
 		Timer t1, t2, t3, t4, t5;
 		
@@ -261,7 +274,7 @@ void TestPancakeRandom()
 	}
 }
 
-const int CNT = 16;
+const int CNT = 12;
 void TestPancakeHard(int gap)
 {
 	srandom(2017218);
@@ -286,7 +299,7 @@ void TestPancakeHard(int gap)
 		GetPancakeInstance(original, count);
 		
 		printf("Problem %d of %d\n", count+1, 100);
-		std::cout << original << "; Initial heuristic " << pancake.HCost(original, goal) << "\n";
+		std::cout << original << "; Initial heuristic " << pancake.HCost(original,goal) << "\n";
 		
 		// A*
 		if (0)
@@ -555,71 +568,109 @@ void TestError()
 {
 	srandom(2017218);
 	PancakePuzzleState<CNT> goal;
+  PancakePuzzleState<CNT> original;
 	PancakePuzzle<4> pancake(2);
 	PancakePuzzleState<4> smallGoal;
 	PancakePuzzle<CNT> pancake0(0);
 	PancakePuzzle<CNT> pancake1(1);
 	PancakePuzzle<CNT> pancake2(2);
+  PancakePuzzle<CNT> pancake3(3);
 	OffsetHeuristic<PancakePuzzleState<CNT>> o1(&pancake0, 1);
 	OffsetHeuristic<PancakePuzzleState<CNT>> o2(&pancake0, 2);
 	OffsetHeuristic<PancakePuzzleState<CNT>> o3(&pancake0, 3);
 	WeightedHeuristic<PancakePuzzleState<CNT>> w9(&pancake0, 0.9);
 	WeightedHeuristic<PancakePuzzleState<CNT>> w8(&pancake0, 0.8);
 	WeightedHeuristic<PancakePuzzleState<CNT>> w7(&pancake0, 0.7);
-
+  float f;
 	goal.Reset();
-	float f;
+  
+ 	f = MeasureHeuristicErrors(&pancake0, goal, &pancake0, 5, 4, [](float i){return i <1;});
+	printf("GAP\\0 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake1, goal, &pancake1, 5, 4, [](float i){return i <1;});
+	printf("GAP\\1 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake2, goal, &pancake2, 5, 4, [](float i){return i <1;});
+	printf("GAP\\2 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake2, goal, &pancake3, 5, 4, [](float i){return i <1;});
+	printf("GAP\\3 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o1, 5, 4, [](float i){return i <1;});
+	printf("GAP-1 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o2, 5, 4, [](float i){return i <1;});
+	printf("GAP-2 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &o3, 5, 4, [](float i){return i <1;});
+	printf("GAP-3 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w9, 5, 4, [](float i){return i <1;});
+	printf("GAPx.9 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w8, 5, 4, [](float i){return i <1;});
+	printf("GAPx.8 Error percentage (5,4): %1.1f\n", f*100);
+	f = MeasureHeuristicErrors(&pancake0, goal, &w7, 5, 4, [](float i){return i <1;});
+	printf("GAPx.7 Error percentage (5,4): %1.1f\n", f*100);
+	
+  srandom(2017218);
+  for (int count = 0; count < 50; count++)
+  {
+    srandom(random());
+    
+    goal.Reset();
+    original.Reset();
+    for (int x = 0; x < CNT; x++)
+      std::swap(original.puzzle[x], original.puzzle[x+random()%(CNT-x)]);
+
+  
 
 //	f = MeasureHeuristicErrors(&pancake, smallGoal, &pancake, 3, 2, [](float i){return i < 1;});
 //	printf("GAP\\2 Error percentage: %1.1f (4-pancake)\n", f*100);
 
-	f = MeasureHeuristicErrors(&pancake0, goal, &pancake0, 3, 2, [](float i){return i <1;});
-	printf("GAP\\0 Error percentage (3,2): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake1, goal, &pancake1, 3, 2, [](float i){return i <1;});
-	printf("GAP\\1 Error percentage (3,2): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake2, goal, &pancake2, 3, 2, [](float i){return i <1;});
-	printf("GAP\\2 Error percentage (3,2): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &o1, 3, 2, [](float i){return i <1;});
-	printf("GAP-1 Error percentage (3,2): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &o2, 3, 2, [](float i){return i <1;});
-	printf("GAP-2 Error percentage (3,2): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &o3, 3, 2, [](float i){return i <1;});
-	printf("GAP-3 Error percentage (3,2): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &w9, 3, 2, [](float i){return i <1;});
-	printf("GAPx.9 Error percentage (3,2): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &w8, 3, 2, [](float i){return i <1;});
-	printf("GAPx.8 Error percentage (3,2): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &w7, 3, 2, [](float i){return i <1;});
-	printf("GAPx.7 Error percentage (3,2): %1.1f\n", f*100);
-
-	printf("\n----\n\n");
+    f = MeasureHeuristicErrors(&pancake0, original, &pancake0, 5, 4, [](float i){return i <1;});
+    printf("GAP\\0 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake1, original, &pancake1, 5, 4, [](float i){return i <1;});
+    printf("GAP\\1 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake2, original, &pancake2, 5, 4, [](float i){return i <1;});
+    printf("GAP\\2 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake2, original, &pancake3, 5, 4, [](float i){return i <1;});
+    printf("GAP\\3 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake0, original, &o1, 5, 4, [](float i){return i <1;});
+    printf("GAP-1 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake0, original, &o2, 5, 4, [](float i){return i <1;});
+    printf("GAP-2 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake0, original, &o3, 5, 4, [](float i){return i <1;});
+    printf("GAP-3 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake0, original, &w9, 5, 4, [](float i){return i <1;});
+    printf("GAPx.9 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake0, original, &w8, 5, 4, [](float i){return i <1;});
+    printf("GAPx.8 Error percentage (5,4): %1.1f\n", f*100);
+    f = MeasureHeuristicErrors(&pancake0, original, &w7, 5, 4, [](float i){return i <1;});
+    printf("GAPx.7 Error percentage (5,4): %1.1f\n", f*100);
+  }
+	// printf("\n----\n\n");
 	
-	f = MeasureHeuristicErrors(&pancake0, goal, &pancake0, 3, 1, [](float i){return i <2;});
-	printf("GAP\\0 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake1, goal, &pancake1, 3, 1, [](float i){return i <2;});
-	printf("GAP\\1 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake2, goal, &pancake2, 3, 1, [](float i){return i <2;});
-	printf("GAP\\2 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &o1, 3, 1, [](float i){return i <2;});
-	printf("GAP-1 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &o2, 3, 1, [](float i){return i <2;});
-	printf("GAP-2 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &o3, 3, 1, [](float i){return i <2;});
-	printf("GAP-3 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &w9, 3, 2, [](float i){return i <2;});
-	printf("GAPx.9 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &w8, 3, 2, [](float i){return i <2;});
-	printf("GAPx.8 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &w7, 3, 2, [](float i){return i <2;});
-	printf("GAPx.7 Error percentage (3,1): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &pancake0, 5, 3, [](float i){return i <2;});
+	// printf("GAP\\0 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake1, goal, &pancake1, 5, 3, [](float i){return i <2;});
+	// printf("GAP\\1 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake2, goal, &pancake2, 5, 3, [](float i){return i <2;});
+	// printf("GAP\\2 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake2, goal, &pancake3, 5, 3, [](float i){return i <2;});
+	// printf("GAP\\2 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &o1, 5, 3, [](float i){return i <2;});
+	// printf("GAP-1 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &o2, 5, 3, [](float i){return i <2;});
+	// printf("GAP-2 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &o3, 5, 3, [](float i){return i <2;});
+	// printf("GAP-3 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &w9, 5, 3, [](float i){return i <2;});
+	// printf("GAPx.9 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &w8, 5, 3, [](float i){return i <2;});
+	// printf("GAPx.8 Error percentage (5,3): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &w7, 5, 3, [](float i){return i <2;});
+	// printf("GAPx.7 Error percentage (5,3): %1.1f\n", f*100);
 
 	
-	f = MeasureHeuristicErrors(&pancake0, goal, &w9, 3, 2, [](float i){return i>=1 && i <2;});
-	printf("GAPx.9 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &w8, 3, 2, [](float i){return i>=1 && i <2;});
-	printf("GAPx.8 Error percentage (3,1): %1.1f\n", f*100);
-	f = MeasureHeuristicErrors(&pancake0, goal, &w7, 3, 2, [](float i){return i>=1 && i <2;});
-	printf("GAPx.7 Error percentage (3,1): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &w9, 3, 2, [](float i){return i>=1 && i <2;});
+	// printf("GAPx.9 Error percentage (3,1): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &w8, 3, 2, [](float i){return i>=1 && i <2;});
+	// printf("GAPx.8 Error percentage (3,1): %1.1f\n", f*100);
+	// f = MeasureHeuristicErrors(&pancake0, goal, &w7, 3, 2, [](float i){return i>=1 && i <2;});
+	// printf("GAPx.7 Error percentage (3,1): %1.1f\n", f*100);
 
 	exit(0);
 }
@@ -652,4 +703,1015 @@ void TestVariants()
 //	Solve(&w9, "/Users/nathanst/bidir/pancake/p11_W9");
 //	Solve(&w8, "/Users/nathanst/bidir/pancake/p11_W8");
 //	Solve(&w7, "/Users/nathanst/bidir/pancake/p11_W7");
+}
+
+
+void TestPancake_overall()
+{
+  std::map<double,int> h1_overall_vals;
+  std::map<double,int> h2_overall_vals;
+  std::map<double,int> h1_astar_vals;
+  std::map<double,int> h2_astar_vals;
+  std::map<double,int> h1_rastar_vals;
+  std::map<double,int> h2_rastar_vals;
+  std::map<double,int> h1_real_bd_vals;
+  std::map<double,int> h2_real_bd_vals;
+  std::vector<PancakePuzzleState<CNT>> nbsPath;
+  std::vector<PancakePuzzleState<CNT>> astarPath;
+  TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
+  NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> nbs;
+  
+  PancakePuzzleState<CNT> goal;
+  PancakePuzzleState<CNT> original;
+  PancakePuzzle<CNT> pancake;
+  
+  PancakePuzzle<CNT> pancake0(0);
+  PancakePuzzle<CNT> pancake2(2);
+  PancakePuzzle<CNT> pancake3(3);
+  std::vector<int> g1 = {0,1,2};
+  std::vector<int> g2 = {3,4,5};
+  std::vector<int> g3 = {6,7,8};
+  std::vector<int> g4 = {9,10,11};
+  PancakePuzzleGapVector<CNT> pancake31(g1);
+  PancakePuzzleGapVector<CNT> pancake32(g2);
+  PancakePuzzleGapVector<CNT> pancake33(g3);
+  PancakePuzzleGapVector<CNT> pancake34(g4);
+  
+  Heuristic<PancakePuzzleState<CNT>> maxgap3_4;
+  //Heuristic<PancakePuzzleState<CNT>> maxgap3_3;
+  //Heuristic<PancakePuzzleState<CNT>> maxgap3_2;
+  
+
+  maxgap3_4.lookups.resize(0);
+  maxgap3_4.lookups.push_back({kMaxNode, 1, 4});
+  maxgap3_4.lookups.push_back({kLeafNode, 0, 0});
+  maxgap3_4.lookups.push_back({kLeafNode, 1, 1});
+  maxgap3_4.lookups.push_back({kLeafNode, 2, 2});
+  maxgap3_4.lookups.push_back({kLeafNode, 3, 3});
+//	h.lookups.push_back({kLeafNode, 4, 4});
+  maxgap3_4.heuristics.resize(0);
+  maxgap3_4.heuristics.push_back(&pancake31);
+  maxgap3_4.heuristics.push_back(&pancake32);
+  maxgap3_4.heuristics.push_back(&pancake33);
+  maxgap3_4.heuristics.push_back(&pancake34);
+  
+
+  Timer t1;
+  srandom(2017218);
+  for (int count = 0; count < 50; count++)
+  {
+    srandom(random());
+    
+    goal.Reset();
+    original.Reset();
+    for (int x = 0; x < CNT; x++)
+      std::swap(original.puzzle[x], original.puzzle[x+random()%(CNT-x)]);
+      if (1){
+        BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> p(original, goal, &pancake0, &pancake2, &pancake2);
+        p.drawProblemInstance = false;
+        p.drawStatistics = false;
+        p.drawAllG = true;
+        p.flipBackwardsGCost = true;
+        p.SaveSVG((std::to_string(count)+"_GAP2.svg").c_str());        
+        BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> p1(original, goal, &pancake0, &maxgap3_4, &maxgap3_4);
+        p1.drawProblemInstance = false;
+        p1.drawStatistics = false;
+        p1.drawAllG = true;
+        p1.flipBackwardsGCost = true;
+        p1.SaveSVG((std::to_string(count)+"_GAP3MAX4.svg").c_str());        
+      }
+      if (0){
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake2);
+        astar.GetPath(&pancake0, original, goal, astarPath);
+        t1.EndTimer();
+        printf("A* GAP\\2 found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), astar.GetNodesTouched(), t1.GetElapsedTime());
+        for (int x = 0; x < astar.GetNumItems(); x++)
+        {
+          const auto &i = astar.GetItem(x);
+          if (i.where != kClosedList)
+            continue;
+          int h_value = i.h;
+          if (h1_astar_vals.find(h_value) == h1_astar_vals.end()){
+            h1_astar_vals.insert(std::make_pair(h_value,1));
+          }
+          else{
+            h1_astar_vals[h_value]++;
+          }
+        }
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake2);
+        astar.GetPath(&pancake0, goal, original, astarPath);
+        t1.EndTimer();
+        printf("r-A* GAP\\2 found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), astar.GetNodesTouched(), t1.GetElapsedTime());
+        for (int x = 0; x < astar.GetNumItems(); x++)
+        {
+          const auto &i = astar.GetItem(x);
+          if (i.where != kClosedList)
+            continue;
+          int h_value = i.h;
+          if (h1_rastar_vals.find(h_value) == h1_rastar_vals.end()){
+            h1_rastar_vals.insert(std::make_pair(h_value,1));
+          }
+          else{
+            h1_rastar_vals[h_value]++;
+          }
+        }
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, original, goal, &pancake2, &pancake2, nbsPath);
+        t1.EndTimer();
+        printf("NBS GAP\\2 found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t1.GetElapsedTime());
+             
+        for (int x = 0; x < nbs.GetNumForwardItems(); x++)
+        {
+          const auto &i = nbs.GetForwardItem(x);
+          if (i.where != kClosed)
+            continue;
+          int h_value = i.h;
+          if (h1_real_bd_vals.find(h_value) == h1_real_bd_vals.end()){
+            h1_real_bd_vals.insert(std::make_pair(h_value,1));
+          }
+          else{
+            h1_real_bd_vals[h_value]++;
+          }
+        }
+        for (int x = 0; x < nbs.GetNumBackwardItems(); x++)
+        {
+          const auto &i = nbs.GetBackwardItem(x);
+          if (i.where != kClosed)
+            continue;
+          int h_value = i.h;
+          if (h1_real_bd_vals.find(h_value) == h1_real_bd_vals.end()){
+            h1_real_bd_vals.insert(std::make_pair(h_value,1));
+          }
+          else{
+            h1_real_bd_vals[h_value]++;
+          }
+        }
+        
+        
+        
+        
+        
+        t1.StartTimer();
+        astar.SetHeuristic(&maxgap3_4);
+        astar.GetPath(&pancake0, original, goal, astarPath);
+        t1.EndTimer();
+        printf("A* GAP\\3-MAX(4) found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), astar.GetNodesTouched(), t1.GetElapsedTime());
+        for (int x = 0; x < astar.GetNumItems(); x++)
+        {
+          const auto &i = astar.GetItem(x);
+          if (i.where != kClosedList)
+            continue;
+          int h_value = i.h;
+          if (h2_astar_vals.find(h_value) == h2_astar_vals.end()){
+            h2_astar_vals.insert(std::make_pair(h_value,1));
+          }
+          else{
+            h2_astar_vals[h_value]++;
+          }
+        }
+        t1.StartTimer();
+        astar.SetHeuristic(&maxgap3_4);
+        astar.GetPath(&pancake0, goal, original, astarPath);
+        t1.EndTimer();
+        printf("r-A* GAP\\3-MAX(4) found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), astar.GetNodesTouched(), t1.GetElapsedTime());
+        for (int x = 0; x < astar.GetNumItems(); x++)
+        {
+          const auto &i = astar.GetItem(x);
+          if (i.where != kClosedList)
+            continue;
+          int h_value = i.h;
+          if (h2_rastar_vals.find(h_value) == h2_rastar_vals.end()){
+            h2_rastar_vals.insert(std::make_pair(h_value,1));
+          }
+          else{
+            h2_rastar_vals[h_value]++;
+          }
+        }
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, original, goal, &maxgap3_4, &maxgap3_4, nbsPath);
+        t1.EndTimer();
+        printf("NBS GAP\\3-MAX(4) found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t1.GetElapsedTime());
+             
+        for (int x = 0; x < nbs.GetNumForwardItems(); x++)
+        {
+          const auto &i = nbs.GetForwardItem(x);
+          if (i.where != kClosed)
+            continue;
+          int h_value = i.h;
+          if (h2_real_bd_vals.find(h_value) == h2_real_bd_vals.end()){
+            h2_real_bd_vals.insert(std::make_pair(h_value,1));
+          }
+          else{
+            h2_real_bd_vals[h_value]++;
+          }
+        }
+        for (int x = 0; x < nbs.GetNumBackwardItems(); x++)
+        {
+          const auto &i = nbs.GetBackwardItem(x);
+          if (i.where != kClosed)
+            continue;
+          int h_value = i.h;
+          if (h2_real_bd_vals.find(h_value) == h2_real_bd_vals.end()){
+            h2_real_bd_vals.insert(std::make_pair(h_value,1));
+          }
+          else{
+            h2_real_bd_vals[h_value]++;
+          }
+        }
+      }
+  }
+  if(0){
+    for (int i = 0; i< 10000000; i++){
+      original.Reset();
+      for (int x = 0; x < CNT; x++)
+        std::swap(original.puzzle[x], original.puzzle[x+random()%(CNT-x)]);
+
+      double h_1_val = pancake2.HCost(original,goal);
+      double h_2_val = maxgap3_4.HCost(original,goal);
+      if (h1_overall_vals.find(h_1_val) == h1_overall_vals.end()){
+        h1_overall_vals.insert(std::make_pair(h_1_val,1));
+      }
+      else{
+        h1_overall_vals[h_1_val]++;
+      }
+      if (h2_overall_vals.find(h_2_val) == h2_overall_vals.end()){
+        h2_overall_vals.insert(std::make_pair(h_2_val,1));
+      }
+      else{
+        h2_overall_vals[h_2_val]++;
+      }
+    }
+  }
+  cout << "h1_overall_vals" << std::endl;
+	for(auto elem : h1_overall_vals)
+  {
+     std::cout << elem.first << " " << elem.second  << "\n";
+  }
+  cout << "h2_overall_vals" << std::endl;
+	for(auto elem : h2_overall_vals)
+  {
+     std::cout << elem.first << " " << elem.second  << "\n";
+  }	
+  cout << "h1_astar_vals" << std::endl;
+	for(auto elem : h1_astar_vals)
+  {
+     std::cout << elem.first << " " << elem.second  << "\n";
+  }
+  cout << "h1_rastar_vals" << std::endl;
+	for(auto elem : h1_rastar_vals)
+  {
+     std::cout << elem.first << " " << elem.second  << "\n";
+  }
+  cout << "h1_real_bd_vals" << std::endl;
+	for(auto elem : h1_real_bd_vals)
+  {
+     std::cout << elem.first << " " << elem.second  << "\n";
+  }	
+  cout << "h2_astar_vals" << std::endl;
+	for(auto elem : h2_astar_vals)
+  {
+     std::cout << elem.first << " " << elem.second  << "\n";
+  }
+  cout << "h2_rastar_vals" << std::endl;
+	for(auto elem : h2_rastar_vals)
+  {
+     std::cout << elem.first << " " << elem.second  << "\n";
+  }
+  cout << "h2_real_bd_vals" << std::endl;
+	for(auto elem : h2_real_bd_vals)
+  {
+     std::cout << elem.first << " " << elem.second  << "\n";
+  }	
+}
+
+void TestPancakeHeuristic()
+{
+  printf("TestPancakeHeuristic\n");
+  srandom(2017218);
+  PancakePuzzleState<CNT> start;
+  PancakePuzzleState<CNT> original;
+  PancakePuzzleState<CNT> goal;
+  
+
+  PancakePuzzle<CNT> pancake0(0);
+  PancakePuzzle<CNT> pancake1(1);
+  PancakePuzzle<CNT> pancake2(2);
+  PancakePuzzle<CNT> pancake3(3);
+  std::vector<int> g1 = {0,1,2};
+  std::vector<int> g2 = {3,4,5};
+  std::vector<int> g3 = {6,7,8};
+  std::vector<int> g4 = {9,10,11};
+  PancakePuzzleGapVector<CNT> pancake31(g1);
+  PancakePuzzleGapVector<CNT> pancake32(g2);
+  PancakePuzzleGapVector<CNT> pancake33(g3);
+  PancakePuzzleGapVector<CNT> pancake34(g4);
+  
+  Heuristic<PancakePuzzleState<CNT>> maxgap3_4;
+  //Heuristic<PancakePuzzleState<CNT>> maxgap3_3;
+  //Heuristic<PancakePuzzleState<CNT>> maxgap3_2;
+  
+
+  maxgap3_4.lookups.resize(0);
+  maxgap3_4.lookups.push_back({kMaxNode, 1, 4});
+  maxgap3_4.lookups.push_back({kLeafNode, 0, 0});
+  maxgap3_4.lookups.push_back({kLeafNode, 1, 1});
+  maxgap3_4.lookups.push_back({kLeafNode, 2, 2});
+  maxgap3_4.lookups.push_back({kLeafNode, 3, 3});
+//	h.lookups.push_back({kLeafNode, 4, 4});
+  maxgap3_4.heuristics.resize(0);
+  maxgap3_4.heuristics.push_back(&pancake31);
+  maxgap3_4.heuristics.push_back(&pancake32);
+  maxgap3_4.heuristics.push_back(&pancake33);
+  maxgap3_4.heuristics.push_back(&pancake34);
+  
+  // maxgap3_3.lookups.resize(0);
+  // maxgap3_3.lookups.push_back({kMaxNode, 1, 3});
+  // maxgap3_3.lookups.push_back({kLeafNode, 0, 0});
+  // maxgap3_3.lookups.push_back({kLeafNode, 1, 1});
+  // maxgap3_3.lookups.push_back({kLeafNode, 2, 2});
+  // maxgap3_3.heuristics.resize(0);
+  // maxgap3_3.heuristics.push_back(&pancake31);
+  // maxgap3_3.heuristics.push_back(&pancake32);
+  // maxgap3_3.heuristics.push_back(&pancake33);
+  
+    // maxgap3_2.lookups.resize(0);
+  // maxgap3_2.lookups.push_back({kMaxNode, 1, 2});
+  // maxgap3_2.lookups.push_back({kLeafNode, 0, 0});
+  // maxgap3_2.lookups.push_back({kLeafNode, 1, 1});
+  // maxgap3_2.heuristics.resize(0);
+  // maxgap3_2.heuristics.push_back(&pancake31);
+  // maxgap3_2.heuristics.push_back(&pancake32);
+
+  // Heuristic<PancakePuzzleState<CNT>> maxgap2_6;
+  // Heuristic<PancakePuzzleState<CNT>> maxgap2_5;
+  // Heuristic<PancakePuzzleState<CNT>> maxgap2_4;
+  // Heuristic<PancakePuzzleState<CNT>> maxgap2_3;
+  // Heuristic<PancakePuzzleState<CNT>> maxgap2_2;
+
+  // std::vector<int> g2_1 = {0,1};
+  // std::vector<int> g2_2 = {2,3};
+  // std::vector<int> g2_3 = {4,5};
+  // std::vector<int> g2_4 = {6,7};
+  // std::vector<int> g2_5 = {8,9};
+  // std::vector<int> g2_6 = {10,11};
+  
+  // PancakePuzzleGapVector<CNT> pancake21(g2_1);
+  // PancakePuzzleGapVector<CNT> pancake22(g2_2);
+  // PancakePuzzleGapVector<CNT> pancake23(g2_3);
+  // PancakePuzzleGapVector<CNT> pancake24(g2_4);
+  // PancakePuzzleGapVector<CNT> pancake25(g2_5);
+  // PancakePuzzleGapVector<CNT> pancake26(g2_6);
+  
+  // maxgap2_6.lookups.resize(0);
+  // maxgap2_6.lookups.push_back({kMaxNode, 1, 6});
+  // maxgap2_6.lookups.push_back({kLeafNode, 0, 0});
+  // maxgap2_6.lookups.push_back({kLeafNode, 1, 1});
+  // maxgap2_6.lookups.push_back({kLeafNode, 2, 2});
+  // maxgap2_6.lookups.push_back({kLeafNode, 3, 3});
+  // maxgap2_6.lookups.push_back({kLeafNode, 4, 4});
+  // maxgap2_6.lookups.push_back({kLeafNode, 5, 5});
+  // maxgap2_6.heuristics.resize(0);
+  // maxgap2_6.heuristics.push_back(&pancake21);
+  // maxgap2_6.heuristics.push_back(&pancake22);
+  // maxgap2_6.heuristics.push_back(&pancake23);
+  // maxgap2_6.heuristics.push_back(&pancake24);
+  // maxgap2_6.heuristics.push_back(&pancake25);
+  // maxgap2_6.heuristics.push_back(&pancake26);
+  
+  // maxgap2_5.lookups.resize(0);
+  // maxgap2_5.lookups.push_back({kMaxNode, 1, 5});
+  // maxgap2_5.lookups.push_back({kLeafNode, 0, 0});
+  // maxgap2_5.lookups.push_back({kLeafNode, 1, 1});
+  // maxgap2_5.lookups.push_back({kLeafNode, 2, 2});
+  // maxgap2_5.lookups.push_back({kLeafNode, 3, 3});
+  // maxgap2_5.lookups.push_back({kLeafNode, 4, 4});
+  // maxgap2_5.heuristics.resize(0);
+  // maxgap2_5.heuristics.push_back(&pancake21);
+  // maxgap2_5.heuristics.push_back(&pancake22);
+  // maxgap2_5.heuristics.push_back(&pancake23);
+  // maxgap2_5.heuristics.push_back(&pancake24);
+  // maxgap2_5.heuristics.push_back(&pancake25);
+  
+  // maxgap2_4.lookups.resize(0);
+  // maxgap2_4.lookups.push_back({kMaxNode, 1, 4});
+  // maxgap2_4.lookups.push_back({kLeafNode, 0, 0});
+  // maxgap2_4.lookups.push_back({kLeafNode, 1, 1});
+  // maxgap2_4.lookups.push_back({kLeafNode, 2, 2});
+  // maxgap2_4.lookups.push_back({kLeafNode, 3, 3});
+  // maxgap2_4.heuristics.resize(0);
+  // maxgap2_4.heuristics.push_back(&pancake21);
+  // maxgap2_4.heuristics.push_back(&pancake22);
+  // maxgap2_4.heuristics.push_back(&pancake23);
+  // maxgap2_4.heuristics.push_back(&pancake24);
+
+  // maxgap2_3.lookups.resize(0);
+  // maxgap2_3.lookups.push_back({kMaxNode, 1, 3});
+  // maxgap2_3.lookups.push_back({kLeafNode, 0, 0});
+  // maxgap2_3.lookups.push_back({kLeafNode, 1, 1});
+  // maxgap2_3.lookups.push_back({kLeafNode, 2, 2});
+  // maxgap2_3.heuristics.resize(0);
+  // maxgap2_3.heuristics.push_back(&pancake21);
+  // maxgap2_3.heuristics.push_back(&pancake22);
+  // maxgap2_3.heuristics.push_back(&pancake23);
+
+  // maxgap2_2.lookups.resize(0);
+  // maxgap2_2.lookups.push_back({kMaxNode, 1, 2});
+  // maxgap2_2.lookups.push_back({kLeafNode, 0, 0});
+  // maxgap2_2.lookups.push_back({kLeafNode, 1, 1});
+  // maxgap2_2.heuristics.resize(0);
+  // maxgap2_2.heuristics.push_back(&pancake21);
+  // maxgap2_2.heuristics.push_back(&pancake22);
+
+  srandom(2017218);
+  for (int count = 0; count < 50; count++)
+  {
+    srandom(random());
+    
+    goal.Reset();
+    original.Reset();
+    for (int x = 0; x < CNT; x++)
+      std::swap(original.puzzle[x], original.puzzle[x+random()%(CNT-x)]);
+    // printf("GAP" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &pancake0, &pancake0);
+    // printf("GAP 1" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &pancake1, &pancake1);
+    //printf("GAP 2" );
+    //BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &pancake2, &pancake2);
+    // printf("GAP 2 MAX(2)" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &maxgap2_2, &maxgap2_2);   
+    // printf("GAP 2 MAX(3)" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &maxgap2_3, &maxgap2_3);
+    // printf("GAP 2 MAX(4)" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &maxgap2_4, &maxgap2_4);
+    // printf("GAP 2 MAX(5)" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &maxgap2_5, &maxgap2_5);
+    // printf("GAP 2 MAX(6)" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &maxgap2_6, &maxgap2_6);
+    // printf("GAP 3" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &pancake3, &pancake3);  
+    // printf("GAP 3 MAX(2)" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &maxgap3_2, &maxgap3_2);   
+    // printf("GAP 3 MAX(3)" );
+    // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &maxgap3_3, &maxgap3_3);
+    //printf("GAP 3 MAX(4)" );
+    //BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(original, goal, &pancake0, &maxgap3_4, &maxgap3_4);
+  }
+}
+
+
+void TestPancakeLowHeuristic(int rad)
+{
+  printf("TestPancakeLowHeuristic %d\n",rad);
+  int count_gap0,count_gap1,count_gap2,count_gap3,count_o1,count_o2,count_o3,count_w9,count_w8,count_w7,icount_gap0,icount_gap1,icount_gap2,icount_gap3,icount_o1,icount_o2,icount_o3,icount_w9,icount_w8,icount_w7,expansions;
+  count_gap0 = count_gap1 = count_gap2 = count_gap3 = count_o1 = count_o2 = count_o3 = count_w9 = count_w8 = count_w7 = icount_gap0 = icount_gap1 = icount_gap2 = icount_gap3 = icount_o1 = icount_o2 = icount_o3 = icount_w9 = icount_w8 = icount_w7 = expansions = 0;
+  PancakePuzzle<CNT> pancake0(0);
+  PancakePuzzle<CNT> pancake1(1);
+  PancakePuzzle<CNT> pancake2(2);
+  PancakePuzzle<CNT> pancake3(3);
+  OffsetHeuristic<PancakePuzzleState<CNT>> o1(&pancake0, 1);
+  OffsetHeuristic<PancakePuzzleState<CNT>> o2(&pancake0, 2);
+  OffsetHeuristic<PancakePuzzleState<CNT>> o3(&pancake0, 3);
+  WeightedHeuristic<PancakePuzzleState<CNT>> w9(&pancake0, 0.9);
+  WeightedHeuristic<PancakePuzzleState<CNT>> w8(&pancake0, 0.8);
+  WeightedHeuristic<PancakePuzzleState<CNT>> w7(&pancake0, 0.7);
+  ZeroHeuristic<PancakePuzzleState<CNT>> z;
+  
+  TemplateAStar<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> astar;
+	std::vector<PancakePuzzleState<CNT>> astarPath;
+  NBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>, NBSQueue<PancakePuzzleState<CNT>, 1, true>> nbs(true);
+	std::vector<PancakePuzzleState<CNT>> nbsPath;
+	std::vector<PancakePuzzleState<CNT>> dvcbsPath;
+  Timer t1;
+  PancakePuzzleState<CNT> original,start;
+  PancakePuzzleState<CNT> goal;
+  goal.Reset();
+  original.Reset();
+  if(1){
+    int limit = 1000000;
+    t1.StartTimer();
+    srandom(3201561);
+    for (int count = 0; count < limit; count++)
+    {
+      srandom(random());
+      
+      goal.Reset();
+      original.Reset();
+      for (int x = 0; x < CNT; x++)
+        std::swap(original.puzzle[x], original.puzzle[x+random()%(CNT-x)]);
+      if (min(pancake0.HCost(original,goal),min(pancake1.HCost(original,goal),min(pancake2.HCost(original,goal),min(pancake3.HCost(original,goal),min(o1.HCost(original,goal),min(o2.HCost(original,goal),min(o3.HCost(original,goal),min(w9.HCost(original,goal),min(w8.HCost(original,goal),w7.HCost(original,goal)))))))))) <= rad){
+        
+        astar.GetPath(&pancake0, original, goal, astarPath);
+        expansions+= astar.GetNodesExpanded();
+        //printf("Problem %d of %d\n", count+1, 50);
+        //std::cout << original << "\n";
+        if (pancake0.HCost(original,goal) <= rad){
+          count_gap0++;
+          if (pancake0.GetPathLength(astarPath) != pancake0.HCost(original,goal)){
+            icount_gap0++;
+          }
+        }
+        if (pancake1.HCost(original,goal) <= rad){
+          count_gap1++;
+          if (pancake0.GetPathLength(astarPath) != pancake1.HCost(original,goal)){
+            icount_gap1++;
+          }
+        }
+        if (pancake2.HCost(original,goal) <= rad){
+          count_gap2++;
+          if (pancake0.GetPathLength(astarPath) != pancake2.HCost(original,goal)){
+            icount_gap2++;
+          }
+        }
+        if (pancake3.HCost(original,goal) <= rad){
+          count_gap3++;
+          if (pancake0.GetPathLength(astarPath) != pancake3.HCost(original,goal)){
+            icount_gap3++;
+          }
+        }
+        if (o1.HCost(original,goal) <= rad){
+          count_o1++;
+          if (pancake0.GetPathLength(astarPath) != o1.HCost(original,goal)){
+            icount_o1++;
+          }
+        }
+        if (o2.HCost(original,goal) <= rad){
+          count_o2++;
+          if (pancake0.GetPathLength(astarPath) != o2.HCost(original,goal)){
+            icount_o2++;
+          }
+        }
+        if (o3.HCost(original,goal) <= rad){
+          count_o3++;
+          if (pancake0.GetPathLength(astarPath) != o3.HCost(original,goal)){
+            icount_o3++;
+          }
+        }
+        if (w9.HCost(original,goal) <= rad){
+          count_w9++;
+          if (pancake0.GetPathLength(astarPath) != w9.HCost(original,goal)){
+            icount_w9++;
+          }
+        }
+        if (w8.HCost(original,goal) <= rad){
+          count_w8++;
+          if (pancake0.GetPathLength(astarPath) != w8.HCost(original,goal)){
+            icount_w8++;
+          }
+        }
+        if (w7.HCost(original,goal) <= rad){
+          count_w7++;
+          if (pancake0.GetPathLength(astarPath) != w7.HCost(original,goal)){
+            icount_w7++;
+          }
+        }
+      }
+    }
+    t1.EndTimer();
+    printf("%d %d %d %d %d %d %d %d %d %d %d\n",count_gap0,count_gap1,count_gap2,count_gap3,count_o1,count_o2,count_o3,count_w9,count_w8,count_w7,limit);
+    printf("%d %d %d %d %d %d %d %d %d %d %d\n",icount_gap0,icount_gap1,icount_gap2,icount_gap3,icount_o1,icount_o2,icount_o3,icount_w9,icount_w8,icount_w7,limit);
+    printf("%1.2f %d\n",t1.GetElapsedTime(),expansions); 
+  }
+  if(1){
+  srandom(2017218);
+    t1.StartTimer();
+    printf("goal ");
+    StateNeighborsUpToDistance(&pancake0, goal, &pancake0, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &pancake1, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &pancake2, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &pancake3, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &o1, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &o2, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &o3, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &w9, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &w8, rad);
+    StateNeighborsUpToDistance(&pancake0, goal, &w7, rad);
+    //StateNeighborsUpToDistance(&pancake0, goal, &z, rad);
+    t1.EndTimer();
+    printf("%1.2f\n",t1.GetElapsedTime()); 
+    printf("start ");
+  }
+  for (int count = 0; count < 50; count++)
+	{
+
+    srandom(random());
+    
+    goal.Reset();
+    original.Reset();
+    for (int x = 0; x < CNT; x++)
+      std::swap(original.puzzle[x], original.puzzle[x+random()%(CNT-x)]);
+    start = original;
+    // A*
+    if(0){ //run algorithms
+      if (1)
+      {
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake0);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake1);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP\\1 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake2);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP\\2 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake3);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP\\3 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        astar.SetHeuristic(&o1);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP-1 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        astar.SetHeuristic(&o2);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP-2 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        astar.SetHeuristic(&o3);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP-3 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());    
+
+        t1.StartTimer();
+        astar.SetHeuristic(&w9);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP0.9 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        astar.SetHeuristic(&w8);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP0.8 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        astar.SetHeuristic(&w7);
+        astar.GetPath(&pancake0, start, goal, astarPath);
+        t1.EndTimer();
+        printf("%d GAP0.7 A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());            
+      }
+
+      // Reverse A*
+      if (0)
+      {
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake0);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake1);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP\\1 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake2);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP\\2 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        astar.SetHeuristic(&pancake3);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP\\3 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        astar.SetHeuristic(&o1);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP-1 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        astar.SetHeuristic(&o2);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP-2 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        astar.SetHeuristic(&o3);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP-3 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());    
+
+        t1.StartTimer();
+        astar.SetHeuristic(&w9);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP0.9 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        astar.SetHeuristic(&w8);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP0.8 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        astar.SetHeuristic(&w7);
+        astar.GetPath(&pancake0, goal, start, astarPath);
+        t1.EndTimer();
+        printf("%d GAP0.7 r-A* found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(astarPath),
+             astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), t1.GetElapsedTime()); 
+      }
+      
+      // NBS e=1
+      if (0)
+      {
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&pancake0, &pancake0, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&pancake1, &pancake1, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\1 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&pancake2, &pancake2, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\2 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&pancake3, &pancake3, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\3 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&o1, &o1, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP-1 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&o2, &o2, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP-2 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&o3, &o3, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP-3 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());    
+
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&w9, &w9, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.9 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&w8, &w8, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.8 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        nbs.GetPath(&pancake0, start, goal,&w7, &w7, nbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.7 NBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(nbsPath),
+             nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), t1.GetElapsedTime());            
+      }
+      // DVCBS
+      if (0)
+      {
+        DVCBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>,DVCBSQueue<PancakePuzzleState<CNT>,1,true>> dvcbs(false,true);
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&pancake0, &pancake0, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&pancake1, &pancake1, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\1 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&pancake2, &pancake2, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\2 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&pancake3, &pancake3, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\3 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&o1, &o1, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP-1 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&o2, &o2, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP-2 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&o3, &o3, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP-3 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());    
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&w9, &w9, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.9 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&w8, &w8, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.8 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&w7, &w7, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.7 DVCBS found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+      }
+      // DVCBS-L
+      if (0)
+      {
+        DVCBS<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>,DVCBSQueue<PancakePuzzleState<CNT>,1,false>> dvcbs(false,false);
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&pancake0, &pancake0, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&pancake1, &pancake1, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\1 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+             
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&pancake2, &pancake2, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\2 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&pancake3, &pancake3, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP\\3 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&o1, &o1, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP-1 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&o2, &o2, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP-2 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&o3, &o3, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP-3 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());    
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&w9, &w9, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.9 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&w8, &w8, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.8 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());      
+
+        t1.StartTimer();
+        dvcbs.GetPath(&pancake0, start, goal,&w7, &w7, dvcbsPath);
+        t1.EndTimer();
+        printf("%d GAP0.7 DVCBS-L found path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n", count, pancake0.GetPathLength(dvcbsPath),
+             dvcbs.GetNodesExpanded(), dvcbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+      }
+    }
+    if(0){
+      StateNeighborsUpToDistance(&pancake0, original, &pancake0, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &pancake1, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &pancake2, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &pancake3, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &o1, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &o2, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &o3, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &w9, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &w8, rad);
+      StateNeighborsUpToDistance(&pancake0, original, &w7, rad);
+      //StateNeighborsUpToDistance(&pancake0, original, &z, rad);
+    }
+    
+    if(0){
+      //BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &pancake0, &pancake0,0,1);
+      // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &pancake1, &pancake1,"tst.svg",1);
+      // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &pancake2, &pancake2,0,1);
+      // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &pancake3, &pancake3,0,1);
+      // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &o1, &o1,0,1);
+      // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &o2, &o2,0,1);
+      // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &o3, &o3,0,1);
+      //BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &w9, &w9,0,1);
+      // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &w8, &w8,0,1);
+      // BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>>::GetWeightedVertexGraph(start, goal, &pancake0, &w7, &w7,0,1);
+        BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> p(start, goal, &pancake0, &w8, &w8);
+        p.drawProblemInstance = false;
+        p.drawStatistics = false;
+        p.drawAllG = true;
+        p.flipBackwardsGCost = true;
+        p.SaveSVG((std::to_string(count)+"w8.svg").c_str());        
+        BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> p1(start, goal, &pancake0, &w9, &w9);
+        p1.drawProblemInstance = false;
+        p1.drawStatistics = false;
+        p1.drawAllG = true;
+        p1.flipBackwardsGCost = true;
+        p1.SaveSVG((std::to_string(count)+"w9.svg").c_str());        
+      
+      //BidirectionalProblemAnalyzer<PancakePuzzleState<CNT>, PancakePuzzleAction, PancakePuzzle<CNT>> p9(original, goal, &pancake0, &z, &z);
+    }
+  }
+  
+}
+
+void TestPancakeDensityVariance(int samplesAmount,int sampleDepth)
+{
+  PancakePuzzle<CNT> pancake;
+
+  OnlineStats stats;
+  PancakePuzzleState<CNT> original;
+  
+  srandom(1923544);
+  for (int count = 0;  count < samplesAmount; count++)
+	{
+    srandom(random());
+    
+    original.Reset();
+    for (int x = 0; x < CNT; x++)
+      std::swap(original.puzzle[x], original.puzzle[x+random()%(CNT-x)]);
+    
+    stats.Push(dijkstraUptoLimit(&pancake,original,sampleDepth));
+    
+  }
+  printf("variance %1.2f", stats.Variance());
+  
 }

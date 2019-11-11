@@ -62,8 +62,8 @@ public:
 	bool InvertAction(PancakePuzzleAction &a) const;
 
 	double HCost(const PancakePuzzleState<N> &state1, const PancakePuzzleState<N> &state2) const;
-	double DefaultH(const PancakePuzzleState<N> &state1) const;
-	double DefaultH(const PancakePuzzleState<N> &state1, const std::vector<int> &goal_locs) const;
+	virtual double DefaultH(const PancakePuzzleState<N> &state1) const;
+	virtual double DefaultH(const PancakePuzzleState<N> &state1, const std::vector<int> &goal_locs) const;
 	double HCost(const PancakePuzzleState<N> &state1) const;
 
 	double GCost(const PancakePuzzleState<N> &s1, const PancakePuzzleState<N> &s2) const

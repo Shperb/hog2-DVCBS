@@ -135,6 +135,7 @@ void MR1PermutationPDB<state, action, environment, bits>::GetStateFromPDBHash(ui
 		s.puzzle[dual[i-1]] = distinct[i-last-1];
 	}
 	s.FinishUnranking();
+  //std::cout << s << std::endl;
 }
 
 template <class state, class action, class environment, int bits>

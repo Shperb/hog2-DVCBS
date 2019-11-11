@@ -65,6 +65,7 @@ RoadMap::RoadMap(const char *graph, const char *coordinates, bool timeGraph)
 	for (unsigned int x = 0; x < xloc.size(); x++)
 	{
 		//printf("(%f, %f) -> ", xloc[x], yloc[x]);
+    /*
 		xloc[x] -= (minx);
 		xloc[x] /= scale;
 		xloc[x] = xloc[x]*2-1+xoff/scale;
@@ -72,8 +73,9 @@ RoadMap::RoadMap(const char *graph, const char *coordinates, bool timeGraph)
 		yloc[x] -= (miny);
 		yloc[x] /= scale;
 		yloc[x] = yloc[x]*2-1;
-		yloc[x] = -yloc[x]+yoff/scale;
-		
+		//yloc[x] = -yloc[x]+yoff/scale;
+		yloc[x] += yoff/scale;
+    */
 		if(xloc[x] < xMin)
 			xMin = xloc[x];
 		else if(xloc[x] > xMax)
@@ -128,8 +130,8 @@ RoadMap::RoadMap(const char *graph, const char *coordinates, bool timeGraph)
 				long double xCoord2 = n2->GetLabelF(GraphSearchConstants::kXCoordinate);
 				long double yCoord2 =n2->GetLabelF(GraphSearchConstants::kYCoordinate);
 				
-				long double dist = scale*sqrtf((xCoord1-xCoord2)*(xCoord1-xCoord2) + (yCoord1-yCoord2)*(yCoord1-yCoord2))/2;
-
+				//long double dist = scale*sqrtf((xCoord1-xCoord2)*(xCoord1-xCoord2) + (yCoord1-yCoord2)*(yCoord1-yCoord2))/2;
+        long double dist = sqrtf((xCoord1-xCoord2)*(xCoord1-xCoord2) + (yCoord1-yCoord2)*(yCoord1-yCoord2));
 				if(e<minE)
 					minE=e;
 				if (fequal(e, 0))
@@ -137,10 +139,13 @@ RoadMap::RoadMap(const char *graph, const char *coordinates, bool timeGraph)
 				if (x1 == y1)
 					printf("**FOUND SELF EDGE\n");
 				
-				
-				g->AddEdge(new edge(x1, y1, e));
-				
-				speed.push_back(dist/e);
+				if(timeGraph){
+          g->AddEdge(new edge(x1, y1, e));
+          speed.push_back(dist/e);
+        }
+        else{
+          g->AddEdge(new edge(x1, y1, dist));
+        }
 			}
 			
 			else if(g->findDirectedEdge(x1,y1)->GetWeight() < e)
@@ -162,8 +167,10 @@ RoadMap::RoadMap(const char *graph, const char *coordinates, bool timeGraph)
 	
 //	double maxSpeed = 0;
 	
-	if(!timeGraph)
-		maxSpeed = *(std::max_element(speed.begin(),speed.end()));
+	if(!timeGraph){
+		//maxSpeed = *(std::max_element(speed.begin(),speed.end()));
+    maxSpeed = 1.0;
+  }
 	else if(timeGraph)
 		maxSpeed = *(std::max_element(speed.begin(),speed.end()));
 	else
@@ -231,7 +238,8 @@ double RoadMap::HCost(const intersection &from, const intersection &to) const
 	double bX=b->GetLabelF(GraphSearchConstants::kXCoordinate);
 	double bY=b->GetLabelF(GraphSearchConstants::kYCoordinate);
 	
-	return scale*sqrt((aX-bX)*(aX-bX)+(aY-bY)*(aY-bY))/(2*maxSpeed);
+	//return scale*sqrt((aX-bX)*(aX-bX)+(aY-bY)*(aY-bY))/(2*maxSpeed);
+  return sqrt((aX-bX)*(aX-bX)+(aY-bY)*(aY-bY))/(maxSpeed);
 }
 
 double RoadMap::GCost(const intersection &node1, const intersection &node2) const

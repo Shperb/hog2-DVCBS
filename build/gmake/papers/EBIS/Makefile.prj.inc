@@ -5,7 +5,7 @@
 # $Source: /usr/cvsroot/project_hog/build/gmake/apps/sample/Makefile.prj.inc,v $
 #-----------------------------------------------------------------------------
 
-NAME = ebis
+NAME = ibex
 DBG_NAME = $(NAME)
 REL_NAME = $(NAME)
 
@@ -51,7 +51,7 @@ PROJ_REL_DEP = \
 ifeq ("$(OPENGL)", "STUB")
 PROJ_DBG_LIB += -lSTUB
 PROJ_REL_LIB += -lSTUB
-PROJ_DBG_DEP +=   $(DBG_BINDIR)/libSTUB.a
+PROJ_DBG_DEP += $(DBG_BINDIR)/libSTUB.a
 PROJ_REL_DEP +=   $(REL_BINDIR)/libSTUB.a
 endif
 

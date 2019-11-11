@@ -20,7 +20,6 @@ PROJECTS = \
   gui \
   mapalgorithms \
   utils \
-  apps/arm \
   apps/airplane \
   apps/localsensingsearch \
   apps/pathsample \
@@ -66,7 +65,6 @@ PROJECTS_ALL = \
   shared \
   simulation \
   utils \
-  apps/arm \
   apps/airplane \
   apps/localsensingsearch \
   apps/cpdb \

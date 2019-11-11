@@ -86,6 +86,21 @@ struct TOHState {
 	uint8_t counts[4];
 };
 
+namespace std {
+    template<int numDisks>
+    struct hash<TOHState<numDisks>> {
+        inline size_t operator()(const TOHState<numDisks>& s) const {
+          int res = 0;
+          for (int x = 0; x < 4; x++)
+            {
+              for (int y = 0; y < s.GetDiskCountOnPeg(x); y++)
+                res += s.disks[x][y] * y + (numDisks*numDisks*10)*x;
+            }
+          return std::hash<int>()(res);
+        }
+    };
+}
+
 template <int D>
 static std::ostream &operator<<(std::ostream &out, const TOHState<D> &s)
 {

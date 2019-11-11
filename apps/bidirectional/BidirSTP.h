@@ -13,5 +13,6 @@
 
 void TestSTP(int algorithm);
 void TestSTP_PDB_overall();
+void TestSTP_Hard_5_5();
 
 #endif /* BidirSTP_hpp */

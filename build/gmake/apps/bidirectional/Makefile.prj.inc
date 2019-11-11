@@ -52,7 +52,7 @@ PROJ_REL_DEP = \
 ifeq ("$(OPENGL)", "STUB")
 PROJ_DBG_LIB += -lSTUB
 PROJ_REL_LIB += -lSTUB
-PROJ_DBG_DEP +=   $(DBG_BINDIR)/libSTUB.a
+PROJ_DBG_DEP += $(DBG_BINDIR)/libSTUB.a
 PROJ_REL_DEP +=   $(REL_BINDIR)/libSTUB.a
 endif
 
@@ -65,5 +65,7 @@ SRC_CPP = \
 	apps/bidirectional/BidirTOH.cpp \
 	apps/bidirectional/BidirTS.cpp \
 	apps/bidirectional/BidirPancake.cpp \
+  apps/bidirectional/BidirRubik.cpp \
 	apps/bidirectional/MMRubik.cpp \
 	apps/bidirectional/MM0Rubik.cpp \
+  apps/bidirectional/BidirRoads.cpp \

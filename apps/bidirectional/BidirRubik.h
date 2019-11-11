@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 
-void RubikTest();
+void TestRubikHeuristicMaxsmallVSBig();
+void TestRubik(int algorithm);
 
 #endif /* BidirRubik_hpp */
