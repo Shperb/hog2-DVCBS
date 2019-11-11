@@ -407,7 +407,7 @@ int MyCLHandler(char *argument[], int maxNumArgs)
     return 1;
 	}
   else if (strcmp(argument[0], "-stp") == 0){
-    TestSTP_Hard_5_5();
+    TestSTP_Hard_15();
     return 1;
   }
 	else if (strcmp(argument[0], "-roads") == 0 && maxNumArgs > 2)

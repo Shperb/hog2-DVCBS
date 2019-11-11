@@ -14,5 +14,5 @@
 void TestSTP(int algorithm);
 void TestSTP_PDB_overall();
 void TestSTP_Hard_5_5();
-
+void TestSTP_Hard_15();
 #endif /* BidirSTP_hpp */

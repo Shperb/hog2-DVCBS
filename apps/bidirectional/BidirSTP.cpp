@@ -53,7 +53,7 @@ std::vector<void*>* MakeMaxSmallPDBs(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleSt
     mn1->StoreGoal(g);
     LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb1 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mn1, g, p1);
     toClean->push_back(pdb1);
-    pdb1->BuildAdditivePDB(g, std::thread::hardware_concurrency());
+    pdb1->BuildAdditivePDB(g, 1);
     //pdb1->DeltaCompress(mn1, g, true);
     //pdb1->DivCompress(17-p1.size(), true);
     
@@ -64,7 +64,7 @@ std::vector<void*>* MakeMaxSmallPDBs(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleSt
     mn2->StoreGoal(g);
     LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb2 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mn2, g, p2);
     toClean->push_back(pdb2);
-    pdb2->BuildAdditivePDB(g, std::thread::hardware_concurrency());
+    pdb2->BuildAdditivePDB(g, 1);
     //pdb2->DeltaCompress(mn2, g, true);
     //pdb2->DivCompress(17-p2.size(), true);
     
@@ -75,16 +75,16 @@ std::vector<void*>* MakeMaxSmallPDBs(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleSt
     mn3->StoreGoal(g);
     LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb3 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mn3, g, p3);
     toClean->push_back(pdb3);
-    pdb3->BuildAdditivePDB(g, std::thread::hardware_concurrency());    
+    pdb3->BuildAdditivePDB(g, 1);    
     //pdb3->DeltaCompress(mn3, g, true);
     //pdb3->DivCompress(17-p3.size(), true);    
     
     // STPPDB *pdb1 = new STPPDB(&mnp, g, p1);
     // STPPDB *pdb2 = new STPPDB(&mnp, g, p2);
     // STPPDB *pdb3 = new STPPDB(&mnp, g, p3);
-    // pdb1->BuildPDB(g, std::thread::hardware_concurrency());
-    // pdb2->BuildPDB(g, std::thread::hardware_concurrency());
-    // pdb3->BuildPDB(g, std::thread::hardware_concurrency());
+    // pdb1->BuildPDB(g, 1);
+    // pdb2->BuildPDB(g, 1);
+    // pdb3->BuildPDB(g, 1);
     
     Heuristic<MNPuzzleState<4, 4>> *addative = new Heuristic<MNPuzzleState<4, 4>>();
     toClean->push_back(addative);
@@ -119,7 +119,7 @@ std::vector<void*>* MakeBigPDB(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleState<4,
 	mnp1->StoreGoal(g);
 	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb11 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mnp1, g, p11) ;
   toClean->push_back(pdb11);
-	pdb11->BuildAdditivePDB(g, std::thread::hardware_concurrency());
+	pdb11->BuildAdditivePDB(g, 1);
   //pdb11->DeltaCompress(mnp1, g, true);
   //pdb11->DivCompress(17-p11.size(), true);
   
@@ -129,7 +129,7 @@ std::vector<void*>* MakeBigPDB(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleState<4,
 	mnp2->StoreGoal(g);
 	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb12 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mnp2, g, p12);
   toClean->push_back(pdb12);
-	pdb12->BuildAdditivePDB(g, std::thread::hardware_concurrency());  
+	pdb12->BuildAdditivePDB(g, 1);  
   //pdb12->DeltaCompress(mnp2, g, true);
   //pdb12->DivCompress(17-p12.size(), true);
   
@@ -139,7 +139,7 @@ std::vector<void*>* MakeBigPDB(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleState<4,
 	mnp3->StoreGoal(g);
 	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb13 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mnp3, g, p13);
   toClean->push_back(pdb13);
-	pdb13->BuildAdditivePDB(g, std::thread::hardware_concurrency());  
+	pdb13->BuildAdditivePDB(g, 1);  
   //pdb13->DeltaCompress(mnp3, g, true);
   //pdb13->DivCompress(17-p13.size(), true);
 
@@ -148,9 +148,9 @@ std::vector<void*>* MakeBigPDB(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleState<4,
   // STPPDB *pdb12 = new STPPDB(&mnp, g, p12);
   // STPPDB *pdb13 = new STPPDB(&mnp, g, p13);
 
-	// pdb11->BuildPDB(g, std::thread::hardware_concurrency());
-	// pdb12->BuildPDB(g, std::thread::hardware_concurrency());
-	// pdb13->BuildPDB(g, std::thread::hardware_concurrency());
+	// pdb11->BuildPDB(g, 1);
+	// pdb12->BuildPDB(g, 1);
+	// pdb13->BuildPDB(g, 1);
   h.lookups.resize(0);
 	h.heuristics.resize(0);
   
@@ -205,7 +205,7 @@ std::vector<void*>* PDB_6_6_6_6(MNPuzzleState<5, 5> g, Heuristic<MNPuzzleState<5
   toClean->push_back(pdb1);
   if (!to_load || !pdb1->Load(hprefix))
   {
-    pdb1->BuildAdditivePDB(g, std::thread::hardware_concurrency());
+    pdb1->BuildAdditivePDB(g, 1);
     if (to_save){
       pdb1->Save(hprefix);
     }
@@ -222,7 +222,7 @@ std::vector<void*>* PDB_6_6_6_6(MNPuzzleState<5, 5> g, Heuristic<MNPuzzleState<5
   toClean->push_back(pdb2);
   if (!to_load || !pdb2->Load(hprefix))
   {
-    pdb2->BuildAdditivePDB(g, std::thread::hardware_concurrency());
+    pdb2->BuildAdditivePDB(g, 1);
     if (to_save){
       pdb2->Save(hprefix);
     }
@@ -238,7 +238,7 @@ std::vector<void*>* PDB_6_6_6_6(MNPuzzleState<5, 5> g, Heuristic<MNPuzzleState<5
   toClean->push_back(pdb3);
   if (!to_load || !pdb3->Load(hprefix))
   {
-    pdb3->BuildAdditivePDB(g, std::thread::hardware_concurrency());
+    pdb3->BuildAdditivePDB(g, 1);
     if (to_save){
       pdb3->Save(hprefix);
     }
@@ -251,7 +251,7 @@ std::vector<void*>* PDB_6_6_6_6(MNPuzzleState<5, 5> g, Heuristic<MNPuzzleState<5
   toClean->push_back(pdb4);
   if (!to_load || !pdb4->Load(hprefix))
   {
-    pdb4->BuildAdditivePDB(g, std::thread::hardware_concurrency());
+    pdb4->BuildAdditivePDB(g, 1);
     if (to_save){
       pdb4->Save(hprefix);
     }
@@ -263,9 +263,126 @@ std::vector<void*>* PDB_6_6_6_6(MNPuzzleState<5, 5> g, Heuristic<MNPuzzleState<5
   // STPPDB *pdb12 = new STPPDB(&mnp, g, p12);
   // STPPDB *pdb13 = new STPPDB(&mnp, g, p13);
 
-	// pdb11->BuildPDB(g, std::thread::hardware_concurrency());
-	// pdb12->BuildPDB(g, std::thread::hardware_concurrency());
-	// pdb13->BuildPDB(g, std::thread::hardware_concurrency());
+	// pdb11->BuildPDB(g, 1);
+	// pdb12->BuildPDB(g, 1);
+	// pdb13->BuildPDB(g, 1);
+  h.lookups.resize(0);
+	h.heuristics.resize(0);
+  
+  //Heuristic<MNPuzzleState<4, 4>> *addative1 = new Heuristic<MNPuzzleState<4, 4>>();
+  //toClean->push_back(addative1);
+  //addative1->lookups.resize(0);
+  h.lookups.push_back({kAddNode, 1, 4});
+  //addative1->lookups.push_back({kMaxNode, 1, 3});
+  h.lookups.push_back({kLeafNode, 0, 0});
+  h.lookups.push_back({kLeafNode, 1, 1});
+  h.lookups.push_back({kLeafNode, 2, 2});
+  h.lookups.push_back({kLeafNode, 3, 3});
+  
+  //addative1->heuristics.resize(0);
+	h.heuristics.push_back(pdb1);
+	h.heuristics.push_back(pdb2);
+  h.heuristics.push_back(pdb3);
+  h.heuristics.push_back(pdb4);
+  //h.lookups.resize(0);
+	// h.lookups.push_back({kMaxNode, 1, 2});
+	// h.lookups.push_back({kLeafNode, 0, 0});
+	// h.lookups.push_back({kLeafNode, 1, 1});
+//	h.lookups.push_back({kLeafNode, 4, 4});
+	//h.heuristics.resize(0);
+  //MNPuzzle<4,4>* mnp = new MNPuzzle<4,4>();
+  //toClean->push_back(mnp);
+	//h.heuristics.push_back(mnp);
+//	h.heuristics.push_back(addative1);
+//	h.heuristics.push_back(pdb2);
+//	h.heuristics.push_back(pdb3);
+//	h.heuristics.push_back(pdb4);
+  return toClean;
+}
+
+
+std::vector<void*>* PDB_4_4_4_4(MNPuzzleState<4, 4> g, Heuristic<MNPuzzleState<4, 4>> &h)
+{
+  bool to_load = true;
+  bool to_save = true;
+  const char *hprefix = "./PDB/";
+  std::cout <<"starting PDB_4_4_4_4" << std::endl;
+  std::vector<void*>* toClean = new std::vector<void*>();
+  //std::vector<int> p12 = {0,9};
+	//std::vector<int> p11 = {0,1};
+	std::vector<int> p1 = {0,1,4,5};
+	std::vector<int> p2 = {0,2,3,6,7};
+	std::vector<int> p3 = {0,8,9,12,13};
+  std::vector<int> p4 = {0,10,11,14,15};
+  MNPuzzle<4,4>* mnp1 = new MNPuzzle<4,4>();
+  toClean->push_back(mnp1);
+  mnp1->SetPattern(p1);
+	mnp1->StoreGoal(g);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb1 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mnp1, g, p1) ;
+  toClean->push_back(pdb1);
+  if (!to_load || !pdb1->Load(hprefix))
+  {
+    pdb1->BuildAdditivePDB(g, 1);
+    if (to_save){
+      pdb1->Save(hprefix);
+    }
+  }
+	
+  //pdb11->DeltaCompress(mnp1, g, true);
+  //pdb11->DivCompress(17-p11.size(), true);
+  
+  MNPuzzle<4, 4>* mnp2 = new MNPuzzle<4, 4>();
+  toClean->push_back(mnp2);  
+  mnp2->SetPattern(p2);
+	mnp2->StoreGoal(g);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb2 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mnp2, g, p2);
+  toClean->push_back(pdb2);
+  if (!to_load || !pdb2->Load(hprefix))
+  {
+    pdb2->BuildAdditivePDB(g, 1);
+    if (to_save){
+      pdb2->Save(hprefix);
+    }
+  }
+  //pdb12->DeltaCompress(mnp2, g, true);
+  //pdb12->DivCompress(17-p12.size(), true);
+  
+  MNPuzzle<4, 4>* mnp3 = new MNPuzzle<4, 4>();
+  toClean->push_back(mnp3);
+  mnp3->SetPattern(p3);
+	mnp3->StoreGoal(g);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb3 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mnp3, g, p3);
+  toClean->push_back(pdb3);
+  if (!to_load || !pdb3->Load(hprefix))
+  {
+    pdb3->BuildAdditivePDB(g, 1);
+    if (to_save){
+      pdb3->Save(hprefix);
+    }
+  }  
+  MNPuzzle<4, 4>* mnp4 = new MNPuzzle<4, 4>();
+  toClean->push_back(mnp4);
+  mnp4->SetPattern(p4);
+	mnp4->StoreGoal(g);
+	LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>* pdb4 = new LexPermutationPDB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>>(mnp4, g, p4);
+  toClean->push_back(pdb4);
+  if (!to_load || !pdb4->Load(hprefix))
+  {
+    pdb4->BuildAdditivePDB(g, 1);
+    if (to_save){
+      pdb4->Save(hprefix);
+    }
+  }  //pdb13->DeltaCompress(mnp3, g, true);
+  //pdb13->DivCompress(17-p13.size(), true);
+
+
+	// STPPDB *pdb11 = new STPPDB(&mnp, g, p11);
+  // STPPDB *pdb12 = new STPPDB(&mnp, g, p12);
+  // STPPDB *pdb13 = new STPPDB(&mnp, g, p13);
+
+	// pdb11->BuildPDB(g, 1);
+	// pdb12->BuildPDB(g, 1);
+	// pdb13->BuildPDB(g, 1);
   h.lookups.resize(0);
 	h.heuristics.resize(0);
   
@@ -522,6 +639,147 @@ void TestSTP_PDB_overall()
    } 
   delete toClean_f2;
 }
+
+
+void TestSTP_Hard_15()
+{
+  int rad = 5;
+  MNPuzzleState<4, 4> goal;
+  MNPuzzle<4, 4> mnp;
+  goal.Reset();
+  Heuristic<MNPuzzleState<4, 4>> hf;
+  Heuristic<MNPuzzleState<4, 4>> hb;
+  std::vector<void*>* toClean_f;
+  std::vector<void*>* toClean_b;
+
+  //std::cout <<"starting sampling" << std::endl;
+  Timer t1;
+  MNPuzzleState<4, 4> s = STP::GetKorfInstance(87);
+  toClean_f = PDB_4_4_4_4(goal, hf);
+  toClean_b = PDB_4_4_4_4(s, hb);
+  
+  // 	f = MeasureHeuristicErrors(&pancake0, goal, &pancake0, 5, 4, [](float i){return i <1;});
+	//printf("GAP\\0 Error percentage (5,4): %1.1f\n", f*100);
+  
+  //    f = MeasureHeuristicErrors(&pancake0, original, &pancake0, 5, 4, [](float i){return i <1;});
+  //  printf("GAP\\0 Error percentage (5,4): %1.1f\n", f*100);
+  if (1){
+    StateNeighborsUpToDistance(&mnp, goal, &hf, rad);
+    StateNeighborsUpToDistance(&mnp, s, &hb, rad);
+    StateNeighborsUpToDistance(&mnp, goal, &hf, 2*rad);
+    StateNeighborsUpToDistance(&mnp, s, &hb, 2*rad);
+    StateNeighborsUpToDistance(&mnp, goal, &hf, 4*rad);
+    StateNeighborsUpToDistance(&mnp, s, &hb, 4*rad);
+    StateNeighborsUpToDistance(&mnp, goal, &hf, 6*rad);
+    StateNeighborsUpToDistance(&mnp, s, &hb, 6*rad);
+
+  } 
+    
+  if(1){
+    //IDAStar<MNPuzzleState<4, 4>, slideDir> ida;
+    int limit = 10000000;
+    srandom(3201582);
+    int count_tot_rad = 0;
+    int count_err_rad = 0; 
+    int count_tot_2rad = 0;
+    int count_err_2rad = 0; 
+    int count_tot_4rad = 0;
+    int count_err_4rad = 0; 
+    int count_tot_6rad = 0;
+    int count_err_6rad = 0;
+    std::map<int,int> h_overall_vals;
+    for (int count = 0; count < limit; count++)
+    {
+      MNPuzzleState<4, 4> s;
+      s.Reset();
+      std::random_shuffle(std::begin(s.puzzle),std::end(s.puzzle));
+      s.FinishUnranking();
+      srandom(random());
+      int h_val = (int) hf.HCost(s,goal);
+      if (h_overall_vals.find(h_val) == h_overall_vals.end()){
+        h_overall_vals.insert(std::make_pair(h_val,1));
+      }
+      else{
+        h_overall_vals[h_val]++;
+      }
+      if (hf.HCost(s,goal) <= 6*rad){
+        bool is_acc = IsGoalInRadius(&mnp, s, goal,&hf,hf.HCost(s,goal));
+        if (hf.HCost(s,goal) <= rad){
+          count_tot_rad++;
+          if (!is_acc){
+            count_err_rad++;
+          }
+        }
+        if (hf.HCost(s,goal) <= 2*rad){
+          count_tot_2rad++;
+          if (!is_acc){
+            count_err_2rad++;
+          }
+        }      
+        if (hf.HCost(s,goal) <= 4*rad){
+          count_tot_4rad++;
+          if (!is_acc){
+            count_err_4rad++;
+          }
+        }
+        if (hf.HCost(s,goal) <= 6*rad){
+          count_tot_6rad++;
+          if (!is_acc){
+            count_err_6rad++;
+          }
+        }
+      }
+    }
+    printf("%d %d\n",count_tot_rad,count_err_rad);
+    printf("%d %d\n",count_tot_2rad,count_err_2rad);
+    printf("%d %d\n",count_tot_4rad,count_err_4rad);
+    printf("%d %d\n",count_tot_6rad,count_err_6rad);
+    cout << "h_overall_vals" << std::endl;
+    for(auto elem : h_overall_vals)
+    {
+       std::cout << elem.first << " " << elem.second  << "\n";
+    }
+    if (1){
+      Timer t;
+      std::vector<MNPuzzleState<4,4>> path;
+      NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> nbs;
+    	t.StartTimer();
+			nbs.GetPath(&mnp, s, goal, &hf, &hb, path);
+			t.EndTimer();
+			printf("NBS found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(path),
+			nbs.GetNodesExpanded(), nbs.GetNecessaryExpansions(), nbs.GetNodesTouched(), t.GetElapsedTime());
+      
+      TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4,4>> astar;
+      t.StartTimer();
+			astar.SetHeuristic(&hf);
+			astar.GetPath(&mnp, s, goal, path);
+			t.EndTimer();
+			printf("A* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(path),
+				   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), astar.GetNodesTouched(), t.GetElapsedTime());
+           
+      t.StartTimer();
+			astar.SetHeuristic(&hb);
+			astar.GetPath(&mnp, goal, s, path);
+			t.EndTimer();
+			printf("R-A* found path length %1.0f; %llu expanded; %llu necessary; %llu generated; %1.2fs elapsed\n", mnp.GetPathLength(path),
+				   astar.GetNodesExpanded(), astar.GetNecessaryExpansions(), astar.GetNodesTouched(), t.GetElapsedTime());
+    }
+
+  }
+  
+  for (auto p : *toClean_f)
+   {
+     delete p;
+   } 
+  delete toClean_f;
+  
+  for (auto p : *toClean_b)
+   {
+     delete p;
+   } 
+  delete toClean_b;
+}
+
 
 void TestSTP_Hard_5_5()
 {
